@@ -3,7 +3,7 @@
 
 #include <QMessageBox>
 
-#include <template/template-version.h>
+#include <llassetgen/llassetgen-version.h>
 
 #include <fiblib/Fibonacci.h>
 
@@ -31,7 +31,7 @@ void MainWindow::on_editNumber_valueChanged(int value)
 void MainWindow::on_about()
 {
     QString about = QString() +
-        "Version:   " + TEMPLATE_VERSION + "\n";
+        "Version:   " + LLASSETGEN_VERSION + "\n";
 
     QMessageBox::about(this, "template project", about);
 }

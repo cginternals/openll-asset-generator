@@ -8,12 +8,12 @@ In the root directory adapt/change/do the following:
 [ ] Edit AUTHORS
 [ ] Edit LICENSE
 [ ] Edit README.md
-[ ] Rename ./template-config.cmake -> <project>-config.cmake
+[√] Rename ./template-config.cmake -> <project>-config.cmake
 
 CMakeLists.txt:
-[ ]  Set META_PROJECT_*
-[ ]  Set META_VERSION_*
-[ ]  Set META_AUTHOR_*
+[√]  Set META_PROJECT_*
+[√]  Set META_VERSION_*
+[√]  Set META_AUTHOR_*
 [ ]  Adjust INSTALL_* to the desired install locations for all systems (defaults should be fine for a start)
 --------------------------------------------------------------------
 
@@ -21,11 +21,11 @@ CMakeLists.txt:
 --------------------------------------------------------------------
 In subdirectory "./deploy/" do:
 deploy/CMakeLists.txt:
-[ ] Substitute pack-template.cmake -> pack-<project>.cmake
+[?] Substitute pack-template.cmake -> pack-<project>.cmake
 [ ] Exchange deploy/images/logo.ico
 [ ] Exchange deploy/images/logo.bmp
 [ ] Exchange deploy/images/logo.png
-[ ] Rename deploy/packages/pack-template.cmake -> pack-<project>.cmake
+[√] Rename deploy/packages/pack-template.cmake -> pack-<project>.cmake
 deploy/packages/pack-<project>.cmake:
 [ ] Adjust OPTION_PACK_GENERATOR to your liking for all systems
 [ ] Adjust package options, e.g., CPACK_DEBIAN_PACKAGE_DEPENDS, CPACK_DEBIAN_PACKAGE_SECTION, CPACK_DEBIAN_PACKAGE_PRIORITY, CPACK_RPM_PACKAGE_LICENSE, CPACK_RPM_PACKAGE_GROUP, ...
@@ -36,8 +36,8 @@ deploy/packages/pack-<project>.cmake:
 In subdirectory "./source/fibcmd" do:
 
 source/fibcmd/main.cpp:
-[ ] Substitute template-version.h -> <project>-version.h
-[ ] Substitute TEMPLATE_VERSION -> <PROJECT>_VERSION
+[√] Substitute template-version.h -> <project>-version.h
+[√] Substitute TEMPLATE_VERSION -> <PROJECT>_VERSION
 --------------------------------------------------------------------
 
 
@@ -53,7 +53,7 @@ docs/api-docs/doxyfile.in:
 In subdirectory "./source/tests/" do:
 
 source/tests/CMakeLists.txt:
-[ ]  Set META_PROJECT_NAME
+[√]  Set META_PROJECT_NAME
 --------------------------------------------------------------------
 
 
@@ -64,7 +64,7 @@ General stuff left to do:
 [ ] Add new projects to source/CMakeLists.txt
 [ ] Add new projects to ./{project}-config.cmake
 [ ] Add new projects to docs/api-docs/doxyfile.in
-[ ] Remove data/DATA_FOLDER.txt
+[√] Remove data/DATA_FOLDER.txt
 [ ] Populate data/
 [ ] Remove ADAPT
 --------------------------------------------------------------------
