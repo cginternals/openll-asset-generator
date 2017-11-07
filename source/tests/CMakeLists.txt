@@ -1,3 +1,7 @@
+# Check if tests are enabled
+if(NOT OPTION_BUILD_TESTS)
+    return()
+endif()
 
 #
 # Configure test project and environment
@@ -7,7 +11,7 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 # Meta information about the project
-set(META_PROJECT_NAME "llassetgen")
+# set(META_PROJECT_NAME "llassetgen")
 
 # Declare project
 project("${META_PROJECT_NAME}-tests" C CXX)
@@ -81,4 +85,4 @@ set_target_properties(test PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
 # Tests
 #
 
-add_test_without_ctest(fiblib-test)
+add_test_without_ctest(llassetgen-tests)

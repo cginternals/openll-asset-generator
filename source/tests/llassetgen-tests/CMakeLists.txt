@@ -1,38 +1,35 @@
 
-# 
+#
 # External dependencies
-# 
+#
 
-# find_package(THIRDPARTY REQUIRED)
+find_package(${META_PROJECT_NAME} REQUIRED HINTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
 
-
-# 
+#
 # Executable name and options
-# 
+#
 
 # Target name
-set(target fibcmd)
-
-# Exit here if required dependencies are not met
-message(STATUS "Example ${target}")
+set(target llassetgen-tests)
+message(STATUS "Test ${target}")
 
 
-# 
+#
 # Sources
-# 
+#
 
 set(sources
     main.cpp
+    llassetgen-tests.cpp
 )
 
 
-# 
+#
 # Create executable
-# 
+#
 
 # Build executable
 add_executable(${target}
-    MACOSX_BUNDLE
     ${sources}
 )
 
@@ -40,9 +37,9 @@ add_executable(${target}
 add_executable(${META_PROJECT_NAME}::${target} ALIAS ${target})
 
 
-# 
+#
 # Project options
-# 
+#
 
 set_target_properties(${target}
     PROPERTIES
@@ -51,9 +48,9 @@ set_target_properties(${target}
 )
 
 
-# 
+#
 # Include directories
-# 
+#
 
 target_include_directories(${target}
     PRIVATE
@@ -62,21 +59,21 @@ target_include_directories(${target}
 )
 
 
-# 
+#
 # Libraries
-# 
+#
 
 target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LIBRARIES}
-    ${META_PROJECT_NAME}::baselib
-    ${META_PROJECT_NAME}::fiblib
+    ${META_PROJECT_NAME}::llassetgen
+    gmock-dev
 )
 
 
-# 
+#
 # Compile definitions
-# 
+#
 
 target_compile_definitions(${target}
     PRIVATE
@@ -84,9 +81,9 @@ target_compile_definitions(${target}
 )
 
 
-# 
+#
 # Compile options
-# 
+#
 
 target_compile_options(${target}
     PRIVATE
@@ -94,32 +91,11 @@ target_compile_options(${target}
 )
 
 
-# 
+#
 # Linker options
-# 
+#
 
 target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LINKER_OPTIONS}
-)
-
-
-#
-# Target Health
-#
-
-perform_health_checks(
-    ${target}
-    ${sources}
-)
-
-
-# 
-# Deployment
-# 
-
-# Executable
-install(TARGETS ${target}
-    RUNTIME DESTINATION ${INSTALL_BIN} COMPONENT examples
-    BUNDLE  DESTINATION ${INSTALL_BIN} COMPONENT examples
 )

@@ -6,7 +6,7 @@ To adapt this template to your own project, follow these steps:
 In the root directory adapt/change/do the following:
 
 [ ] Edit AUTHORS
-[ ] Edit LICENSE
+[√] Edit LICENSE
 [ ] Edit README.md
 [√] Rename ./template-config.cmake -> <project>-config.cmake
 
@@ -45,7 +45,7 @@ source/fibcmd/main.cpp:
 In subdirectory "./docs/api-docs/" do:
 
 docs/api-docs/doxyfile.in:
-[ ] Adjust INPUT tag (list of doxygen annotated sources)
+[√] Adjust INPUT tag (list of doxygen annotated sources)
 --------------------------------------------------------------------
 
 
@@ -60,10 +60,10 @@ source/tests/CMakeLists.txt:
 --------------------------------------------------------------------
 General stuff left to do:
 
-[ ] Rename and adjust projects in source/
-[ ] Add new projects to source/CMakeLists.txt
-[ ] Add new projects to ./{project}-config.cmake
-[ ] Add new projects to docs/api-docs/doxyfile.in
+[√] Rename and adjust projects in source/
+[√] Add new projects to source/CMakeLists.txt
+[√] Add new projects to ./{project}-config.cmake
+[√] Add new projects to docs/api-docs/doxyfile.in
 [√] Remove data/DATA_FOLDER.txt
 [ ] Populate data/
 [ ] Remove ADAPT
