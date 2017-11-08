@@ -29,20 +29,17 @@ set(DEFAULT_PROJECT_OPTIONS
 # External dependencies
 #
 
-find_package(Freetype)
-find_package(PNG)
-
 #
 # Include directories
 #
 
-set(DEFAULT_INCLUDE_DIRECTORIES ${FREETYPE_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS})
+set(DEFAULT_INCLUDE_DIRECTORIES)
 
 #
 # Libraries
 #
 
-set(DEFAULT_LIBRARIES ${FREETYPE_LIBRARY} ${PNG_LIBRARY})
+set(DEFAULT_LIBRARIES)
 
 
 #

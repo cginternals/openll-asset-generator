@@ -2,7 +2,8 @@
 # External dependencies
 #
 
-# find_package(THIRDPARTY REQUIRED)
+find_package(Freetype)
+find_package(PNG)
 
 
 #
@@ -37,6 +38,7 @@ set(headers
 
 set(sources
     ${source_path}/llassetgen.cpp
+    ${source_path}/DistanceTransform.cpp
 )
 
 # Group source files
@@ -138,6 +140,8 @@ target_link_libraries(${target}
     PRIVATE
 
     PUBLIC
+    Freetype::Freetype
+    PNG::PNG
     ${DEFAULT_LIBRARIES}
 
     INTERFACE
