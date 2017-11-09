@@ -1,9 +1,14 @@
 #include <ft2build.h>
 #include <freetype/freetype.h>
-#include <png.h>
 
 #include <llassetgen/llassetgen.h>
 
-namespace llassetgen {
 
+
+namespace llassetgen {
+    FT_Library freetype;
+
+    void init() {
+        assert(FT_Init_FreeType(&freetype) == 0);
+    }
 }
