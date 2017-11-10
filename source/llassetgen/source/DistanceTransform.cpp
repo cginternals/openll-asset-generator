@@ -30,15 +30,23 @@ namespace llassetgen {
             memset(input.get(), 0, size);
     }
 
-    DistanceTransform::InputType DistanceTransform::inputAt(DimensionType x, DimensionType y) {
-        assert(x < width && y < height && input.get());
-        DimensionType i = y*width+x;
+    DistanceTransform::InputType DistanceTransform::inputAt(PositionType pos) {
+        assert(pos.x < width && pos.y < height && input.get());
+        DimensionType i = pos.y*width+pos.x;
         return (input[i/8] >> (i%8)) & 1;
     }
 
-    void DistanceTransform::inputAt(DimensionType x, DimensionType y, InputType bit) {
-        assert(x < width && y < height && input.get());
-        DimensionType i = y*width+x;
+    DistanceTransform::InputType DistanceTransform::inputAtClamped(PositionType pos) {
+        assert(input.get());
+        if(static_cast<int>(pos.x) < 0 || static_cast<int>(pos.y) < 0 || pos.x >= width || pos.y >= height)
+            return 0;
+        DimensionType i = pos.y*width+pos.x;
+        return (input[i/8] >> (i%8)) & 1;
+    }
+
+    void DistanceTransform::inputAt(PositionType pos, InputType bit) {
+        assert(pos.x < width && pos.y < height && input.get());
+        DimensionType i = pos.y*width+pos.x;
         InputType mask = 1 << (i%8);
         i /= 8;
         if(bit)
@@ -47,16 +55,23 @@ namespace llassetgen {
             input[i] &= ~mask;
     }
 
-    DistanceTransform::OutputType& DistanceTransform::outputAt(DimensionType x, DimensionType y) {
-        assert(x < width && y < height && output.get());
-        return output[y*width+x];
+    DistanceTransform::OutputType& DistanceTransform::outputAt(PositionType pos) {
+        assert(pos.x < width && pos.y < height && output.get());
+        return output[pos.y*width+pos.x];
+    }
+
+    DistanceTransform::OutputType DistanceTransform::outputAtClamped(PositionType pos) {
+        assert(output.get());
+        if(static_cast<int>(pos.x) < 0 || static_cast<int>(pos.y) < 0 || pos.x >= width || pos.y >= height)
+            return std::numeric_limits<OutputType>::infinity();
+        return output[pos.y*width+pos.x];
     }
 
     void DistanceTransform::importFreeTypeBitmap(FT_Bitmap* bitmap, DimensionType padding) {
         resetInput(bitmap->width + padding*2, bitmap->rows + padding*2, true);
         for(DimensionType y = 0; y < bitmap->rows; ++y)
             for(DimensionType x = 0; x < bitmap->width; ++x)
-                inputAt(padding+x, padding+y, (bitmap->buffer[y*bitmap->pitch+(x/8)] >> (7-x%8)) & 1);
+                inputAt({padding+x, padding+y}, (bitmap->buffer[y*bitmap->pitch+(x/8)] >> (7-x%8)) & 1);
     }
 
     void DistanceTransform::importPng(std::string path) {
@@ -105,7 +120,7 @@ namespace llassetgen {
         std::unique_ptr<PixelType[]> rowBuffer(new PixelType[width]);
         for(DimensionType y = 0; y < height; ++y) {
             for(DimensionType x = 0; x < width; ++x)
-                rowBuffer[x] = clamp((outputAt(x, y)-blackDistance) / (whiteDistance-blackDistance), 0.0F, 1.0F) * std::numeric_limits<PixelType>::max();
+                rowBuffer[x] = clamp((outputAt({x, y})-blackDistance) / (whiteDistance-blackDistance), 0.0F, 1.0F) * std::numeric_limits<PixelType>::max();
             png_write_row(png, reinterpret_cast<png_bytep>(rowBuffer.get()));
         }
     }
@@ -139,5 +154,59 @@ namespace llassetgen {
         png_write_end(png, NULL);
         png_destroy_write_struct(&png, &pngInfo);
         fclose(file);
+    }
+
+
+
+    DeadReackoning::PositionType& DeadReackoning::posAt(PositionType pos) {
+        assert(pos.x < width && pos.y < height && posBuffer.get());
+        return posBuffer[pos.y*width+pos.x];
+    }
+
+    void DeadReackoning::transformAt(PositionType pos, PositionType target, OutputType distance) {
+        target += pos;
+        if(outputAtClamped(target)+distance < outputAt(pos)) {
+            posAt(pos) = target = posAt(target);
+            outputAt(pos) = std::sqrt(square(pos.x-target.x)+square(pos.y-target.y));
+        }
+    }
+
+    void DeadReackoning::transform() {
+        assert(width > 0 && height > 0);
+
+        posBuffer.reset(new PositionType[width * height]);
+        output.reset(new OutputType[width * height]);
+
+        for(DimensionType y = 0; y < height; ++y)
+            for(DimensionType x = 0; x < width; ++x) {
+                PositionType pos = {x, y};
+                bool center = inputAt(pos);
+                posAt(pos) = pos;
+                outputAt(pos) = (center && (
+                                 inputAtClamped({x-1, y}) != center || inputAtClamped({x+1, y}) != center ||
+                                 inputAtClamped({x, y-1}) != center || inputAtClamped({x, y+1}) != center))
+                                ? 0 : std::numeric_limits<OutputType>::infinity();
+            }
+
+        const OutputType distance[] = {
+            std::sqrt(2.0F), 1.0F, std::sqrt(2.0F), 1.0F
+        };
+        const PositionType target[] = {
+            {-1, -1}, { 0, -1}, {+1, -1}, {-1,  0}
+        };
+
+        for(DimensionType y = 0; y < height; ++y)
+            for(DimensionType x = 0; x < width; ++x)
+                for(DimensionType i = 0; i < 4; ++i)
+                    transformAt({x, y}, target[i], distance[i]);
+
+        for(DimensionType y = 0; y < height; ++y)
+            for(DimensionType x = 0; x < width; ++x)
+                for(DimensionType i = 0; i < 4; ++i)
+                    transformAt({width-x-1, height-y-1}, -(target[3-i]), distance[3-i]);
+
+        for(DimensionType y = 0; y < height; ++y)
+            for(DimensionType x = 0; x < width; ++x)
+                outputAt({x, y}) *= inputAt({x, y}) ? -1 : 1;
     }
 }
