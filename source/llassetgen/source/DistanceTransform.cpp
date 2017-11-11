@@ -209,4 +209,59 @@ namespace llassetgen {
             for(DimensionType x = 0; x < width; ++x)
                 outputAt({x, y}) *= inputAt({x, y}) ? -1 : 1;
     }
+
+
+
+    void ParabolaEnvelope::transformLine(DimensionType length) {
+        apex[0] = 0;
+        range[0] = -std::numeric_limits<OutputType>::infinity();
+        range[1] = +std::numeric_limits<OutputType>::infinity();
+        for(DimensionType parabola = 0, q = 1; q < length; ++q) {
+            OutputType s;
+            do {
+                s = (srcBuffer[q]+square(q)) - (srcBuffer[apex[parabola]]+square(apex[parabola]));
+                s /= 2*(q-apex[parabola]);
+            } while(s <= range[parabola--]);
+            parabola += 2;
+            apex[parabola] = q;
+            range[parabola] = s;
+            range[parabola+1] = +std::numeric_limits<OutputType>::infinity();
+        }
+        for(DimensionType parabola = 0, q = 0; q < length; ++q) {
+            while(range[parabola+1] < q)
+                ++parabola;
+            dstBuffer[q] = srcBuffer[apex[parabola]]+square(q-apex[parabola]);
+        }
+    }
+
+    void ParabolaEnvelope::transform() {
+        assert(width > 0 && height > 0);
+
+        DimensionType length = std::max(width, height);
+        srcBuffer.reset(new OutputType[length]);
+        dstBuffer.reset(new OutputType[length]);
+        apex.reset(new DimensionType[length]);
+        range.reset(new OutputType[length+1]);
+        output.reset(new OutputType[width * height]);
+
+        for(DimensionType x = 0; x < width; ++x)
+            for(DimensionType y = 0; y < height; ++y)
+                outputAt({x, y}) = (inputAt({x, y})) ? 0 : 1E20;
+
+        for(DimensionType y = 0; y < height; ++y) {
+            for(DimensionType x = 0; x < width; ++x)
+                srcBuffer[x] = outputAt({x, y});
+            transformLine(width);
+            for(DimensionType x = 0; x < width; ++x)
+                outputAt({x, y}) = dstBuffer[x];
+        }
+
+        for(DimensionType x = 0; x < width; ++x) {
+            for(DimensionType y = 0; y < height; ++y)
+                srcBuffer[y] = outputAt({x, y});
+            transformLine(height);
+            for(DimensionType y = 0; y < height; ++y)
+                outputAt({x, y}) = std::sqrt(dstBuffer[y]);
+        }
+    }
 }

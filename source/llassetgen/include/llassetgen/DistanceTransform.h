@@ -60,4 +60,14 @@ namespace llassetgen {
         public:
         void transform();
     };
+
+    class ParabolaEnvelope : public DistanceTransform {
+        std::unique_ptr<OutputType[]> srcBuffer, dstBuffer;
+        std::unique_ptr<DimensionType[]> apex;
+        std::unique_ptr<OutputType[]> range;
+        void transformLine(DimensionType length);
+
+        public:
+        void transform();
+    };
 }
