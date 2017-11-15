@@ -7,6 +7,8 @@
 
 #include "DistanceTransform.h"
 
+#include <llassetgen/llassetgen_api.h>
+
 
 
 struct FT_LibraryRec_;
@@ -14,5 +16,5 @@ struct FT_LibraryRec_;
 namespace llassetgen {
     extern FT_LibraryRec_* freetype;
 
-    void init();
+    LLASSETGEN_API void init();
 };
