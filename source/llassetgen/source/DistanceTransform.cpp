@@ -1,3 +1,5 @@
+#pragma once
+
 #include <algorithm>
 #include <limits>
 
@@ -5,7 +7,7 @@
 #include <freetype/freetype.h>
 #include <png.h>
 
-#include <llassetgen/llassetgen.h>
+#include <llassetgen/DistanceTransform.h>
 
 
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 
 #include <ft2build.h>

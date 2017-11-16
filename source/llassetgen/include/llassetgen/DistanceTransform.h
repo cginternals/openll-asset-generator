@@ -1,3 +1,8 @@
+#pragma once
+
+#include <llassetgen/llassetgen_api.h>
+#include <llassetgen/llassetgen.h>
+
 struct FT_Bitmap_;
 struct png_struct_def;
 
@@ -45,9 +50,9 @@ namespace llassetgen {
         OutputType& outputAt(PositionType pos);
         OutputType outputAtClamped(PositionType pos);
 
-        void importFreeTypeBitmap(FT_Bitmap_* bitmap, DimensionType padding);
-        void importPng(std::string path);
-        void exportPng(std::string path, OutputType blackDistance, OutputType whiteDistance, DimensionType bitDepth);
+        LLASSETGEN_API void importFreeTypeBitmap(FT_Bitmap_* bitmap, DimensionType padding);
+        LLASSETGEN_API void importPng(std::string path);
+        LLASSETGEN_API void exportPng(std::string path, OutputType blackDistance, OutputType whiteDistance, DimensionType bitDepth);
 
         virtual void transform() = 0;
     };
