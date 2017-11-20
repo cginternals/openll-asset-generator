@@ -2,7 +2,7 @@
 #include <limits>
 
 #include <ft2build.h>
-#include <freetype/freetype.h>
+#include FT_FREETYPE_H
 #include <png.h>
 
 #include <llassetgen/DistanceTransform.h>
