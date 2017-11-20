@@ -1,5 +1,3 @@
-#pragma once
-
 #include <iostream>
 
 #include <ft2build.h>
@@ -14,7 +12,7 @@ using namespace llassetgen;
 int main(int argc, char** argv) {
     llassetgen::init();
 
-    std::unique_ptr<DistanceTransform> dt;
+    std::unique_ptr<DistanceTransform> dt(new DeadReckoning());
     if(argc == 5 && strcmp(argv[1], "-dt-from-glyph") == 0) {
         // Example: llassetgen-cmd -dt-from-glyph G /Library/Fonts/Verdana.ttf glyph.png
         FT_Face face;

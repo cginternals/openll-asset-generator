@@ -47,7 +47,7 @@ namespace llassetgen {
         bool inputAt(DimensionType offset);
         bool inputAt(PositionType pos);
         bool inputAtClamped(PositionType pos);
-        void inputAt(PositionType pos, InputType bit);
+        void inputAt(PositionType pos, bool bit);
         OutputType& outputAt(DimensionType offset);
         OutputType& outputAt(PositionType pos);
         OutputType outputAtClamped(PositionType pos);

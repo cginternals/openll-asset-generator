@@ -46,7 +46,7 @@ namespace llassetgen {
         return inputAt(pos);
     }
 
-    void DistanceTransform::inputAt(PositionType pos, InputType bit) {
+    void DistanceTransform::inputAt(PositionType pos, bool bit) {
         assert(pos.x < width && pos.y < height && input.get());
         DimensionType i = pos.y*width+pos.x;
         InputType mask = 1 << (i%8);
