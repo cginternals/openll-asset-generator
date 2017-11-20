@@ -1,5 +1,3 @@
-#pragma once
-
 #include <algorithm>
 #include <limits>
 
@@ -32,17 +30,17 @@ namespace llassetgen {
             memset(input.get(), 0, size);
     }
 
-    DistanceTransform::InputType DistanceTransform::inputAt(DimensionType offset) {
+    bool DistanceTransform::inputAt(DimensionType offset) {
         assert(offset < width * height && input.get());
         return (input[offset/8] >> (offset%8)) & 1;
     }
 
-    DistanceTransform::InputType DistanceTransform::inputAt(PositionType pos) {
+    bool DistanceTransform::inputAt(PositionType pos) {
         assert(pos.x < width && pos.y < height);
         return inputAt(pos.y*width+pos.x);
     }
 
-    DistanceTransform::InputType DistanceTransform::inputAtClamped(PositionType pos) {
+    bool DistanceTransform::inputAtClamped(PositionType pos) {
         if(static_cast<int>(pos.x) < 0 || static_cast<int>(pos.y) < 0 || pos.x >= width || pos.y >= height)
             return 0;
         return inputAt(pos);
@@ -77,6 +75,7 @@ namespace llassetgen {
     }
 
     void DistanceTransform::importFreeTypeBitmap(FT_Bitmap* bitmap, DimensionType padding) {
+        assert(bitmap);
         resetInput(bitmap->width + padding*2, bitmap->rows + padding*2, true);
         for(DimensionType y = 0; y < bitmap->rows; ++y)
             for(DimensionType x = 0; x < bitmap->width; ++x)
@@ -87,7 +86,7 @@ namespace llassetgen {
         FILE* file = fopen(path.c_str(), "r");
         assert(file);
         int bitDepth = 0, colorType = 0;
-        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
         png_infop pngInfo = png_create_info_struct(png);
         if(setjmp(png_jmpbuf(png)))
             assert(false);
@@ -101,7 +100,7 @@ namespace llassetgen {
                 png_set_expand_gray_1_2_4_to_8(png);
             assert(png_set_interlace_handling(png) == 1);
             png_read_update_info(png, pngInfo);
-            png_get_IHDR(png, pngInfo, &width, &height, &bitDepth, &colorType, NULL, NULL, NULL);
+            png_get_IHDR(png, pngInfo, &width, &height, &bitDepth, &colorType, nullptr, nullptr, nullptr);
             assert(colorType == PNG_COLOR_TYPE_GRAY);
             assert(bitDepth == 8);
             DimensionType index = 0;
@@ -109,7 +108,7 @@ namespace llassetgen {
             resetInput(width, height, false);
             std::unique_ptr<InputType[]> rowBuffer(new InputType[width]);
             for(DimensionType y = 0; y < height; ++y) {
-                png_read_row(png, reinterpret_cast<png_bytep>(rowBuffer.get()), NULL);
+                png_read_row(png, reinterpret_cast<png_bytep>(rowBuffer.get()), nullptr);
                 for(DimensionType x = 0; x < width; ++x) {
                     byte |= (rowBuffer[x] >= std::numeric_limits<InputType>::max()/2 ? 1 : 0) << bit;
                     if(++bit >= 8) {
@@ -119,8 +118,8 @@ namespace llassetgen {
                 }
             }
         }
-        png_read_end(png, NULL);
-        png_destroy_read_struct(&png, &pngInfo, NULL);
+        png_read_end(png, nullptr);
+        png_destroy_read_struct(&png, &pngInfo, nullptr);
         fclose(file);
     }
 
@@ -138,7 +137,7 @@ namespace llassetgen {
         assert(width > 0 && height > 0 && output.get());
         FILE* file = fopen(path.c_str(), "w");
         assert(file);
-        png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
         png_infop pngInfo = png_create_info_struct(png);
         if(setjmp(png_jmpbuf(png)))
             assert(false);
@@ -160,7 +159,7 @@ namespace llassetgen {
                     assert(false);
             }
         }
-        png_write_end(png, NULL);
+        png_write_end(png, nullptr);
         png_destroy_write_struct(&png, &pngInfo);
         fclose(file);
     }
@@ -252,8 +251,8 @@ namespace llassetgen {
         parabolas.reset(new Parabola[length+1]);
         lineBuffer.reset(new OutputType[length]);
 
-        for(DimensionType x = 0; x < width; ++x)
-            for(DimensionType y = 0; y < height; ++y)
+        for(DimensionType y = 0; y < height; ++y)
+            for(DimensionType x = 0; x < width; ++x)
                 outputAt({x, y}) = (inputAt({x, y})) ? 0 : 1E20;
 
         for(DimensionType y = 0; y < height; ++y)

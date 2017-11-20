@@ -44,9 +44,9 @@ namespace llassetgen {
         }
 
         void resetInput(DimensionType width, DimensionType height, bool clear);
-        InputType inputAt(DimensionType offset);
-        InputType inputAt(PositionType pos);
-        InputType inputAtClamped(PositionType pos);
+        bool inputAt(DimensionType offset);
+        bool inputAt(PositionType pos);
+        bool inputAtClamped(PositionType pos);
         void inputAt(PositionType pos, InputType bit);
         OutputType& outputAt(DimensionType offset);
         OutputType& outputAt(PositionType pos);
