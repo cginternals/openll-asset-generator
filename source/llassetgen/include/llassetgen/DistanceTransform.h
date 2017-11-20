@@ -44,9 +44,11 @@ namespace llassetgen {
         }
 
         void resetInput(DimensionType width, DimensionType height, bool clear);
+        InputType inputAt(DimensionType offset);
         InputType inputAt(PositionType pos);
         InputType inputAtClamped(PositionType pos);
         void inputAt(PositionType pos, InputType bit);
+        OutputType& outputAt(DimensionType offset);
         OutputType& outputAt(PositionType pos);
         OutputType outputAtClamped(PositionType pos);
 
@@ -57,8 +59,9 @@ namespace llassetgen {
         virtual void transform() = 0;
     };
 
-    class DeadReackoning : public DistanceTransform {
+    class DeadReckoning : public DistanceTransform {
         std::unique_ptr<PositionType[]> posBuffer;
+
         PositionType& posAt(PositionType pos);
         void transformAt(PositionType pos, PositionType target, OutputType distance);
 
@@ -67,10 +70,14 @@ namespace llassetgen {
     };
 
     class ParabolaEnvelope : public DistanceTransform {
-        std::unique_ptr<OutputType[]> srcBuffer, dstBuffer;
-        std::unique_ptr<DimensionType[]> apex;
-        std::unique_ptr<OutputType[]> range;
-        void transformLine(DimensionType length);
+        struct Parabola {
+            DimensionType apex;
+            OutputType begin, value;
+        };
+        std::unique_ptr<Parabola[]> parabolas;
+        std::unique_ptr<OutputType[]> lineBuffer;
+
+        void transformLine(DimensionType offset, DimensionType pitch, DimensionType length);
 
         public:
         void transform();
