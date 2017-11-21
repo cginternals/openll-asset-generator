@@ -252,8 +252,14 @@ namespace llassetgen {
         lineBuffer.reset(new OutputType[length]);
 
         for(DimensionType y = 0; y < height; ++y)
-            for(DimensionType x = 0; x < width; ++x)
-                outputAt({x, y}) = (inputAt({x, y})) ? 0 : 1E20;
+            for(DimensionType x = 0; x < width; ++x) {
+                PositionType pos = {x, y};
+                bool center = inputAt(pos);
+                outputAt(pos) = (center && (
+                                 inputAtClamped({x-1, y}) != center || inputAtClamped({x+1, y}) != center ||
+                                 inputAtClamped({x, y-1}) != center || inputAtClamped({x, y+1}) != center))
+                                ? 0 : 1E20;
+            }
 
         for(DimensionType y = 0; y < height; ++y)
             transformLine(y*width, 1, width);
@@ -263,6 +269,6 @@ namespace llassetgen {
 
         for(DimensionType x = 0; x < width; ++x)
             for(DimensionType y = 0; y < height; ++y)
-                outputAt({x, y}) = std::sqrt(outputAt({x, y}));
+                outputAt({x, y}) = std::sqrt(outputAt({x, y})) * (inputAt({x, y}) ? -1 : 1);
     }
 }
