@@ -1,5 +1,3 @@
-#pragma once
-
 #include <algorithm>
 #include <limits>
 
@@ -32,21 +30,23 @@ namespace llassetgen {
             memset(input.get(), 0, size);
     }
 
-    DistanceTransform::InputType DistanceTransform::inputAt(PositionType pos) {
-        assert(pos.x < width && pos.y < height && input.get());
-        DimensionType i = pos.y*width+pos.x;
-        return (input[i/8] >> (i%8)) & 1;
+    bool DistanceTransform::inputAt(DimensionType offset) {
+        assert(offset < width * height && input.get());
+        return (input[offset/8] >> (offset%8)) & 1;
     }
 
-    DistanceTransform::InputType DistanceTransform::inputAtClamped(PositionType pos) {
-        assert(input.get());
+    bool DistanceTransform::inputAt(PositionType pos) {
+        assert(pos.x < width && pos.y < height);
+        return inputAt(pos.y*width+pos.x);
+    }
+
+    bool DistanceTransform::inputAtClamped(PositionType pos) {
         if(static_cast<int>(pos.x) < 0 || static_cast<int>(pos.y) < 0 || pos.x >= width || pos.y >= height)
             return 0;
-        DimensionType i = pos.y*width+pos.x;
-        return (input[i/8] >> (i%8)) & 1;
+        return inputAt(pos);
     }
 
-    void DistanceTransform::inputAt(PositionType pos, InputType bit) {
+    void DistanceTransform::inputAt(PositionType pos, bool bit) {
         assert(pos.x < width && pos.y < height && input.get());
         DimensionType i = pos.y*width+pos.x;
         InputType mask = 1 << (i%8);
@@ -55,6 +55,11 @@ namespace llassetgen {
             input[i] |= mask;
         else
             input[i] &= ~mask;
+    }
+
+    DistanceTransform::OutputType& DistanceTransform::outputAt(DimensionType offset) {
+        assert(offset < width * height && output.get());
+        return output[offset];
     }
 
     DistanceTransform::OutputType& DistanceTransform::outputAt(PositionType pos) {
@@ -70,6 +75,7 @@ namespace llassetgen {
     }
 
     void DistanceTransform::importFreeTypeBitmap(FT_Bitmap* bitmap, DimensionType padding) {
+        assert(bitmap);
         resetInput(bitmap->width + padding*2, bitmap->rows + padding*2, true);
         for(DimensionType y = 0; y < bitmap->rows; ++y)
             for(DimensionType x = 0; x < bitmap->width; ++x)
@@ -80,7 +86,7 @@ namespace llassetgen {
         FILE* file = fopen(path.c_str(), "r");
         assert(file);
         int bitDepth = 0, colorType = 0;
-        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
         png_infop pngInfo = png_create_info_struct(png);
         if(setjmp(png_jmpbuf(png)))
             assert(false);
@@ -94,7 +100,7 @@ namespace llassetgen {
                 png_set_expand_gray_1_2_4_to_8(png);
             assert(png_set_interlace_handling(png) == 1);
             png_read_update_info(png, pngInfo);
-            png_get_IHDR(png, pngInfo, &width, &height, &bitDepth, &colorType, NULL, NULL, NULL);
+            png_get_IHDR(png, pngInfo, &width, &height, &bitDepth, &colorType, nullptr, nullptr, nullptr);
             assert(colorType == PNG_COLOR_TYPE_GRAY);
             assert(bitDepth == 8);
             DimensionType index = 0;
@@ -102,7 +108,7 @@ namespace llassetgen {
             resetInput(width, height, false);
             std::unique_ptr<InputType[]> rowBuffer(new InputType[width]);
             for(DimensionType y = 0; y < height; ++y) {
-                png_read_row(png, reinterpret_cast<png_bytep>(rowBuffer.get()), NULL);
+                png_read_row(png, reinterpret_cast<png_bytep>(rowBuffer.get()), nullptr);
                 for(DimensionType x = 0; x < width; ++x) {
                     byte |= (rowBuffer[x] >= std::numeric_limits<InputType>::max()/2 ? 1 : 0) << bit;
                     if(++bit >= 8) {
@@ -112,8 +118,8 @@ namespace llassetgen {
                 }
             }
         }
-        png_read_end(png, NULL);
-        png_destroy_read_struct(&png, &pngInfo, NULL);
+        png_read_end(png, nullptr);
+        png_destroy_read_struct(&png, &pngInfo, nullptr);
         fclose(file);
     }
 
@@ -131,7 +137,7 @@ namespace llassetgen {
         assert(width > 0 && height > 0 && output.get());
         FILE* file = fopen(path.c_str(), "w");
         assert(file);
-        png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
         png_infop pngInfo = png_create_info_struct(png);
         if(setjmp(png_jmpbuf(png)))
             assert(false);
@@ -153,19 +159,19 @@ namespace llassetgen {
                     assert(false);
             }
         }
-        png_write_end(png, NULL);
+        png_write_end(png, nullptr);
         png_destroy_write_struct(&png, &pngInfo);
         fclose(file);
     }
 
 
 
-    DeadReackoning::PositionType& DeadReackoning::posAt(PositionType pos) {
+    DeadReckoning::PositionType& DeadReckoning::posAt(PositionType pos) {
         assert(pos.x < width && pos.y < height && posBuffer.get());
         return posBuffer[pos.y*width+pos.x];
     }
 
-    void DeadReackoning::transformAt(PositionType pos, PositionType target, OutputType distance) {
+    void DeadReckoning::transformAt(PositionType pos, PositionType target, OutputType distance) {
         target += pos;
         if(outputAtClamped(target)+distance < outputAt(pos)) {
             posAt(pos) = target = posAt(target);
@@ -173,11 +179,10 @@ namespace llassetgen {
         }
     }
 
-    void DeadReackoning::transform() {
+    void DeadReckoning::transform() {
         assert(width > 0 && height > 0);
-
-        posBuffer.reset(new PositionType[width * height]);
         output.reset(new OutputType[width * height]);
+        posBuffer.reset(new PositionType[width * height]);
 
         for(DimensionType y = 0; y < height; ++y)
             for(DimensionType x = 0; x < width; ++x) {
@@ -209,61 +214,55 @@ namespace llassetgen {
 
         for(DimensionType y = 0; y < height; ++y)
             for(DimensionType x = 0; x < width; ++x)
-                outputAt({x, y}) *= inputAt({x, y}) ? -1 : 1;
+                if(inputAt({x, y}))
+                    outputAt({x, y}) *= -1;
     }
 
 
 
-    void ParabolaEnvelope::transformLine(DimensionType length) {
-        apex[0] = 0;
-        range[0] = -std::numeric_limits<OutputType>::infinity();
-        range[1] = +std::numeric_limits<OutputType>::infinity();
-        for(DimensionType parabola = 0, q = 1; q < length; ++q) {
-            OutputType s;
+    void ParabolaEnvelope::transformLine(DimensionType offset, DimensionType pitch, DimensionType length) {
+        parabolas[0].apex = 0;
+        parabolas[0].begin = -std::numeric_limits<OutputType>::infinity();
+        parabolas[0].value = outputAt(offset+0*pitch);
+        parabolas[1].begin = +std::numeric_limits<OutputType>::infinity();
+        for(DimensionType parabola = 0, i = 1; i < length; ++i) {
+            OutputType begin;
             do {
-                s = (srcBuffer[q]+square(q)) - (srcBuffer[apex[parabola]]+square(apex[parabola]));
-                s /= 2*(q-apex[parabola]);
-            } while(s <= range[parabola--]);
+                DimensionType apex = parabolas[parabola].apex;
+                begin = (outputAt(offset+i*pitch)+square(i) - (parabolas[parabola].value+square(apex))) / (2 * (i - apex));
+            } while(begin <= parabolas[parabola--].begin);
             parabola += 2;
-            apex[parabola] = q;
-            range[parabola] = s;
-            range[parabola+1] = +std::numeric_limits<OutputType>::infinity();
+            parabolas[parabola].apex = i;
+            parabolas[parabola].begin = begin;
+            parabolas[parabola].value = outputAt(offset+i*pitch);
+            parabolas[parabola+1].begin = std::numeric_limits<OutputType>::infinity();
         }
-        for(DimensionType parabola = 0, q = 0; q < length; ++q) {
-            while(range[parabola+1] < q)
-                ++parabola;
-            dstBuffer[q] = srcBuffer[apex[parabola]]+square(q-apex[parabola]);
+        for(DimensionType parabola = 0, i = 0; i < length; ++i) {
+            while(parabolas[++parabola].begin < i);
+            --parabola;
+            outputAt(offset+i*pitch) = parabolas[parabola].value+square(i-parabolas[parabola].apex);
         }
     }
 
     void ParabolaEnvelope::transform() {
         assert(width > 0 && height > 0);
-
-        DimensionType length = std::max(width, height);
-        srcBuffer.reset(new OutputType[length]);
-        dstBuffer.reset(new OutputType[length]);
-        apex.reset(new DimensionType[length]);
-        range.reset(new OutputType[length+1]);
         output.reset(new OutputType[width * height]);
+        DimensionType length = std::max(width, height);
+        parabolas.reset(new Parabola[length+1]);
+        lineBuffer.reset(new OutputType[length]);
+
+        for(DimensionType y = 0; y < height; ++y)
+            for(DimensionType x = 0; x < width; ++x)
+                outputAt({x, y}) = (inputAt({x, y})) ? 0 : 1E20;
+
+        for(DimensionType y = 0; y < height; ++y)
+            transformLine(y*width, 1, width);
+
+        for(DimensionType x = 0; x < width; ++x)
+            transformLine(x, width, height);
 
         for(DimensionType x = 0; x < width; ++x)
             for(DimensionType y = 0; y < height; ++y)
-                outputAt({x, y}) = (inputAt({x, y})) ? 0 : 1E20;
-
-        for(DimensionType y = 0; y < height; ++y) {
-            for(DimensionType x = 0; x < width; ++x)
-                srcBuffer[x] = outputAt({x, y});
-            transformLine(width);
-            for(DimensionType x = 0; x < width; ++x)
-                outputAt({x, y}) = dstBuffer[x];
-        }
-
-        for(DimensionType x = 0; x < width; ++x) {
-            for(DimensionType y = 0; y < height; ++y)
-                srcBuffer[y] = outputAt({x, y});
-            transformLine(height);
-            for(DimensionType y = 0; y < height; ++y)
-                outputAt({x, y}) = std::sqrt(dstBuffer[y]);
-        }
+                outputAt({x, y}) = std::sqrt(outputAt({x, y}));
     }
 }
