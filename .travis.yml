@@ -25,7 +25,8 @@ matrix:
 
 before_install:
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -qq cmake3 cppcheck clang-tidy-3.8 libfreetype6-dev libpng-dev; fi
-  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype && brew upgrade libpng; fi
+  # libpng is already installed by default
+  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype; fi
 
 before_script:
   - ./configure
