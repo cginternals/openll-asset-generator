@@ -57,8 +57,8 @@ install:
 
 - mkdir deps\freetype
 - nuget install freetype
-- ps: move freetype*\* deps\freetype -force
-#- move deps\freetype_static.lib deps\freetype.lib
+- ps: move freetype*\*\x64\v141\static\Release\freetype28.lib deps\freetype\freetype28.lib -force
+- ps : move freetype*\*\include deps\freetype\include -force
 
 before_build:
 - cmd: >-
