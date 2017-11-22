@@ -55,25 +55,22 @@ install:
 - ps: move freetype*\*\x64\v141\static\Release\freetype28.lib deps\freetype\freetype28.lib -force
 - ps : move freetype*\*\include deps\freetype\include -force
 
-- cmd: cd
-
 before_build:
 - cmd: >-
-    cd
 
-    set ZLIB_ROOT=deps\zlib
+    set ZLIB_ROOT=C:\projects\llassetgen\deps\zlib
 
-    set PNG_ROOT=deps\libpng
+    set PNG_ROOT=C:\projects\llassetgen\deps\libpng
 
-    set FREETYPE_DIR=deps\freetype
+    set FREETYPE_DIR=C:\projects\llassetgen\deps\freetype
 
-    set ZLIB_INCLUDE_DIR=deps\zlib\include
+    set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\deps\zlib\include
 
-    set ZLIB_LIBRARY_RELEASE=deps\zlib\zlib.lib
+    set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\deps\zlib\zlib.lib
 
-    set PNG_PNG_INCLUDE_DIR=deps\libpng\include
+    set PNG_PNG_INCLUDE_DIR=C:\projects\llassetgen\deps\libpng\include
 
-    set PNG_LIBRARY_RELEASE=deps\libpng\png.lib
+    set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\deps\libpng\png.lib
 
     set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
 
