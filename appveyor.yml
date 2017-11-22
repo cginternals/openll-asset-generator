@@ -14,10 +14,10 @@ configuration:
 platform:
 - x64
 environment:
-  zlib_include_dir : deps\zlib\include
-  zlib_library_release : deps\zlib\zlib.lib
-  png_png_include_dir : deps\libpng\include
-  png_library_release : deps\libpng\png.lib
+  ZLIB_INCLUDE_DIR : deps\zlib\include
+  ZLIB_LIBRARY_RELEASE : deps\zlib\zlib.lib
+  PNG_PNG_INCLUDE_DIR : deps\libpng\include
+  PNG_LIBRARY_RELEASE : deps\libpng\png.lib
 
   matrix:
   - arch: Win64
