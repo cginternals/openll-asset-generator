@@ -39,49 +39,29 @@ install:
 - mkdir deps
 - if "%arch%"=="Win64" (set ver=x64)
 
-- mkdir deps\zlib
 - echo install zlib-msvc-%ver%
 - nuget install zlib-msvc-%ver%
-- cmd: set ZLIB_ROOT=C:\projects\llassetgen\zlib-msvc-%ver%.1.2.11.8900
-- cmd: echo %ZLIB_ROOT
-#- ps: move zlib*\*\zlib.lib deps\zlib\zlib.lib -force
-#- ps: move zlib*\*\include deps\zlib\include -force
+- cmd : move zlib* zlib
+- cmd : set ZLIB_ROOT=C:\projects\llassetgen\zlib
+- cmd : set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\zlib\build\native\include
+- cmd : set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\zlib\build\native\lib_release\zlib.lib
 
-- mkdir deps\libpng
 - nuget install libpng-msvc-%ver%
-- ps : move libpng*\*\libpng16.lib deps\libpng\libpng16.lib -force
-- ps : move libpng*\*\include deps\libpng\include -force
+- cmd : move libpng* libpng
+- cmd : set PNG_ROOT=C:\projects\llassetgen\libpng
+- cmd : set PNG_PNG_INCLUDE_DIR=C:\projects\llassetgen\libpng\build\native\include
+- cmd : set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\libpng\build\native\lib_release\libpng16.lib
 
-- mkdir deps\freetype
 - nuget install freetype
-- ps: move freetype*\*\x64\v141\static\Release\freetype28.lib deps\freetype\freetype28.lib -force
-- ps : move freetype*\*\include deps\freetype\include -force
+- cmd : move freetype* libpng
+- cmd : set FREETYPE_DIR=C:\projects\llassetgen\freetype
+- cmd : set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\freetype\build\native\include
+- cmd : set FREETYPE_LIBRARY=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Release\freetype28.lib
+
+- cmd : set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
 
 before_build:
-- cmd: >-
-
-    set ZLIB_ROOT=C:\projects\llassetgen\deps\zlib
-
-    set PNG_ROOT=C:\projects\llassetgen\deps\libpng
-
-    set FREETYPE_DIR=C:\projects\llassetgen\deps\freetype
-    
-    set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\deps\freetype\include
-    
-    set FREETYPE_LIBRARY=C:\projects\llassetgen\deps\freetype\freetype28.lib
-
-    set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\deps\zlib\include
-
-    set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\deps\zlib\zlib.lib
-
-    set PNG_PNG_INCLUDE_DIR=C:\projects\llassetgen\deps\libpng\include
-
-    set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\deps\libpng\png.lib
-
-    set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
-
-    echo %PATH%
-    
+- cmd: >-   
     mkdir build
     
     cd build
