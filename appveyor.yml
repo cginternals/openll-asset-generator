@@ -55,14 +55,17 @@ install:
 - ps: move freetype*\*\x64\v141\static\Release\freetype28.lib deps\freetype\freetype28.lib -force
 - ps : move freetype*\*\include deps\freetype\include -force
 
+- cmd: cd
+
 before_build:
 - cmd: >-
+    cd
 
     set ZLIB_ROOT=deps\zlib
 
     set PNG_ROOT=deps\libpng
 
-    set FREETYPE_DIR=deps\freetype\
+    set FREETYPE_DIR=deps\freetype
 
     set ZLIB_INCLUDE_DIR=deps\zlib\include
 
