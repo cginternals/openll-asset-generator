@@ -58,7 +58,7 @@ install:
 - cmd : move freetype* freetype
 - cmd : set FREETYPE_DIR=C:\projects\llassetgen\freetype
 - cmd : set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\freetype\build\native\include
-- if %"configuration%"=="Release" ( set FREETYPE_LIBRARY_DEBUG=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Release\freetype28.lib)
+- if %"configuration%"=="Release" ( set FREETYPE_LIBRARY_RELEASE=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Release\freetype28.lib)
 - if %"configuration%"=="Debug" ( set FREETYPE_LIBRARY_DEBUG=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Debug\freetype28d.lib)
 - cmd : set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
 
