@@ -13,6 +13,11 @@ configuration:
 platform:
 - x64
 environment:
+  zlib_include_dir : deps\include
+  zlib_library_release : deps\zlib.lib
+  png_png_include_dir : deps\include
+  png_library_release : deps\png.lib
+
   matrix:
   - arch: Win64
   # - arch: #does not work, Release|x64 not a valid target
@@ -25,10 +30,25 @@ init:
 - if "%arch%"=="Win64" ( set arch= Win64)
 - echo %arch%
 - echo %APPVEYOR_BUILD_WORKER_IMAGE%
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set generator="Visual Studio 14 2015%arch%" )
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" ( set generator="Visual Studio 12 2013%arch%" )
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" set tools="msvc15")
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set generator="Visual Studio 14 2015%arch%" set tools="msvc14")
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" ( set generator="Visual Studio 12 2013%arch%" set tools="msvc12")
 - echo %generator%
+
+install:
+- mkdir deps
+
+- nuget install zlib-%tools%-%arch%-master -Source https://ci.appveyor.com/nuget/zlib-94hmpf3q011d
+- ps: move zlib*\* deps -force
+- move deps\zlibstatic.lib deps\zlib.lib
+
+- nuget install libpng-%tools%-%arch%-master -Source https://ci.appveyor.com/nuget/libpng-7hwq4pmmrc48 &&
+- ps : move libpng*\* deps -force
+- move deps\libpng16_static.lib deps\png.lib
+
+- nuget install freetype-%tools%-%arch%-master -Source https://ci.appveyor.com/nuget/freetype-vf7bw7v5ec29 &&
+- ps: move freetype*\* deps -force
+- move deps\freetype_static.lib deps\freetype.lib
 
 before_build:
 - cmd: >-
