@@ -64,18 +64,21 @@ install:
 - cmd: set PNG_PNG_INCLUDE_DIR = "deps\libpng\include"
 - cmd: set PNG_LIBRARY_RELEASE = "deps\libpng\png.lib"
 
-- cmd: set CMAKE_PREFIX_PATH = %ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%CMAKE_PREFIX_PATH;%
 - cmd: set PATH = %ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH;%
 
 before_build:
 - cmd: >-
+    echo %PATH%
+    
+    echo %ZLIB_INCLUDE_DIR%
+
     mkdir build
     
     cd build
     
     cmake --version
 
-    cmake .. -G %generator% -DCMAKE_PREFIX_PATH=%CMAKE_PREFIX_PATH%
+    cmake .. -G %generator%
     
 build:
   project: c:\projects\llassetgen\build\llassetgen.sln
