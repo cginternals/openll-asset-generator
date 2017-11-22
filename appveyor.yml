@@ -18,7 +18,7 @@ environment:
   - arch: Win64
   # - arch: #does not work, Release|x64 not a valid target
 matrix:
-  fast_finish: true
+  #fast_finish: true
 
 # skip unsupported combinations
 init:
@@ -44,17 +44,15 @@ install:
 - cmd : move zlib* zlib
 - cmd : set ZLIB_ROOT=C:\projects\llassetgen\zlib
 - cmd : set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\zlib\build\native\include
-- if "%configuration%"=="Release" ( set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\zlib\build\native\lib_release\zlib.lib)
-- if "%configuration%"=="Debug" ( set ZLIB_LIBRARY_DEBUG=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib)
-#- if "%configuration%"=="Debug" ( set ZLIB_LIBRARY=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib)
+- cmd : set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\zlib\build\native\lib_release\zlib.lib
+- cmd : set ZLIB_LIBRARY_DEBUG=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib
 
 - nuget install libpng-msvc-%ver%
 - cmd : move libpng* libpng
 - cmd : set PNG_ROOT=C:\projects\llassetgen\libpng
 - cmd : set PNG_PNG_INCLUDE_DIR=C:\projects\llassetgen\libpng\build\native\include
-- if "%configuration%"=="Release" ( set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\libpng\build\native\lib_release\libpng16.lib)
-- if "%configuration%"=="Debug" ( set PNG_LIBRARY_DEBUG=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib)
-#- if "%configuration%"=="Debug" ( set PNG_LIBRARY=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib)
+- cmd : set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\libpng\build\native\lib_release\libpng16.lib
+- cmd : set PNG_LIBRARY_DEBUG=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib
 
 - nuget install freetype
 - cmd : move freetype* freetype
