@@ -77,6 +77,7 @@ namespace llassetgen {
         std::unique_ptr<Parabola[]> parabolas;
         std::unique_ptr<OutputType[]> lineBuffer;
 
+        void edgeDetection(DimensionType offset, DimensionType pitch, DimensionType length);
         void transformLine(DimensionType offset, DimensionType pitch, DimensionType length);
 
         public:

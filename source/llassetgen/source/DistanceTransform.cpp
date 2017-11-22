@@ -220,6 +220,22 @@ namespace llassetgen {
 
 
 
+    void ParabolaEnvelope::edgeDetection(DimensionType offset, DimensionType pitch, DimensionType length) {
+        InputType prev = 0;
+        DimensionType begin = 0;
+        for(DimensionType j = 0; j < length; ++j) {
+            InputType next = inputAt(offset+j*pitch);
+            if(next == prev)
+                continue;
+            DimensionType end = (next) ? j-1 : j;
+            prev = next;
+            begin = end;
+            outputAt(offset+end*pitch) = 0;
+        }
+        if(prev)
+            outputAt(offset+(length-1)*pitch) = 0;
+    }
+
     void ParabolaEnvelope::transformLine(DimensionType offset, DimensionType pitch, DimensionType length) {
         parabolas[0].apex = 0;
         parabolas[0].begin = -std::numeric_limits<OutputType>::infinity();
@@ -252,20 +268,18 @@ namespace llassetgen {
         lineBuffer.reset(new OutputType[length]);
 
         for(DimensionType y = 0; y < height; ++y)
-            for(DimensionType x = 0; x < width; ++x) {
-                PositionType pos = {x, y};
-                bool center = inputAt(pos);
-                outputAt(pos) = (center && (
-                                 inputAtClamped({x-1, y}) != center || inputAtClamped({x+1, y}) != center ||
-                                 inputAtClamped({x, y-1}) != center || inputAtClamped({x, y+1}) != center))
-                                ? 0 : 1E20;
-            }
+            for(DimensionType x = 0; x < width; ++x)
+                outputAt({x, y}) = 1E20;
 
-        for(DimensionType y = 0; y < height; ++y)
+        for(DimensionType y = 0; y < height; ++y) {
+            edgeDetection(y*width, 1, width);
             transformLine(y*width, 1, width);
+        }
 
-        for(DimensionType x = 0; x < width; ++x)
+        for(DimensionType x = 0; x < width; ++x) {
+            edgeDetection(x, width, height);
             transformLine(x, width, height);
+        }
 
         for(DimensionType x = 0; x < width; ++x)
             for(DimensionType y = 0; y < height; ++y)
