@@ -42,8 +42,8 @@ install:
 - mkdir deps\zlib
 - echo install zlib-msvc-%ver%
 - nuget install zlib-msvc-%ver%
-#- cmd: move zlib* deps\zlib
-- cmd : dir /s /b /o
+- cmd: set ZLIB_ROOT=C:\projects\llassetgen\zlib-msvc-%ver%.1.2.11.8900
+- cmd: echo %ZLIB_ROOT
 #- ps: move zlib*\*\zlib.lib deps\zlib\zlib.lib -force
 #- ps: move zlib*\*\include deps\zlib\include -force
 
