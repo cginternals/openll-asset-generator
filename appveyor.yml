@@ -42,8 +42,10 @@ install:
 - mkdir deps\zlib
 - echo install zlib-msvc-%ver%
 - nuget install zlib-msvc-%ver%
-- ps: move zlib*\*\zlib.lib deps\zlib\zlib.lib -force
-- ps: move zlib*\*\include deps\zlib\include -force
+- ps: move -r zlib*\* deps\zlib\
+- cmd : dir /s /b /o
+#- ps: move zlib*\*\zlib.lib deps\zlib\zlib.lib -force
+#- ps: move zlib*\*\include deps\zlib\include -force
 
 - mkdir deps\libpng
 - nuget install libpng-msvc-%ver%
