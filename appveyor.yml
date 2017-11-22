@@ -14,10 +14,10 @@ configuration:
 platform:
 - x64
 environment:
-  zlib_include_dir : deps\include
-  zlib_library_release : deps\zlib.lib
-  png_png_include_dir : deps\include
-  png_library_release : deps\png.lib
+  zlib_include_dir : deps\zlib\include
+  zlib_library_release : deps\zlib\zlib.lib
+  png_png_include_dir : deps\libpng\include
+  png_library_release : deps\libpng\png.lib
 
   matrix:
   - arch: Win64
@@ -42,21 +42,23 @@ init:
 
 install:
 - mkdir deps
-- mkdir deps\zlib
-
 - if "%arch%"=="Win64" (set ver=x64)
+
+- mkdir deps\zlib
 - echo install zlib-msvc-%ver%
 - nuget install zlib-msvc-%ver%
 - ps: move zlib*\*\zlib.lib deps\zlib\zlib.lib -force
 - ps: move zlib*\*\include deps\zlib\include -force
 
-- nuget install libpng-%tools%-%arch%-master -Source https://ci.appveyor.com/nuget/libpng-7hwq4pmmrc48 &&
-- ps : move libpng*\* deps -force
-- move deps\libpng16_static.lib deps\png.lib
+- mkdir deps\libpng
+- nuget install libpng-msvc-%ver%
+- ps : move libpng*\*\libpng16.lib deps\libpng\libpng16.lib -force
+- ps : move libpng*\*\include deps\libpng\include -force
 
-- nuget install freetype-%tools%-%arch%-master -Source https://ci.appveyor.com/nuget/freetype-vf7bw7v5ec29 &&
-- ps: move freetype*\* deps -force
-- move deps\freetype_static.lib deps\freetype.lib
+- mkdir deps\freetype
+- nuget install freetype
+- ps: move freetype*\* deps\freetype -force
+#- move deps\freetype_static.lib deps\freetype.lib
 
 before_build:
 - cmd: >-
