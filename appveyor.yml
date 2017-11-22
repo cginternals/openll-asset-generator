@@ -53,7 +53,7 @@ install:
 - cmd : set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\libpng\build\native\lib_release\libpng16.lib
 
 - nuget install freetype
-- cmd : move freetype* libpng
+- cmd : move freetype* freetype
 - cmd : set FREETYPE_DIR=C:\projects\llassetgen\freetype
 - cmd : set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\freetype\build\native\include
 - cmd : set FREETYPE_LIBRARY=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Release\freetype28.lib
