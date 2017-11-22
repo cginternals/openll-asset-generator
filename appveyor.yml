@@ -44,6 +44,10 @@ install:
 - cmd : move zlib* zlib
 - cmd : set ZLIB_ROOT=C:\projects\llassetgen\zlib
 - cmd : set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\zlib\build\native\include
+- echo %configuration%
+- echo "%configuration%"
+- echo $(configuration)
+- echo "$(configuration)"
 - if "%configuration%"=="Release" ( cmd : set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\zlib\build\native\lib_release\zlib.lib)
 - if "%configuration%"=="Debug" (	cmd : set ZLIB_LIBRARY_DEBUG=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib)
 
