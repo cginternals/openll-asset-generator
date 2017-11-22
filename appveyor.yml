@@ -44,22 +44,22 @@ install:
 - cmd : move zlib* zlib
 - cmd : set ZLIB_ROOT=C:\projects\llassetgen\zlib
 - cmd : set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\zlib\build\native\include
-- if %configuration%=="Release" ( cmd : set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\zlib\build\native\lib_release\zlib.lib)
-- if %configuration%=="Debug" (	cmd : set ZLIB_LIBRARY_DEBUG=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib)
+- if "%configuration%"=="Release" ( cmd : set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\zlib\build\native\lib_release\zlib.lib)
+- if "%configuration%"=="Debug" (	cmd : set ZLIB_LIBRARY_DEBUG=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib)
 
 - nuget install libpng-msvc-%ver%
 - cmd : move libpng* libpng
 - cmd : set PNG_ROOT=C:\projects\llassetgen\libpng
 - cmd : set PNG_PNG_INCLUDE_DIR=C:\projects\llassetgen\libpng\build\native\include
-- if $(configuration)=="Release" ( cmd : set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\libpng\build\native\lib_release\libpng16.lib)
-- if $(configuration)=="Debug" ( cmd : set PNG_LIBRARY_DEBUG=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib)
+- if "%configuration%"=="Release" ( cmd : set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\libpng\build\native\lib_release\libpng16.lib)
+- if "%configuration%"=="Debug" ( cmd : set PNG_LIBRARY_DEBUG=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib)
 
 - nuget install freetype
 - cmd : move freetype* freetype
 - cmd : set FREETYPE_DIR=C:\projects\llassetgen\freetype
 - cmd : set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\freetype\build\native\include
-- if $(configuration)=="Release" ( cmd : set FREETYPE_LIBRARY_DEBUG=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Release\freetype28.lib)
-- if $(configuration)=="Debug" ( cmd : set FREETYPE_LIBRARY_DEBUG=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Debug\freetype28d.lib)
+- if %"configuration%"=="Release" ( cmd : set FREETYPE_LIBRARY_DEBUG=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Release\freetype28.lib)
+- if %"configuration%"=="Debug" ( cmd : set FREETYPE_LIBRARY_DEBUG=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Debug\freetype28d.lib)
 - cmd : set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
 
 before_build:
