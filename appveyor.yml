@@ -45,7 +45,8 @@ init:
 install:
 - mkdir deps
 
-- nuget install zlib-%tools%-%arch%-master -Source https://ci.appveyor.com/nuget/zlib-94hmpf3q011d
+- echo install zlib-%tools%-%arch%-master
+- nuget install zlib-%tools%-%arch%-master
 - ps: move zlib*\* deps -force
 - move deps\zlibstatic.lib deps\zlib.lib
 
