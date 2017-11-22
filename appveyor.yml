@@ -57,13 +57,15 @@ install:
 
 - cmd: set ZLIB_ROOT = "deps\zlib"
 - cmd: set PNG_ROOT = "deps\libpng"
+- cmd: set FREETYPE_ROOT = "deps\freetype\"
 
 - cmd: set ZLIB_INCLUDE_DIR = "deps\zlib\include"
 - cmd: set ZLIB_LIBRARY_RELEASE = "deps\zlib\zlib.lib"
 - cmd: set PNG_PNG_INCLUDE_DIR = "deps\libpng\include"
 - cmd: set PNG_LIBRARY_RELEASE = "deps\libpng\png.lib"
 
-- cmd: set PATH = %ZLIB_ROOT%;%PNG_ROOT%;%PATH;%
+- cmd: set CMAKE_PREFIX_PATH = %ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_ROOT%;%CMAKE_PREFIX_PATH;%
+- cmd: set PATH = %ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_ROOT%;%PATH;%
 
 before_build:
 - cmd: >-
