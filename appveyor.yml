@@ -43,9 +43,7 @@ init:
 install:
 - mkdir deps
 
-- if "%arch%"=="Win64" (
-    set ver=x64&&
-    set tools=msvc)
+- if "%arch%"=="Win64" (set ver=x64 && set tools=msvc)
 - echo install zlib-%tools%-%ver%-master
 - nuget install zlib-%tools%-%ver%-master
 - ps: move zlib*\* deps -force
