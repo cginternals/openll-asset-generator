@@ -57,20 +57,38 @@ install:
 - ps: move freetype*\*\x64\v141\static\Release\freetype28.lib deps\freetype\freetype28.lib -force
 - ps : move freetype*\*\include deps\freetype\include -force
 
-- cmd: set ZLIB_INCLUDE_DIR = "deps\zlib\include"
-- cmd: set ZLIB_LIBRARY_RELEASE = "deps\zlib\zlib.lib"
-- cmd: set PNG_PNG_INCLUDE_DIR = "deps\libpng\include"
-- cmd: set PNG_LIBRARY_RELEASE = "deps\libpng\png.lib"
-
 before_build:
 - cmd: >-
+
+    set ZLIB_ROOT=C:\projects\llassetgen\deps\zlib
+
+    set PNG_ROOT=C:\projects\llassetgen\deps\libpng
+
+    set FREETYPE_DIR=C:\projects\llassetgen\deps\freetype
+    
+    set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\deps\freetype\include
+    
+    set FREETYPE_LIBRARY=C:\projects\llassetgen\deps\freetype\freetype28.lib
+
+    set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\deps\zlib\include
+
+    set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\deps\zlib\zlib.lib
+
+    set PNG_PNG_INCLUDE_DIR=C:\projects\llassetgen\deps\libpng\include
+
+    set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\deps\libpng\png.lib
+
+    set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
+
+    echo %PATH%
+    
     mkdir build
     
     cd build
     
     cmake --version
 
-    cmake .. -G %generator%
+    cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DFREETYPE_DIR=%FREETYPE_DIR% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS%
     
 build:
   project: c:\projects\llassetgen\build\llassetgen.sln
