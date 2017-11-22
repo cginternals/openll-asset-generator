@@ -14,11 +14,6 @@ configuration:
 platform:
 - x64
 environment:
-  ZLIB_INCLUDE_DIR : deps\zlib\include
-  ZLIB_LIBRARY_RELEASE : deps\zlib\zlib.lib
-  PNG_PNG_INCLUDE_DIR : deps\libpng\include
-  PNG_LIBRARY_RELEASE : deps\libpng\png.lib
-
   matrix:
   - arch: Win64
   # - arch: #does not work, Release|x64 not a valid target
@@ -59,6 +54,11 @@ install:
 - nuget install freetype
 - ps: move freetype*\*\x64\v141\static\Release\freetype28.lib deps\freetype\freetype28.lib -force
 - ps : move freetype*\*\include deps\freetype\include -force
+
+- cmd: set ZLIB_INCLUDE_DIR = "deps\zlib\include"
+- cmd: set ZLIB_LIBRARY_RELEASE = "deps\zlib\zlib.lib"
+- cmd: set PNG_PNG_INCLUDE_DIR = "deps\libpng\include"
+- cmd: set PNG_LIBRARY_RELEASE = "deps\libpng\png.lib"
 
 before_build:
 - cmd: >-
