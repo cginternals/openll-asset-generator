@@ -75,7 +75,7 @@ before_build:
     
     cmake --version
 
-    cmake .. -G %generator%
+    cmake .. -G %generator% -DCMAKE_PREFIX_PATH=%CMAKE_PREFIX_PATH%
     
 build:
   project: c:\projects\llassetgen\build\llassetgen.sln
