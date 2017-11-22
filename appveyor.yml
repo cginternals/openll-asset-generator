@@ -28,7 +28,6 @@ matrix:
 # skip unsupported combinations
 init:
 - set arch=
-- if "%arch%"=="Win64" ( set arch=Win64)
 - echo %arch%
 - echo %APPVEYOR_BUILD_WORKER_IMAGE%
 - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( 
@@ -45,8 +44,9 @@ init:
 install:
 - mkdir deps
 
-- echo install zlib-%tools%-%arch%-master
-- nuget install zlib-%tools%-%arch%-master
+- if "%arch%" == "Win64" (set ver = "x64")
+- echo install zlib-%tools%-%ver%-master
+- nuget install zlib-%tools%-%ver%-master
 - ps: move zlib*\* deps -force
 - move deps\zlibstatic.lib deps\zlib.lib
 
