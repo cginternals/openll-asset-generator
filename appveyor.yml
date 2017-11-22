@@ -44,8 +44,8 @@ install:
 - mkdir deps
 
 - if "%arch%"=="Win64" (set ver=x64)
-- echo install zlib-msvc-%ver%-master
-- nuget install zlib-msvc-%ver%-master
+- echo install zlib-msvc-%ver%
+- nuget install zlib-msvc-%ver%
 - ps: move zlib*\* deps -force
 - move deps\zlibstatic.lib deps\zlib.lib
 
