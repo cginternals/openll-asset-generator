@@ -64,9 +64,9 @@ before_build:
 
     set FREETYPE_DIR=C:\projects\llassetgen\deps\freetype
     
-    set FREETYPE_LIBRARY=C:\projects\llassetgen\deps\freetype\freetype28.lib
-    
     set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\deps\freetype\include
+    
+    set FREETYPE_LIBRARY=C:\projects\llassetgen\deps\freetype\freetype28.lib
 
     set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\deps\zlib\include
 
@@ -86,7 +86,7 @@ before_build:
     
     cmake --version
 
-    cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DFREETYPE_DIR=%FREETYPE_DIR%
+    cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DFREETYPE_DIR=%FREETYPE_DIR% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS%
     
 build:
   project: c:\projects\llassetgen\build\llassetgen.sln
