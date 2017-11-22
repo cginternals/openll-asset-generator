@@ -76,15 +76,13 @@ before_build:
 
     echo %PATH%
     
-    echo %FREETYPE_DIR%
-
     mkdir build
     
     cd build
     
     cmake --version
 
-    cmake .. -G %generator%
+    cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DFREETYPE_DIR=%FREETYPE_DIR%
     
 build:
   project: c:\projects\llassetgen\build\llassetgen.sln
