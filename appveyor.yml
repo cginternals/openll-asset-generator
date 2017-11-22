@@ -42,7 +42,7 @@ install:
 - mkdir deps\zlib
 - echo install zlib-msvc-%ver%
 - nuget install zlib-msvc-%ver%
-- ps: move -r zlib*\* deps\zlib\
+- cmd: move zlib*\* deps\zlib\
 - cmd : dir /s /b /o
 #- ps: move zlib*\*\zlib.lib deps\zlib\zlib.lib -force
 #- ps: move zlib*\*\include deps\zlib\include -force
