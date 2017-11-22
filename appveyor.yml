@@ -42,12 +42,13 @@ init:
 
 install:
 - mkdir deps
+- mkdir deps\zlib
 
 - if "%arch%"=="Win64" (set ver=x64)
 - echo install zlib-msvc-%ver%
 - nuget install zlib-msvc-%ver%
-- ps: move zlib*\* deps -force
-- move deps\zlibstatic.lib deps\zlib.lib
+- ps: move zlib*\*\zlib.lib deps\zlib\zlib.lib -force
+- ps: move zlib*\*\include deps\zlib\include -force
 
 - nuget install libpng-%tools%-%arch%-master -Source https://ci.appveyor.com/nuget/libpng-7hwq4pmmrc48 &&
 - ps : move libpng*\* deps -force
