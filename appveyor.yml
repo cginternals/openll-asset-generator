@@ -46,7 +46,7 @@ install:
 - cmd : set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\zlib\build\native\include
 - if "%configuration%"=="Release" ( set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\zlib\build\native\lib_release\zlib.lib)
 - if "%configuration%"=="Debug" ( set ZLIB_LIBRARY_DEBUG=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib)
-- if "%configuration%"=="Debug" ( set ZLIB_LIBRARY=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib)
+#- if "%configuration%"=="Debug" ( set ZLIB_LIBRARY=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib)
 
 - nuget install libpng-msvc-%ver%
 - cmd : move libpng* libpng
@@ -54,7 +54,7 @@ install:
 - cmd : set PNG_PNG_INCLUDE_DIR=C:\projects\llassetgen\libpng\build\native\include
 - if "%configuration%"=="Release" ( set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\libpng\build\native\lib_release\libpng16.lib)
 - if "%configuration%"=="Debug" ( set PNG_LIBRARY_DEBUG=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib)
-- if "%configuration%"=="Debug" ( set PNG_LIBRARY=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib)
+#- if "%configuration%"=="Debug" ( set PNG_LIBRARY=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib)
 
 - nuget install freetype
 - cmd : move freetype* freetype
@@ -72,7 +72,7 @@ before_build:
     
     cmake --version
 
-    cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DFREETYPE_DIR=%FREETYPE_DIR% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS%
+    cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DPNG_LIBRARY_DEBUG=%PNG_LIBRARY_DEBUG% -DFREETYPE_DIR=%FREETYPE_DIR% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS%
     
 build:
   project: c:\projects\llassetgen\build\llassetgen.sln
