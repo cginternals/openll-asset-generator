@@ -2,7 +2,6 @@ version: '{build}'
 branches:
   only:
   - master
-  - debug-appveyor
 clone_folder: c:\projects\llassetgen
 image:
 - Visual Studio 2015
