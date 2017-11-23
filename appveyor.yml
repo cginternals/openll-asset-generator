@@ -58,7 +58,7 @@ install:
 - cmd : set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
 
 before_build:
-- cmd: >-   
+- cmd: >-
     mkdir build
     
     cd build
