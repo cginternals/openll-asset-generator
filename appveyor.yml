@@ -5,7 +5,7 @@ branches:
   - debug-appveyor
 clone_folder: c:\projects\llassetgen
 image:
-- Visual Studio 2013
+#- Visual Studio 2013
 - Visual Studio 2015
 - Visual Studio 2017
 configuration:
@@ -18,7 +18,7 @@ environment:
   - arch: Win64
   # - arch: #does not work, Release|x64 not a valid target
 matrix:
-  fast_finish: false
+  fast_finish: true
 
 # skip unsupported combinations
 init:
@@ -37,17 +37,16 @@ init:
 
 install:
 - mkdir deps
-- if "%arch%"=="Win64" (set ver=x64)
 
-- echo install zlib-msvc-%ver%
-- nuget install zlib-msvc-%ver%
+- echo install zlib-msvc-%platform%
+- nuget install zlib-msvc-%platform%
 - cmd : move zlib* zlib
 - cmd : set ZLIB_ROOT=C:\projects\llassetgen\zlib
 - cmd : set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\zlib\build\native\include
 - cmd : set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\zlib\build\native\lib_release\zlib.lib
 - cmd : set ZLIB_LIBRARY_DEBUG=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib
 
-- nuget install libpng-msvc-%ver%
+- nuget install libpng-msvc-%platform%
 - cmd : move libpng* libpng
 - cmd : set PNG_ROOT=C:\projects\llassetgen\libpng
 - cmd : set PNG_PNG_INCLUDE_DIR=C:\projects\llassetgen\libpng\build\native\include
