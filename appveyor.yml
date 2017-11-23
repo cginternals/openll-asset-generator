@@ -5,7 +5,6 @@ branches:
   - debug-appveyor
 clone_folder: c:\projects\llassetgen
 image:
-#- Visual Studio 2013
 - Visual Studio 2015
 - Visual Studio 2017
 configuration:
@@ -30,9 +29,6 @@ init:
 - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( 
     set generator="Visual Studio 14 2015 %arch%"&& 
     set tools=msvc14)
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" ( 
-    set generator="Visual Studio 12 2013 %arch%"&& 
-    set tools=msvc12)
 - echo %generator%
 
 install:
