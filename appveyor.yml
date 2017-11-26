@@ -4,7 +4,6 @@ branches:
   - master
 clone_folder: c:\projects\llassetgen
 image:
-- Visual Studio 2013
 - Visual Studio 2015
 - Visual Studio 2017
 configuration:
@@ -21,14 +20,41 @@ matrix:
 
 # skip unsupported combinations
 init:
-- set arch=
-- if "%arch%"=="Win64" ( set arch= Win64)
 - echo %arch%
 - echo %APPVEYOR_BUILD_WORKER_IMAGE%
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set generator="Visual Studio 14 2015%arch%" )
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2013" ( set generator="Visual Studio 12 2013%arch%" )
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( 
+    set generator="Visual Studio 15 2017 %arch%"&&
+    set tools=msvc15)
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( 
+    set generator="Visual Studio 14 2015 %arch%"&& 
+    set tools=msvc14)
 - echo %generator%
+
+install:
+- mkdir deps
+
+- echo install zlib-msvc-%platform%
+- nuget install zlib-msvc-%platform%
+- cmd : move zlib* zlib
+- cmd : set ZLIB_ROOT=C:\projects\llassetgen\zlib
+- cmd : set ZLIB_INCLUDE_DIR=C:\projects\llassetgen\zlib\build\native\include
+- cmd : set ZLIB_LIBRARY_RELEASE=C:\projects\llassetgen\zlib\build\native\lib_release\zlib.lib
+- cmd : set ZLIB_LIBRARY_DEBUG=C:\projects\llassetgen\zlib\build\native\lib_debug\zlibd.lib
+
+- nuget install libpng-msvc-%platform%
+- cmd : move libpng* libpng
+- cmd : set PNG_ROOT=C:\projects\llassetgen\libpng
+- cmd : set PNG_PNG_INCLUDE_DIR=C:\projects\llassetgen\libpng\build\native\include
+- cmd : set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\libpng\build\native\lib_release\libpng16.lib
+- cmd : set PNG_LIBRARY_DEBUG=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib
+
+- nuget install freetype
+- cmd : move freetype* freetype
+- cmd : set FREETYPE_DIR=C:\projects\llassetgen\freetype
+- cmd : set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\freetype\build\native\include
+- if "%configuration%"=="Release" ( set FREETYPE_LIBRARY=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Release\freetype28.lib)
+- if "%configuration%"=="Debug" ( set FREETYPE_LIBRARY=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Debug\freetype28d.lib)
+- cmd : set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
 
 before_build:
 - cmd: >-
@@ -38,7 +64,7 @@ before_build:
     
     cmake --version
 
-    cmake .. -G %generator%
+    cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DPNG_LIBRARY_DEBUG=%PNG_LIBRARY_DEBUG% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS%
     
 build:
   project: c:\projects\llassetgen\build\llassetgen.sln
