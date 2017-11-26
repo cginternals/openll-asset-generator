@@ -66,7 +66,7 @@ namespace llassetgen {
         void transformAt(PositionType pos, PositionType target, OutputType distance);
 
         public:
-        void transform();
+        LLASSETGEN_API void transform();
     };
 
     class ParabolaEnvelope : public DistanceTransform {
