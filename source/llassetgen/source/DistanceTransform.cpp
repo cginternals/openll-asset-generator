@@ -273,7 +273,7 @@ namespace llassetgen {
         for(DimensionType parabola = 0, i = 0; i < length; ++i) {
             while(parabolas[++parabola].begin < i);
             --parabola;
-            outputAt(offset+i*pitch) = parabolas[parabola].value+square(i-parabolas[parabola].apex);
+            outputAt(offset+i*pitch) = std::sqrt(parabolas[parabola].value+square(i-parabolas[parabola].apex)) * (inputAt(offset+i*pitch) ? -1 : 1);
         }
     }
 
@@ -291,9 +291,5 @@ namespace llassetgen {
             edgeDetection<false>(x, width, height);
             transformLine(x, width, height);
         }
-
-        for(DimensionType x = 0; x < width; ++x)
-            for(DimensionType y = 0; y < height; ++y)
-                outputAt({x, y}) = std::sqrt(outputAt({x, y})) * (inputAt({x, y}) ? -1 : 1);
     }
 }
