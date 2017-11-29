@@ -31,6 +31,7 @@ if (${CMAKE_VERSION} VERSION_GREATER "3.2")
 endif()
 
 # Include custom cmake modules
+include(cmake/ClangFormat.cmake)
 include(cmake/GetGitRevisionDescription.cmake)
 include(cmake/HealthCheck.cmake)
 include(cmake/GenerateTemplateExportHeader.cmake)
@@ -114,6 +115,13 @@ add_check_template_target(${META_CMAKE_INIT_SHA})
 # Configure health check tools
 enable_cppcheck(On)
 enable_clang_tidy(On)
+
+
+#
+# Source Code Formatting Setup
+#
+
+enable_clang_format(On)
 
 
 #
