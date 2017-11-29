@@ -100,7 +100,7 @@ namespace llassetgen {
                 png_set_expand_gray_1_2_4_to_8(png);
             assert(png_set_interlace_handling(png) == 1);
             png_read_update_info(png, pngInfo);
-            png_get_IHDR(png, pngInfo, &width, &height, &bitDepth, &colorType, nullptr, nullptr, nullptr);
+            png_get_IHDR(png, pngInfo, reinterpret_cast<png_uint_32*>(&width), reinterpret_cast<png_uint_32*>(&height), &bitDepth, &colorType, nullptr, nullptr, nullptr);
             assert(colorType == PNG_COLOR_TYPE_GRAY);
             assert(bitDepth == 8);
             DimensionType index = 0;
