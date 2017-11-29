@@ -83,7 +83,7 @@ namespace llassetgen {
     }
 
     void DistanceTransform::importPng(std::string path) {
-        FILE* file = fopen(path.c_str(), "r");
+        FILE* file = fopen(path.c_str(), "rb");
         assert(file);
         int bitDepth = 0, colorType = 0;
         png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
