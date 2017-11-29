@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <limits>
 
+#include <png.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <png.h>
 
 #include <llassetgen/DistanceTransform.h>
 
