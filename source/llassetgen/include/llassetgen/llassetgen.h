@@ -6,7 +6,7 @@
 #include <string>
 
 #include "DistanceTransform.h"
-#include "Bitmap.h"
+#include "Image.h"
 
 #include <llassetgen/llassetgen_api.h>
 
