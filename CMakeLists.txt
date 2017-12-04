@@ -3,7 +3,7 @@
 #
 
 # CMake version
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
 
 #
 # Configure CMake environment

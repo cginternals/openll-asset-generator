@@ -23,10 +23,10 @@ matrix:
   - os: osx
     compiler: gcc
 
-#I have no idea what the following lines do; I copied them from cmake-init, but I don't think that we need those exact lines
-#before_install:
-#  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -qq cmake qt5-default cppcheck clang-tidy-3.8; fi
-#  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install qt5 cppcheck; fi
+before_install:
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -qq cmake3 cppcheck clang-tidy-3.8 libfreetype6-dev libpng-dev; fi
+  # libpng is already installed by default
+  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype; fi
 
 before_script:
   - ./configure
