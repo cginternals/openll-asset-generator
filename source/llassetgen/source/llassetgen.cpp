@@ -1,5 +1,5 @@
 #include <ft2build.h>
-#include <freetype/freetype.h>
+#include FT_FREETYPE_H
 
 #include <llassetgen/llassetgen.h>
 

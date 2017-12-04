@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <limits>
 
-#include <ft2build.h>
-#include <freetype/freetype.h>
 #include <png.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #include <llassetgen/DistanceTransform.h>
 
@@ -83,7 +83,7 @@ namespace llassetgen {
     }
 
     void DistanceTransform::importPng(std::string path) {
-        FILE* file = fopen(path.c_str(), "r");
+        FILE* file = fopen(path.c_str(), "rb");
         assert(file);
         int bitDepth = 0, colorType = 0;
         png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
@@ -100,7 +100,7 @@ namespace llassetgen {
                 png_set_expand_gray_1_2_4_to_8(png);
             assert(png_set_interlace_handling(png) == 1);
             png_read_update_info(png, pngInfo);
-            png_get_IHDR(png, pngInfo, &width, &height, &bitDepth, &colorType, nullptr, nullptr, nullptr);
+            png_get_IHDR(png, pngInfo, reinterpret_cast<png_uint_32*>(&width), reinterpret_cast<png_uint_32*>(&height), &bitDepth, &colorType, nullptr, nullptr, nullptr);
             assert(colorType == PNG_COLOR_TYPE_GRAY);
             assert(bitDepth == 8);
             DimensionType index = 0;
