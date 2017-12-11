@@ -77,8 +77,8 @@ namespace llassetgen {
     void DistanceTransform::importFreeTypeBitmap(FT_Bitmap* bitmap, DimensionType padding) {
         assert(bitmap);
         resetInput(bitmap->width + padding*2, bitmap->rows + padding*2, true);
-        for(DimensionType y = 0; y < bitmap->rows; ++y)
-            for(DimensionType x = 0; x < bitmap->width; ++x)
+        for(DimensionType y = 0; y < static_cast<int>(bitmap->rows); ++y)
+            for(DimensionType x = 0; x < static_cast<int>(bitmap->width); ++x)
                 inputAt({padding+x, padding+y}, (bitmap->buffer[y*bitmap->pitch+(x/8)] >> (7-x%8)) & 1);
     }
 
