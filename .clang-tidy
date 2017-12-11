@@ -1,4 +1,4 @@
 ---
-Checks: '*'
+Checks: '*,-android-*,-llvm-namespace-comment,-readability-implicit-bool-cast'
 HeaderFilterRegex: '.*'
 ...
