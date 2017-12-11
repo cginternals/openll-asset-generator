@@ -7,9 +7,7 @@ namespace llassetgen {
         T y = 0;
 
         Vec2() = default;
-
-        template <class T2>
-        Vec2(T2 _x, T2 _y) : x{_x}, y{_y} {}
+        Vec2(T _x, T _y) : x{_x}, y{_y} {}
 
         Vec2 operator+(const Vec2& other) const;
         Vec2& operator+=(const Vec2& other);
