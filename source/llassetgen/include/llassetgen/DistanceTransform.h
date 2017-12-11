@@ -2,6 +2,7 @@
 
 #include <llassetgen/llassetgen_api.h>
 #include <llassetgen/llassetgen.h>
+#include <llassetgen/Vec2.h>
 
 struct FT_Bitmap_;
 struct png_struct_def;
@@ -9,23 +10,10 @@ struct png_struct_def;
 namespace llassetgen {
     class DistanceTransform {
         public:
-        using DimensionType = unsigned int;
+        using DimensionType = int;
         using InputType = unsigned char;
         using OutputType = float;
-        struct PositionType {
-            DimensionType x, y;
-            template<typename T>
-            PositionType(T _x, T _y) :x(_x), y(_y) {}
-            PositionType() {}
-            PositionType& operator+=(const PositionType& other) {
-                x += other.x;
-                y += other.y;
-                return *this;
-            }
-            PositionType operator-() const {
-                return {-x, -y};
-            }
-        };
+        using PositionType = Vec2<DimensionType>;
 
         protected:
         std::unique_ptr<InputType[]> input;
