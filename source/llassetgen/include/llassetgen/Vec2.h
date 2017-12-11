@@ -1,0 +1,63 @@
+#pragma once
+
+namespace llassetgen {
+    template <class T>
+    struct Vec2 {
+        T x = 0;
+        T y = 0;
+
+        Vec2() = default;
+
+        template <class T2>
+        Vec2(T2 _x, T2 _y) : x{_x}, y{_y} {}
+
+        Vec2 operator+(const Vec2& other) const;
+        Vec2& operator+=(const Vec2& other);
+        Vec2 operator-(const Vec2& other) const;
+        Vec2& operator-=(const Vec2& other);
+
+        Vec2 operator-() const;
+
+        bool operator==(const Vec2& other) const;
+        bool operator!=(const Vec2& other) const;
+    };
+
+    template <class T>
+    Vec2<T> Vec2<T>::operator+(const Vec2& other) const {
+        return {x + other.x, y + other.y};
+    }
+
+    template <class T>
+    Vec2<T>& Vec2<T>::operator+=(const Vec2& other) {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+
+    template <class T>
+    Vec2<T> Vec2<T>::operator-(const Vec2& other) const {
+        return {x - other.x, y - other.y};
+    }
+
+    template <class T>
+    Vec2<T>& Vec2<T>::operator-=(const Vec2& other) {
+        x -= other.x;
+        y -= other.y;
+        return *this;
+    }
+
+    template <class T>
+    Vec2<T> Vec2<T>::operator-() const {
+        return {-x, -y};
+    }
+
+    template <class T>
+    bool Vec2<T>::operator==(const Vec2& other) const {
+        return x == other.x && y == other.y;
+    }
+
+    template <class T>
+    bool Vec2<T>::operator!=(const Vec2& other) const {
+        return !(*this == other);
+    }
+}
