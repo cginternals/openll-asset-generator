@@ -34,7 +34,8 @@ set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(headers
     ${include_path}/llassetgen.h
-	${include_path}/DistanceTransform.h
+    ${include_path}/DistanceTransform.h
+    ${include_path}/Vec2.h
 )
 
 set(sources
