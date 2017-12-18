@@ -1,5 +1,6 @@
 #pragma once
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-default"
 // Distributed under the 3-Clause BSD License.  See accompanying
 // file LICENSE or https://github.com/CLIUtils/CLI11 for details.
 
@@ -2912,3 +2913,4 @@ struct AppFriend {
 } // namespace detail
 
 } // namespace CLI
+#pragma GCC diagnostic pop
