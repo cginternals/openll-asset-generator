@@ -1,5 +1,6 @@
 # vi: ft=yaml
 BasedOnStyle: Google
 IndentWidth: 4
+ColumnLimit: 120
 NamespaceIndentation: All
 Standard: Cpp11
