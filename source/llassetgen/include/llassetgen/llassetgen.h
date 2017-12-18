@@ -9,8 +9,6 @@
 
 #include <llassetgen/llassetgen_api.h>
 
-
-
 struct FT_LibraryRec_;
 
 namespace llassetgen {

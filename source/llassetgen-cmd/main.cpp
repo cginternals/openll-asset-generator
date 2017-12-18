@@ -5,15 +5,13 @@
 
 #include <llassetgen/llassetgen.h>
 
-
-
 using namespace llassetgen;
 
 int main(int argc, char** argv) {
     llassetgen::init();
 
     std::unique_ptr<DistanceTransform> dt(new DeadReckoning());
-    if(argc == 5 && strcmp(argv[1], "-dt-from-glyph") == 0) {
+    if (argc == 5 && strcmp(argv[1], "-dt-from-glyph") == 0) {
         // Example: llassetgen-cmd -dt-from-glyph G /Library/Fonts/Verdana.ttf glyph.png
         FT_Face face;
         assert(FT_New_Face(freetype, argv[3], 0, &face) == 0);
@@ -22,7 +20,7 @@ int main(int argc, char** argv) {
         dt->importFreeTypeBitmap(&face->glyph->bitmap, 20);
         dt->transform();
         dt->exportPng(argv[4], -10, 20, 8);
-    } else if(argc == 4 && strcmp(argv[1], "-dt-from-png") == 0) {
+    } else if (argc == 4 && strcmp(argv[1], "-dt-from-png") == 0) {
         // Example: llassetgen-cmd -dt-from-png input.png output.png
         dt->importPng(argv[2]);
         dt->transform();
