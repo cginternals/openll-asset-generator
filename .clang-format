@@ -3,4 +3,5 @@ BasedOnStyle: Google
 IndentWidth: 4
 ColumnLimit: 120
 NamespaceIndentation: All
+FixNamespaceComments: false
 Standard: Cpp11
