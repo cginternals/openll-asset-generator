@@ -19,7 +19,6 @@ message(STATUS "Test ${target}")
 
 set(sources
     main.cpp
-    llassetgen-tests.cpp
 )
 
 
