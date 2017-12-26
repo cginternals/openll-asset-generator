@@ -2,6 +2,7 @@
 # External dependencies
 #
 
+find_package(Boost REQUIRED)
 find_package(Freetype)
 find_package(PNG)
 
@@ -36,11 +37,13 @@ set(headers
     ${include_path}/llassetgen.h
     ${include_path}/DistanceTransform.h
     ${include_path}/Geometry.h
+    ${include_path}/Packing.h
 )
 
 set(sources
     ${source_path}/llassetgen.cpp
     ${source_path}/DistanceTransform.cpp
+    ${source_path}/Packing.cpp
 )
 
 # Group source files
@@ -142,6 +145,7 @@ target_link_libraries(${target}
     PRIVATE
 
     PUBLIC
+    Boost::boost
     Freetype::Freetype
     PNG::PNG
     ${DEFAULT_LIBRARIES}
