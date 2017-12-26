@@ -21,6 +21,14 @@ namespace llassetgen {
     };
 
     template <class T>
+    struct Rect {
+        Vec2<T> position{0, 0};
+        Vec2<T> size{0, 0};
+
+        Rect(Vec2<T> _position, Vec2<T> _size);
+    };
+
+    template <class T>
     Vec2<T> Vec2<T>::operator+(const Vec2& other) const {
         return {x + other.x, y + other.y};
     }
@@ -58,4 +66,7 @@ namespace llassetgen {
     bool Vec2<T>::operator!=(const Vec2& other) const {
         return !(*this == other);
     }
+
+    template <class T>
+    Rect<T>::Rect(Vec2<T> _position, Vec2<T> _size) : position{_position}, size{_size} {}
 }

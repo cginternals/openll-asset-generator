@@ -1,6 +1,6 @@
 #pragma once
 
-#include <llassetgen/Vec2.h>
+#include <llassetgen/Geometry.h>
 #include <llassetgen/llassetgen.h>
 #include <llassetgen/llassetgen_api.h>
 
