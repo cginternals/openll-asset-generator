@@ -13,44 +13,129 @@
 
 namespace llassetgen {
 
-	Image::Image(FT_Bitmap &ft_bitmap) {
+	Image::Image(const FT_Bitmap &ft_bitmap) {
 		height = ft_bitmap.rows;
 		width = ft_bitmap.width;
+		stride = width;
+		min_x = 0;
+		min_y = 0;
+		max_x = width;
+		max_y = height;
 
-		// TODO: correct mono mode
 		switch (ft_bitmap.pixel_mode) {
 			case FT_PIXEL_MODE_MONO:
 				bit_depth = 1;
 				break;
 			case FT_PIXEL_MODE_GRAY2:
+				// We haven't found a single font using this format, however.
 				bit_depth = 2;
 				break;
 			case FT_PIXEL_MODE_GRAY4:
+				// We haven't found a single font using this format, however.
 				bit_depth = 4;
 				break;	
 			default:
 				bit_depth = 8;
 		}
-		data = std::unique_ptr<uint8_t>(new uint8_t[height * width * bit_depth / 8]);
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++){
-				for (size_t byte = 0; byte < bit_depth / 8; byte++) {
-					data.get()[y * width * bit_depth / 8 + x * bit_depth / 8 + byte] = ft_bitmap.buffer[y * ft_bitmap.pitch * bit_depth / 8 + x * bit_depth / 8 + byte];
-				}
+
+		data = std::shared_ptr<uint8_t>(new uint8_t[height * width * bit_depth / 8]);
+		for (size_t y = 0; y < height; y++) {
+			for (size_t x = 0; x < width; x++){
+				data.get()[y * stride * bit_depth / 8 + x * bit_depth / 8] = 0xFF - ft_bitmap.buffer[y * ft_bitmap.pitch + x * bit_depth / 8];
 			}
 		}
 	}
 
-	int Image::at(size_t x, size_t y) {
-		int pixel = 0;
-		for (int byte = 0; byte < bit_depth / 8; byte++) {
-			pixel <<= 8;
-			pixel |= data.get()[y * width * bit_depth / 8 + x * bit_depth / 8 + byte];
-		}
-		return pixel;
+	Image::Image(const size_t _width, const size_t _height, const size_t _bit_depth) {
+		assert(_bit_depth == 1 || _bit_depth == 2 || _bit_depth == 4 || _bit_depth == 8 || _bit_depth == 16 || _bit_depth == 24 || _bit_depth == 32);
+		width = _width;
+		height = _height;
+		bit_depth = _bit_depth;
+		stride = _width;
+		min_x = 0;
+		min_y = 0;
+		max_x = width;
+		max_y = height;
+		data = std::shared_ptr<uint8_t>(new uint8_t[height * width * bit_depth / 8]());
 	}
 
-	void Image::exportPng(std::string filepath) {
+	size_t Image::get_width() {
+		return width;
+	}
+
+	size_t Image::get_height() {
+		return height;
+	}
+
+	size_t Image::get_bit_depth() {
+		return bit_depth;
+	}
+
+	Image Image::view(const size_t _min_x, const size_t _max_x, const size_t _min_y, const size_t _max_y) {
+		return Image(_min_x, _max_x, _min_y, _max_y, bit_depth, stride, data);
+	}
+
+	Image::Image(const size_t _min_x, const size_t _max_x, const size_t _min_y, const size_t _max_y, const uint8_t _bit_depth, const size_t _stride, const std::shared_ptr<uint8_t>_data)
+	{
+		width = _max_x - _min_x;
+		height = _max_y - _min_y;
+		stride = _stride;
+		data = _data;
+		min_x = _min_x;
+		min_y = _min_y;
+		max_x = _max_x;
+		max_y = _max_y;
+		bit_depth = _bit_depth;
+	}
+
+	uint32_t Image::at(const size_t x, const size_t y) {
+ 		size_t offset_x = x + min_x;
+		size_t offset_y = y + min_y;
+		assert(offset_x < max_x && offset_x >= min_x && offset_y < max_y && offset_y >= min_y);
+		if (bit_depth <= 8) {
+			uint8_t byte = data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8];
+			size_t bit_pos = offset_x % (8 / bit_depth);
+			byte <<= bit_pos * bit_depth;
+			byte >>= 8 - bit_depth;
+			return (uint32_t)byte;
+		} else {
+			uint32_t return_data = 0;
+			for (size_t byte_pos = 0; byte_pos < bit_depth / 8; ++byte_pos) {
+				return_data <<= 8;
+				return_data |= data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8 + byte_pos];
+			}
+			return return_data;
+		}
+	}
+
+	void Image::put(const size_t x, const size_t y, const uint32_t in) {
+		size_t offset_x = x + min_x;
+		size_t offset_y = y + min_y;
+		assert(offset_x < max_x && offset_x >= min_x && offset_y < max_y && offset_y >= min_y);
+		if (bit_depth <= 8) {
+			uint8_t mask = 0xFF;
+			uint8_t in_byte = (uint8_t)in;
+			mask <<= 8 - bit_depth;
+			in_byte <<= 8 - bit_depth;
+
+			mask >>= 8 - bit_depth;
+			in_byte >>= 8 - bit_depth;
+
+			size_t bit_pos = offset_x % (8 / bit_depth);
+			in_byte <<= 8 - bit_pos * bit_depth - bit_depth;
+			mask <<= 8 - bit_pos * bit_depth - bit_depth;
+
+			data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8] = data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8] & ~mask | in_byte;
+		} else {
+			uint32_t in_int = in;
+			for (int byte_pos = bit_depth / 8 - 1; byte_pos >= 0; byte_pos--) {
+				data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8 + byte_pos] = (uint8_t)in_int;
+				in_int >>= 8;
+			}
+		}
+	}
+
+	void Image::exportPng(const std::string filepath) {
 		std::ofstream out_file(filepath, std::ofstream::out | std::ofstream::binary);
 		if (!out_file.good()) {
 			std::cerr << "couldnt open file";
@@ -87,7 +172,7 @@ namespace llassetgen {
 		}
 	
 		for (int y = 0; y < height; y++) {
-			png_write_row(png, reinterpret_cast<png_bytep>(&data.get()[y * width * bit_depth / 8]));
+			png_write_row(png, reinterpret_cast<png_bytep>(&data.get()[y * stride * bit_depth / 8]));
 		}
 	
 		png_write_end(png, nullptr);
@@ -111,7 +196,7 @@ namespace llassetgen {
 		((std::ostream*)a)->flush();
 	}
 
-	Image::Image(std::string filepath)
+	Image::Image(const std::string filepath)
 	{
 		std::ifstream in_file(filepath, std::ifstream::in | std::ifstream::binary);
 		
@@ -152,6 +237,11 @@ namespace llassetgen {
 
 		width = png_get_image_width(png, info);
 		height = png_get_image_height(png, info);
+		stride = width;
+		min_x = 0;
+		min_y = 0;
+		max_x = width;
+		max_y = height;
 		bit_depth = png_get_bit_depth(png, info);
 		uint32_t color_type = png_get_color_type(png, info);
 
@@ -193,12 +283,10 @@ namespace llassetgen {
 		png_destroy_read_struct(&png, &info, (png_infopp)0);
 		in_file.close();
 
-		data = std::unique_ptr<uint8_t>(new uint8_t[width * height * bit_depth / 8]);
+		data = std::shared_ptr<uint8_t>(new uint8_t[width * height * bit_depth / 8]);
 		for (size_t y = 0; y < height; y++) {
 			for (size_t x = 0; x < width; x++) {
-				for (int byte = 0; byte < bit_depth / 8; byte++) {
-					data.get()[y * width * bit_depth / 8 + x * bit_depth / 8 + byte] = multi_channel_data.get()[y * stride + x * bit_depth / 8 * channels + byte];
-				}
+					data.get()[y * width * bit_depth / 8 + x * bit_depth / 8] = multi_channel_data.get()[y * stride + x * bit_depth / 8 * channels];
 			}
 		}
 	}

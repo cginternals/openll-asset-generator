@@ -15,15 +15,23 @@
 namespace llassetgen {
 	class Image {
 		public:
-			LLASSETGEN_API Image(FT_Bitmap &ft_bitmap);
-			LLASSETGEN_API Image(std::string filepath);
-			LLASSETGEN_API void exportPng(std::string filepath);
-			LLASSETGEN_API int at(size_t x, size_t y);
+			LLASSETGEN_API Image(const FT_Bitmap &ft_bitmap);
+			LLASSETGEN_API Image(const std::string filepath);
+			LLASSETGEN_API Image(const size_t width, const size_t height, const size_t bit_depth);
+			LLASSETGEN_API void exportPng(const std::string filepath);
+			LLASSETGEN_API uint32_t at(const size_t x, const size_t y);
+			LLASSETGEN_API void put(const size_t x, const size_t y, const uint32_t data);
+			LLASSETGEN_API size_t get_width();
+			LLASSETGEN_API size_t get_height();
+			LLASSETGEN_API size_t get_bit_depth();
+			LLASSETGEN_API Image view(const size_t _min_x, const size_t _max_x, const size_t _min_y, const size_t _max_y);
 		private:
-			uint32_t height;
-			uint32_t width;
-			unsigned char bit_depth;
-			std::unique_ptr<uint8_t> data;
+			Image::Image(const size_t _min_x, const size_t _max_x, const size_t _min_y, const size_t _max_y, const uint8_t _bit_depth, const size_t _stride, const std::shared_ptr<uint8_t> _data);
+			size_t stride;
+			size_t height, width;
+			size_t min_x, max_x, min_y, max_y;
+			uint8_t bit_depth;
+			std::shared_ptr<uint8_t> data;
 			static void read_data(png_structp png, png_bytep data, png_size_t length);
 			static void write_data(png_structp png, png_bytep data, png_size_t length);
 			static void flush_data(png_structp png);
