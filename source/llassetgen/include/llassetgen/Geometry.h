@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 namespace llassetgen {
     template <class T>
     struct Vec2 {
@@ -69,4 +71,10 @@ namespace llassetgen {
 
     template <class T>
     Rect<T>::Rect(Vec2<T> _position, Vec2<T> _size) : position{_position}, size{_size} {}
+
+    template <class T>
+    std::ostream& operator<<(std::ostream& out, const Vec2<T>& vec) {
+        out << '(' << vec.x << ',' << vec.y << ')';
+        return out;
+    }
 }

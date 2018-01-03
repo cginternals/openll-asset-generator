@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <iterator>
 #include <type_traits>
@@ -8,9 +9,25 @@
 #include <boost/optional.hpp>
 
 #include <llassetgen/Geometry.h>
+#include <llassetgen/llassetgen_api.h>
 
 namespace llassetgen {
     using PackingSizeType = uint32_t;
+
+    /*
+     * Describes the packing of a texture atlas.
+     *
+     * The rectangles in `rects` correspond to the input rectangles at the same
+     * position in the packing algorithms input.
+     */
+    struct Packing {
+        Vec2<PackingSizeType> atlasSize{};
+        std::vector<Rect<PackingSizeType>> rects{};
+
+        Packing() = default;
+
+        explicit Packing(Vec2<PackingSizeType> _atlasSize);
+    };
 
     namespace detail {
         template <class Iter>
@@ -26,21 +43,26 @@ namespace llassetgen {
             // C++11 doesn't allow void as the return type of constexpr functions
             return 0;
         }
+
+        class LLASSETGEN_API ShelfNextFitPacker {
+           public:
+            ShelfNextFitPacker(Vec2<PackingSizeType> atlasSize, size_t rectCount);
+
+            bool packNext(Vec2<PackingSizeType> rectSize);
+
+            bool packNextRotatable(Vec2<PackingSizeType> rectSize);
+
+            Packing packing;
+
+           private:
+            LLASSETGEN_NO_EXPORT void openNewShelf();
+
+            LLASSETGEN_NO_EXPORT void store(Vec2<PackingSizeType> rectSize);
+
+            Vec2<PackingSizeType> currentShelfSize{0, 0};
+            PackingSizeType usedHeight{0};
+        };
     }
-
-    /*
-     * Describes the packing of a texture atlas.
-     *
-     * The rectangles in `rects` correspond to the input rectangles at the same
-     * position in the packing algorithms input.
-     */
-    struct Packing {
-        Vec2<PackingSizeType> atlasSize{};
-        std::vector<Rect<PackingSizeType>> rects{};
-
-        Packing() = default;
-        explicit Packing(Vec2<PackingSizeType> _atlasSize);
-    };
 
     /**
      * Use the shelf next fit algorithm to pack a fixed size texture atlas.
@@ -56,36 +78,26 @@ namespace llassetgen {
      * convertible to it.
      */
     template <class Iter>
-    boost::optional<Packing> shelfPackAtlas(Iter sizes_begin, Iter sizes_end, Vec2<PackingSizeType> atlasSize) {
+    boost::optional<Packing> shelfPackAtlas(Iter sizesBegin, Iter sizesEnd, Vec2<PackingSizeType> atlasSize,
+                                            bool allowRotations) {
         detail::assertCorrectIteratorType<Iter>();
 
-        auto rectCount = static_cast<size_t>(std::distance(sizes_begin, sizes_end));
-        Packing packing{atlasSize};
-        packing.rects.reserve(rectCount);
+        auto rectCount = static_cast<size_t>(std::distance(sizesBegin, sizesEnd));
+        detail::ShelfNextFitPacker packer{atlasSize, rectCount};
 
-        Vec2<PackingSizeType> currentShelfSize{0, 0};
-        PackingSizeType usedHeight{0};
-        while (sizes_begin != sizes_end) {
-            const Vec2<PackingSizeType>& rectSize = *sizes_begin++;
-
-            if (currentShelfSize.x + rectSize.x > atlasSize.x) {
-                usedHeight += currentShelfSize.y;
-                if (rectSize.x > atlasSize.x) {
-                    return {};
-                }
-
-                currentShelfSize = {0, 0};
-            }
-
-            if (usedHeight + rectSize.y > atlasSize.y) {
-                return {};
-            }
-
-            packing.rects.push_back({{currentShelfSize.x, usedHeight}, rectSize});
-            currentShelfSize.x += rectSize.x;
-            currentShelfSize.y = std::max(currentShelfSize.y, rectSize.y);
+        bool allPacked;
+        if (allowRotations) {
+            allPacked = std::all_of(sizesBegin, sizesEnd,
+                                    [&](Vec2<PackingSizeType> rectSize) { return packer.packNextRotatable(rectSize); });
+        } else {
+            allPacked = std::all_of(sizesBegin, sizesEnd,
+                                    [&](Vec2<PackingSizeType> rectSize) { return packer.packNext(rectSize); });
         }
 
-        return packing;
+        if (allPacked) {
+            return std::move(packer.packing);
+        }
+
+        return boost::none;
     }
 }
