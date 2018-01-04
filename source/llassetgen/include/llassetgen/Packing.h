@@ -55,8 +55,8 @@ namespace llassetgen {
          * The returned sizes will always be powers of two, and will be as close
          * to square as possible.
          */
-        template <class Iter>
-        Vec2<PackingSizeType> predictAtlasSize(Iter sizesBegin, Iter sizesEnd) {
+        template <class ForwardIter>
+        Vec2<PackingSizeType> predictAtlasSize(ForwardIter sizesBegin, ForwardIter sizesEnd) {
             uint64_t areaSum;
             Vec2<PackingSizeType> maxSides;
             std::for_each(sizesBegin, sizesEnd, [&](Vec2<PackingSizeType> rectSize) {
@@ -116,9 +116,9 @@ namespace llassetgen {
      * input multiple times. Their items must be `Vec2<PackingSizeType>`s, or
      * convertible to it.
      */
-    template <class Iter>
-    Packing shelfPackAtlas(Iter sizesBegin, Iter sizesEnd, bool allowRotations) {
-        impl_packing::assertCorrectIteratorType<Iter>();
+    template <class ForwardIter>
+    Packing shelfPackAtlas(ForwardIter sizesBegin, ForwardIter sizesEnd, bool allowRotations) {
+        impl_packing::assertCorrectIteratorType<ForwardIter>();
 
         Vec2<PackingSizeType> atlasSize = impl_packing::predictAtlasSize(sizesBegin, sizesEnd);
         while (true) {
@@ -144,10 +144,10 @@ namespace llassetgen {
      * input multiple times. Their items must be `Vec2<PackingSizeType>`s, or
      * convertible to it.
      */
-    template <class Iter>
-    boost::optional<Packing> shelfPackAtlas(Iter sizesBegin, Iter sizesEnd, Vec2<PackingSizeType> atlasSize,
-                                            bool allowRotations) {
-        impl_packing::assertCorrectIteratorType<Iter>();
+    template <class ForwardIter>
+    boost::optional<Packing> shelfPackAtlas(ForwardIter sizesBegin, ForwardIter sizesEnd,
+                                            Vec2<PackingSizeType> atlasSize, bool allowRotations) {
+        impl_packing::assertCorrectIteratorType<ForwardIter>();
 
         auto rectCount = static_cast<size_t>(std::distance(sizesBegin, sizesEnd));
         impl_packing::ShelfNextFitPacker packer{atlasSize, rectCount};
