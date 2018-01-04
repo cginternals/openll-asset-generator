@@ -1,5 +1,4 @@
 #include <gmock/gmock.h>
-#include <boost/optional.hpp>
 
 #include <llassetgen/llassetgen.h>
 
@@ -14,7 +13,7 @@ using Vec = llassetgen::Vec2<llassetgen::PackingSizeType>;
  */
 class PackingTest : public testing::Test {
    protected:
-    virtual boost::optional<Packing> run(const std::vector<Vec>& rectSizes, Vec atlasSize, bool allowRotations) = 0;
+    virtual bool run(const std::vector<Vec>& rectSizes, bool allowRotations, Packing& packing) = 0;
     virtual Packing run(const std::vector<Vec>& rectSizes, bool allowRotations) = 0;
 
     static bool rotatedSizesEquals(Vec size1, Vec size2) { return size1 == size2 || size1 == Vec{size2.y, size2.x}; }
@@ -37,17 +36,20 @@ class PackingTest : public testing::Test {
     void validatePacking(Packing packing, const std::vector<Vec>& rectSizes, bool allowRotations);
 
     void testRejectTooWide() {
-        EXPECT_EQ(boost::none, run({{2, 1}}, {1, 1}, false));
-        EXPECT_EQ(boost::none, run({{2, 1}}, {1, 1}, true));
+        Packing p1{{1, 1}}, p2{{1, 1}};
+        EXPECT_FALSE(run({{2, 1}}, false, p1));
+        EXPECT_FALSE(run({{2, 1}}, true, p2));
     }
 
     void testRejectTooHigh() {
-        EXPECT_EQ(boost::none, run({{1, 2}}, {1, 1}, false));
-        EXPECT_EQ(boost::none, run({{1, 2}}, {1, 1}, true));
+        Packing p1{{1, 1}}, p2{{1, 1}};
+        EXPECT_FALSE(run({{1, 2}}, false, p1));
+        EXPECT_FALSE(run({{1, 2}}, true, p2));
     }
 
     void testRotateOnly() {
-        EXPECT_EQ(boost::none, run({{2, 1}, {1, 2}}, {2, 2}, false));
+        Packing p{{2, 2}};
+        EXPECT_FALSE(run({{2, 1}, {1, 2}}, false, p));
         expectSuccessfulValidPacking({{2, 1}, {1, 2}}, {2, 2}, true);
     }
 
@@ -68,10 +70,8 @@ class PackingTest : public testing::Test {
 };
 
 void PackingTest::expectSuccessfulValidPacking(const std::vector<Vec>& rectSizes, Vec atlasSize, bool allowRotations) {
-    auto maybePacking = run(rectSizes, atlasSize, allowRotations);
-    ASSERT_NE(boost::none, maybePacking);
-
-    Packing packing = *maybePacking;
+    Packing packing{atlasSize};
+    ASSERT_TRUE(run(rectSizes, allowRotations, packing));
     EXPECT_EQ(atlasSize, packing.atlasSize);
     validatePacking(packing, rectSizes, allowRotations);
 }
@@ -95,8 +95,8 @@ void PackingTest::validatePacking(Packing packing, const std::vector<Vec>& rectS
 }
 
 class ShelfNextFitPackingTest : public PackingTest {
-    boost::optional<Packing> run(const std::vector<Vec>& rectSizes, Vec atlasSize, bool allowRotations) override {
-        return llassetgen::shelfPackAtlas(rectSizes.begin(), rectSizes.end(), atlasSize, allowRotations);
+    bool run(const std::vector<Vec>& rectSizes, bool allowRotations, Packing& packing) override {
+        return llassetgen::shelfPackFixedSizeAtlas(rectSizes.begin(), rectSizes.end(), allowRotations, packing);
     }
 
     Packing run(const std::vector<Vec>& rectSizes, bool allowRotations) override {

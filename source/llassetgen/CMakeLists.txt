@@ -2,7 +2,6 @@
 # External dependencies
 #
 
-find_package(Boost REQUIRED)
 find_package(Freetype)
 find_package(PNG)
 
@@ -145,7 +144,6 @@ target_link_libraries(${target}
     PRIVATE
 
     PUBLIC
-    Boost::boost
     Freetype::Freetype
     PNG::PNG
     ${DEFAULT_LIBRARIES}
