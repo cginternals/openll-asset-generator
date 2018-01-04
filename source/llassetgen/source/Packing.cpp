@@ -71,5 +71,24 @@ namespace llassetgen {
             currentShelfSize.x += rectSize.x;
             currentShelfSize.y = std::max(currentShelfSize.y, rectSize.y);
         }
+
+        unsigned int ceilLog2(uint64_t i) {
+            unsigned int exponent = 0;
+            uint64_t powerOfTwo = 1;
+            while (powerOfTwo < i) {
+                powerOfTwo *= 2;
+                exponent++;
+            }
+
+            return exponent;
+        }
+
+        Vec2<PackingSizeType> nextLargerAtlasSize(Vec2<PackingSizeType> previous) {
+            if (previous.x > previous.y) {
+                return {previous.x, 2 * previous.y};
+            }
+
+            return {2 * previous.x, previous.y};
+        }
     }
 }

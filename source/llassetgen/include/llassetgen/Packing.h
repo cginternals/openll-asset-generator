@@ -12,7 +12,7 @@
 #include <llassetgen/llassetgen_api.h>
 
 namespace llassetgen {
-    using PackingSizeType = uint32_t;
+    using PackingSizeType = unsigned int;
 
     /*
      * Describes the packing of a texture atlas.
@@ -44,6 +44,49 @@ namespace llassetgen {
             return 0;
         }
 
+        /**
+         * Return the smallest integer x so that i <= 2^x.
+         */
+        LLASSETGEN_API unsigned int ceilLog2(uint64_t i);
+
+        /**
+         * Find the smallest atlas size that might fit the given rectangles.
+         *
+         * The returned sizes will always be powers of two, and will be as close
+         * to square as possible.
+         */
+        template <class Iter>
+        Vec2<PackingSizeType> predictAtlasSize(Iter sizesBegin, Iter sizesEnd) {
+            uint64_t areaSum;
+            Vec2<PackingSizeType> maxSides;
+            std::for_each(sizesBegin, sizesEnd, [&](Vec2<PackingSizeType> rectSize) {
+                areaSum += static_cast<uint64_t>(rectSize.x) * rectSize.y;
+                maxSides.x = std::max(maxSides.x, rectSize.x);
+                maxSides.y = std::max(maxSides.y, rectSize.y);
+            });
+
+            auto areaExponent = ceilLog2(areaSum);
+            auto heightExponent = areaExponent / 2;
+            auto widthExponent = areaExponent - heightExponent;
+            auto minWidthExponent = ceilLog2(maxSides.x);
+            auto minHeightExponent = ceilLog2(maxSides.y);
+
+            if (widthExponent < minWidthExponent) {
+                widthExponent = minWidthExponent;
+                heightExponent = std::max(minHeightExponent, areaExponent - widthExponent);
+            } else if (heightExponent < minHeightExponent) {
+                heightExponent = minHeightExponent;
+                widthExponent = std::max(minWidthExponent, areaExponent - heightExponent);
+            }
+
+            return {1u << widthExponent, 1u << heightExponent};
+        }
+
+        /**
+         * Returns the next bigger atlas size to test for packing.
+         */
+        LLASSETGEN_API Vec2<PackingSizeType> nextLargerAtlasSize(Vec2<PackingSizeType> previous);
+
         class LLASSETGEN_API ShelfNextFitPacker {
            public:
             ShelfNextFitPacker(Vec2<PackingSizeType> atlasSize, size_t rectCount);
@@ -62,6 +105,30 @@ namespace llassetgen {
             Vec2<PackingSizeType> currentShelfSize{0, 0};
             PackingSizeType usedHeight{0};
         };
+    }
+
+    /**
+     * Use the shelf next fit algorithm to pack a texture atlas.
+     *
+     * See the fixed size overload for a description of the algorithm.
+     *
+     * The pair of iterators must be ForwardIterators, i.e. allow iterating the
+     * input multiple times. Their items must be `Vec2<PackingSizeType>`s, or
+     * convertible to it.
+     */
+    template <class Iter>
+    Packing shelfPackAtlas(Iter sizesBegin, Iter sizesEnd, bool allowRotations) {
+        impl_packing::assertCorrectIteratorType<Iter>();
+
+        Vec2<PackingSizeType> atlasSize = impl_packing::predictAtlasSize(sizesBegin, sizesEnd);
+        while (true) {
+            auto maybePacking = shelfPackAtlas(sizesBegin, sizesEnd, atlasSize, allowRotations);
+            if (maybePacking) {
+                return *maybePacking;
+            }
+
+            atlasSize = impl_packing::nextLargerAtlasSize(atlasSize);
+        }
     }
 
     /**
