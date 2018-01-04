@@ -51,12 +51,12 @@ namespace llassetgen {
 		width = _width;
 		height = _height;
 		bit_depth = _bit_depth;
-		stride = _width;
+		stride = _width * (bit_depth / 8);
 		min_x = 0;
 		min_y = 0;
 		max_x = width;
 		max_y = height;
-		data = std::shared_ptr<uint8_t>(new uint8_t[height * width * bit_depth / 8]());
+		data = std::shared_ptr<uint8_t>(new uint8_t[height * stride]());
 	}
 
 	size_t Image::get_width() {
@@ -93,7 +93,7 @@ namespace llassetgen {
 		size_t offset_y = y + min_y;
 		assert(offset_x < max_x && offset_x >= min_x && offset_y < max_y && offset_y >= min_y);
 		if (bit_depth <= 8) {
-			uint8_t byte = data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8];
+			uint8_t byte = data.get()[offset_y * stride + offset_x * bit_depth / 8];
 			size_t bit_pos = offset_x % (8 / bit_depth);
 			byte <<= bit_pos * bit_depth;
 			byte >>= 8 - bit_depth;
@@ -102,7 +102,7 @@ namespace llassetgen {
 			uint32_t return_data = 0;
 			for (size_t byte_pos = 0; byte_pos < bit_depth / 8; ++byte_pos) {
 				return_data <<= 8;
-				return_data |= data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8 + byte_pos];
+				return_data |= data.get()[offset_y * stride + offset_x * bit_depth / 8 + byte_pos];
 			}
 			return return_data;
 		}
@@ -125,11 +125,11 @@ namespace llassetgen {
 			in_byte <<= 8 - bit_pos * bit_depth - bit_depth;
 			mask <<= 8 - bit_pos * bit_depth - bit_depth;
 
-			data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8] = data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8] & ~mask | in_byte;
+			data.get()[offset_y * stride + offset_x * bit_depth / 8] = data.get()[offset_y * stride + offset_x * bit_depth / 8] & ~mask | in_byte;
 		} else {
 			uint32_t in_int = in;
 			for (int byte_pos = bit_depth / 8 - 1; byte_pos >= 0; byte_pos--) {
-				data.get()[offset_y * stride * bit_depth / 8 + offset_x * bit_depth / 8 + byte_pos] = (uint8_t)in_int;
+				data.get()[offset_y * stride + offset_x * bit_depth / 8 + byte_pos] = (uint8_t)in_int;
 				in_int >>= 8;
 			}
 		}
@@ -138,7 +138,7 @@ namespace llassetgen {
 	void Image::exportPng(const std::string filepath) {
 		std::ofstream out_file(filepath, std::ofstream::out | std::ofstream::binary);
 		if (!out_file.good()) {
-			std::cerr << "couldnt open file";
+			std::cerr << "could not open file " << filepath;
 			abort();
 		}
 
@@ -237,7 +237,6 @@ namespace llassetgen {
 
 		width = png_get_image_width(png, info);
 		height = png_get_image_height(png, info);
-		stride = width;
 		min_x = 0;
 		min_y = 0;
 		max_x = width;
@@ -249,13 +248,15 @@ namespace llassetgen {
 			if (bit_depth < 8)
 				png_set_expand_gray_1_2_4_to_8(png);
 			bit_depth = 8;
-		} else {
+		}
+		else {
 			if (png_get_valid(png, info, PNG_INFO_tRNS)) {
 				png_set_tRNS_to_alpha(png);
 			}
 			if (color_type == PNG_COLOR_TYPE_PALETTE) {
 				png_set_palette_to_rgb(png);
-			} else	if (color_type == PNG_COLOR_TYPE_RGB ||
+			}
+			else	if (color_type == PNG_COLOR_TYPE_RGB ||
 				color_type == PNG_COLOR_TYPE_RGBA ||
 				color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
 				png_set_rgb_to_gray_fixed(png, 1, -1, -1);
@@ -266,16 +267,16 @@ namespace llassetgen {
 			PNG_COLOR_MASK_COLOR
 			PNG_COLOR_MASK_ALPHA*/
 		}
-		
+
 		png_read_update_info(png, info);
 		uint8_t channels = png_get_channels(png, info);
 		
-		uint8_t stride = width * bit_depth * channels / 8;
+		stride = width * (bit_depth / 8);
 
 		std::unique_ptr<png_bytep> row_ptrs(new png_bytep[height]);
-		std::unique_ptr<uint8_t> multi_channel_data(new uint8_t[width * height * bit_depth * channels / 8]);
+		std::unique_ptr<uint8_t> multi_channel_data(new uint8_t[height * stride * channels]);
 		for (size_t i = 0; i < height; i++) {
-			row_ptrs.get()[i] = (png_bytep)multi_channel_data.get() + i * stride;
+			row_ptrs.get()[i] = (png_bytep)multi_channel_data.get() + i * stride * channels;
 		}
 
 		png_read_image(png, row_ptrs.get());
@@ -283,10 +284,10 @@ namespace llassetgen {
 		png_destroy_read_struct(&png, &info, (png_infopp)0);
 		in_file.close();
 
-		data = std::shared_ptr<uint8_t>(new uint8_t[width * height * bit_depth / 8]);
+		data = std::shared_ptr<uint8_t>(new uint8_t[height * stride]);
 		for (size_t y = 0; y < height; y++) {
 			for (size_t x = 0; x < width; x++) {
-					data.get()[y * width * bit_depth / 8 + x * bit_depth / 8] = multi_channel_data.get()[y * stride + x * bit_depth / 8 * channels];
+				put(x, y, multi_channel_data.get()[y * stride * channels + x * bit_depth / 8 * channels]);
 			}
 		}
 	}
