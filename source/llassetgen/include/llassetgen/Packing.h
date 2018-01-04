@@ -6,8 +6,6 @@
 #include <type_traits>
 #include <vector>
 
-#include <boost/optional.hpp>
-
 #include <llassetgen/Geometry.h>
 #include <llassetgen/llassetgen_api.h>
 
@@ -89,19 +87,18 @@ namespace llassetgen {
 
         class LLASSETGEN_API ShelfNextFitPacker {
            public:
-            ShelfNextFitPacker(Vec2<PackingSizeType> atlasSize, size_t rectCount);
+            explicit ShelfNextFitPacker(Packing& _packing) : packing{_packing} {};
 
             bool packNext(Vec2<PackingSizeType> rectSize);
 
             bool packNextRotatable(Vec2<PackingSizeType> rectSize);
-
-            Packing packing;
 
            private:
             LLASSETGEN_NO_EXPORT void openNewShelf();
 
             LLASSETGEN_NO_EXPORT void store(Vec2<PackingSizeType> rectSize);
 
+            Packing& packing;
             Vec2<PackingSizeType> currentShelfSize{0, 0};
             PackingSizeType usedHeight{0};
         };
@@ -112,59 +109,68 @@ namespace llassetgen {
      *
      * See the fixed size overload for a description of the algorithm.
      *
-     * The pair of iterators must be ForwardIterators, i.e. allow iterating the
-     * input multiple times. Their items must be `Vec2<PackingSizeType>`s, or
-     * convertible to it.
+     * @param[in] sizesBegin
+     *   Begin iterator for the sizes of the input rectangles. This iterators
+     *   items must be convertible to `Vec2<PackingSizeType>`. It must also be
+     *   a ForwardIterator, i.e. allow iterating over the input multiple times.
+     * @param[in] sizesEnd
+     *   End iterator for the rectangle sizes. Same constraints as for
+     *   `sizesBegin` apply.
+     * @param[in] allowRotations
+     *   Whether to allow rotating rectangles by 90˚.
+     * @return
+     *   Resulting packing.
      */
     template <class ForwardIter>
     Packing shelfPackAtlas(ForwardIter sizesBegin, ForwardIter sizesEnd, bool allowRotations) {
         impl_packing::assertCorrectIteratorType<ForwardIter>();
 
-        Vec2<PackingSizeType> atlasSize = impl_packing::predictAtlasSize(sizesBegin, sizesEnd);
-        while (true) {
-            auto maybePacking = shelfPackAtlas(sizesBegin, sizesEnd, atlasSize, allowRotations);
-            if (maybePacking) {
-                return *maybePacking;
-            }
-
-            atlasSize = impl_packing::nextLargerAtlasSize(atlasSize);
+        size_t rectCount = static_cast<size_t>(std::distance(sizesBegin, sizesEnd));
+        Packing packing{impl_packing::predictAtlasSize(sizesBegin, sizesEnd)};
+        packing.rects.reserve(rectCount);
+        while (!shelfPackFixedSizeAtlas(sizesBegin, sizesEnd, allowRotations, packing)) {
+            packing.atlasSize = impl_packing::nextLargerAtlasSize(packing.atlasSize);
+            packing.rects.clear();
         }
+
+        return packing;
     }
 
     /**
      * Use the shelf next fit algorithm to pack a fixed size texture atlas.
      *
      * This algorithm can produce suboptimal packings, but has very fast runtime
-     * (O(n), where n is the number of rects to pack).
+     * (O(n), where n is the number of rectangles to pack).
      *
-     * Returns an empty optional if the input rectangles can't be fit into the
-     * given atlas size.
-     *
-     * The pair of iterators must be ForwardIterators, i.e. allow iterating the
-     * input multiple times. Their items must be `Vec2<PackingSizeType>`s, or
-     * convertible to it.
+     * @param[in] sizesBegin
+     *   Begin iterator for the sizes of the input rectangles. This iterators
+     *   items must be convertible to `Vec2<PackingSizeType>`. It must also be
+     *   a ForwardIterator, i.e. allow iterating over the input multiple times.
+     * @param[in] sizesEnd
+     *   End iterator for the rectangle sizes. Same constraints as for
+     *   `sizesBegin` apply.
+     * @param[in] allowRotations
+     *   Whether to allow rotating rectangles by 90˚.
+     * @param[out] packing
+     *   Instance to store the packing into. The atlas size should already be
+     *   set to the desired value. The `rects` vector must be empty, but may
+     *   have an appropriate amount of memory reserved to improve performance.
+     *   If the packing fails, the packing is left in an unfinished state.
+     * @return
+     *   Whether the rectangles fit inside the atlas
      */
     template <class ForwardIter>
-    boost::optional<Packing> shelfPackAtlas(ForwardIter sizesBegin, ForwardIter sizesEnd,
-                                            Vec2<PackingSizeType> atlasSize, bool allowRotations) {
+    bool shelfPackFixedSizeAtlas(ForwardIter sizesBegin, ForwardIter sizesEnd, bool allowRotations, Packing& packing) {
         impl_packing::assertCorrectIteratorType<ForwardIter>();
 
-        auto rectCount = static_cast<size_t>(std::distance(sizesBegin, sizesEnd));
-        impl_packing::ShelfNextFitPacker packer{atlasSize, rectCount};
+        impl_packing::ShelfNextFitPacker packer{packing};
 
-        bool allPacked;
         if (allowRotations) {
-            allPacked = std::all_of(sizesBegin, sizesEnd,
-                                    [&](Vec2<PackingSizeType> rectSize) { return packer.packNextRotatable(rectSize); });
-        } else {
-            allPacked = std::all_of(sizesBegin, sizesEnd,
-                                    [&](Vec2<PackingSizeType> rectSize) { return packer.packNext(rectSize); });
+            return std::all_of(sizesBegin, sizesEnd,
+                               [&](Vec2<PackingSizeType> rectSize) { return packer.packNextRotatable(rectSize); });
         }
 
-        if (allPacked) {
-            return std::move(packer.packing);
-        }
-
-        return boost::none;
+        return std::all_of(sizesBegin, sizesEnd,
+                           [&](Vec2<PackingSizeType> rectSize) { return packer.packNext(rectSize); });
     }
 }
