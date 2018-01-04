@@ -29,7 +29,7 @@ namespace llassetgen {
         explicit Packing(Vec2<PackingSizeType> _atlasSize);
     };
 
-    namespace detail {
+    namespace impl_packing {
         template <class Iter>
         constexpr int assertCorrectIteratorType() {
             using IterTraits = typename std::iterator_traits<Iter>;
@@ -80,10 +80,10 @@ namespace llassetgen {
     template <class Iter>
     boost::optional<Packing> shelfPackAtlas(Iter sizesBegin, Iter sizesEnd, Vec2<PackingSizeType> atlasSize,
                                             bool allowRotations) {
-        detail::assertCorrectIteratorType<Iter>();
+        impl_packing::assertCorrectIteratorType<Iter>();
 
         auto rectCount = static_cast<size_t>(std::distance(sizesBegin, sizesEnd));
-        detail::ShelfNextFitPacker packer{atlasSize, rectCount};
+        impl_packing::ShelfNextFitPacker packer{atlasSize, rectCount};
 
         bool allPacked;
         if (allowRotations) {
