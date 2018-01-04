@@ -6,7 +6,7 @@
 namespace llassetgen {
     Packing::Packing(Vec2<PackingSizeType> _atlasSize) : atlasSize{_atlasSize} {}
 
-    namespace detail {
+    namespace impl_packing {
         ShelfNextFitPacker::ShelfNextFitPacker(Vec2<PackingSizeType> atlasSize, size_t rectCount) : packing{atlasSize} {
             packing.rects.reserve(rectCount);
         }
