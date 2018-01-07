@@ -8,5 +8,5 @@ Font Asset Generator based on OpenLL Specifications
 
 | Service | System | Compiler | Status |
 | :------ | ------ | -------- | -----: |
-|  [Travis-CI](https://travis-ci.org/hpicgs/openll-asset-generator) | Ubuntu 14.04, macOS | GCC 4.8, Clang 3.9 <br> AppleClang 8.1 | [![Travis Build Status](https://img.shields.io/travis/hpicgs/openll-asset-generator.svg)]()|
-| [AppVeyor](https://ci.appveyor.com/project/anne-gropler/openll-asset-generator) | Windows | MSVC 2015<br>MSVC 2017 | [![AppVeyor Build Status](https://img.shields.io/appveyor/ci/anne-gropler/openll-asset-generator/master.svg)]()|
+| [Travis-CI](https://travis-ci.org/hpicgs/openll-asset-generator) | Ubuntu 14.04, macOS | GCC 4.8, Clang 3.9 <br> AppleClang 8.1 | [![Travis Build Status](https://img.shields.io/travis/hpicgs/openll-asset-generator.svg)]()|
+| [AppVeyor](https://ci.appveyor.com/project/anne-gropler/openll-asset-generator-5cjbt) | Windows | MSVC 2015<br>MSVC 2017 | [![AppVeyor Build Status](https://img.shields.io/appveyor/ci/anne-gropler/openll-asset-generator-5cjbt.svg)]()|
