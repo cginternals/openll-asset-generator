@@ -55,8 +55,8 @@ namespace llassetgen {
          */
         template <class ForwardIter>
         Vec2<PackingSizeType> predictAtlasSize(ForwardIter sizesBegin, ForwardIter sizesEnd) {
-            uint64_t areaSum;
-            Vec2<PackingSizeType> maxSides;
+            uint64_t areaSum{0};
+            Vec2<PackingSizeType> maxSides{0, 0};
             std::for_each(sizesBegin, sizesEnd, [&](Vec2<PackingSizeType> rectSize) {
                 areaSum += static_cast<uint64_t>(rectSize.x) * rectSize.y;
                 maxSides.x = std::max(maxSides.x, rectSize.x);
