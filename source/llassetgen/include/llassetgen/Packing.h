@@ -24,7 +24,7 @@ namespace llassetgen {
 
         Packing() = default;
 
-        explicit Packing(Vec2<PackingSizeType> _atlasSize);
+        LLASSETGEN_API explicit Packing(Vec2<PackingSizeType> _atlasSize);
     };
 
     namespace impl_packing {
