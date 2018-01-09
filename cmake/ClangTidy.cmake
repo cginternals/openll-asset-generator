@@ -9,7 +9,8 @@ function(perform_clang_tidy check_target target)
             ${clang_tidy_EXECUTABLE}
                 -p\t${PROJECT_BINARY_DIR}
                 ${ARGN}
-                -checks=*
+                # Instructs clang-tidy to load a .clang-tidy config file
+                -config=
                 "$<$<NOT:$<BOOL:${CMAKE_EXPORT_COMPILE_COMMANDS}>>:--\t$<$<BOOL:${includes}>:-I$<JOIN:${includes},\t-I>>>"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )

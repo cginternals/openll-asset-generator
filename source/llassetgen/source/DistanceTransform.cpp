@@ -12,7 +12,7 @@
  * some discussion on this topic.
  */
 // clang-format off
-#include <png.h>
+#include <png.h> // NOLINT
 #include <ft2build.h>
 #include FT_FREETYPE_H
 // clang-format on
