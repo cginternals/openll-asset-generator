@@ -87,7 +87,7 @@ namespace llassetgen {
 
         class LLASSETGEN_API ShelfNextFitPacker {
            public:
-            explicit ShelfNextFitPacker(Packing& _packing) : packing(_packing) {};
+            explicit ShelfNextFitPacker(Packing& _packing) : packing(_packing){};
 
             bool packNext(Vec2<PackingSizeType> rectSize);
 
