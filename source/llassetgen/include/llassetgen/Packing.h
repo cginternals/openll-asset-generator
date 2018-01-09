@@ -125,7 +125,7 @@ namespace llassetgen {
     Packing shelfPackAtlas(ForwardIter sizesBegin, ForwardIter sizesEnd, bool allowRotations) {
         impl_packing::assertCorrectIteratorType<ForwardIter>();
 
-        size_t rectCount = static_cast<size_t>(std::distance(sizesBegin, sizesEnd));
+        auto rectCount = static_cast<size_t>(std::distance(sizesBegin, sizesEnd));
         Packing packing{impl_packing::predictAtlasSize(sizesBegin, sizesEnd)};
         packing.rects.reserve(rectCount);
         while (!shelfPackFixedSizeAtlas(sizesBegin, sizesEnd, allowRotations, packing)) {
