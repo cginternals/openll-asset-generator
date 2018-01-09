@@ -9,12 +9,10 @@ namespace llassetgen {
     namespace impl_packing {
         bool ShelfNextFitPacker::packNext(Vec2<PackingSizeType> rectSize) {
             if (currentShelfSize.x + rectSize.x > packing.atlasSize.x) {
-                usedHeight += currentShelfSize.y;
+                openNewShelf();
                 if (rectSize.x > packing.atlasSize.x) {
                     return false;
                 }
-
-                currentShelfSize = {0, 0};
             }
 
             if (usedHeight + rectSize.y > packing.atlasSize.y) {
