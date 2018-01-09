@@ -229,16 +229,16 @@ namespace llassetgen {
             InputType next = inputAt(offset+j*pitch);
             if(next == prev)
                 continue;
-            DimensionType end = (next) ? j-1 : j;
+            DimensionType end = (next) ? j : j-1;
             if(fill)
                 for(DimensionType i = begin; i < end; ++i) {
                     if(begin == 0 && !prev)
                         outputAt(offset+i*pitch) = square(end-i);
                     else
-                        outputAt(offset+i*pitch) = square((i < (end+begin+1)/2) ? i-begin : end-i);
+                        outputAt(offset+i*pitch) = square((i < (end+begin)/2) ? i-begin+1 : end-i);
                 }
             prev = next;
-            begin = end;
+            begin = end+1;
             outputAt(offset+end*pitch) = 0;
         }
         if(fill)
@@ -246,9 +246,9 @@ namespace llassetgen {
                 if(begin == 0 && !prev)
                     outputAt(offset+i*pitch) = 1E20F;
                 else if(!prev)
-                    outputAt(offset+i*pitch) = square(i-begin);
+                    outputAt(offset+i*pitch) = square(i-begin+1);
                 else
-                    outputAt(offset+i*pitch) = square((i < (length+begin+1)/2) ? i-begin : length-i);
+                    outputAt(offset+i*pitch) = square((i < (length+begin)/2) ? i-begin+1 : length-i);
             }
         if(prev)
             outputAt(offset+(length-1)*pitch) = 0;
