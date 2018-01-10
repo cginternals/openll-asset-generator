@@ -45,13 +45,23 @@ install:
 - cmd : set PNG_LIBRARY_RELEASE=C:\projects\llassetgen\libpng\build\native\lib_release\libpng16.lib
 - cmd : set PNG_LIBRARY_DEBUG=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib
 
+- if "%image%"=="Visual Studio 2015" ( set Qt5Core_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5Core)
+- if "%image%"=="Visual Studio 2015" ( set Qt5Gui_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5Gui
+- if "%image%"=="Visual Studio 2015" ( set Qt5OpenGL_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5OpenGL
+- if "%image%"=="Visual Studio 2015" ( set Qt5Widgets_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5Widgets
+
+- if "%image%"=="Visual Studio 2017" ( set Qt5Core_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Core)
+- if "%image%"=="Visual Studio 2017" ( set Qt5Gui_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Gui
+- if "%image%"=="Visual Studio 2017" ( set Qt5OpenGL_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5OpenGL
+- if "%image%"=="Visual Studio 2017" ( set Qt5Widgets_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Widgets
+
 - nuget install freetype
 - cmd : move freetype* freetype
 - cmd : set FREETYPE_DIR=C:\projects\llassetgen\freetype
 - cmd : set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\freetype\build\native\include
 - if "%configuration%"=="Release" ( set FREETYPE_LIBRARY=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Release\freetype28.lib)
 - if "%configuration%"=="Debug" ( set FREETYPE_LIBRARY=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Debug\freetype28d.lib)
-- cmd : set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
+- cmd : set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%Qt5Core_DIR%;%Qt5Gui_DIR%;%Qt5OpenGL_DIR%;%Qt5Widgets_DIR%;%PATH%;
 
 before_build:
 - cmd: >-
