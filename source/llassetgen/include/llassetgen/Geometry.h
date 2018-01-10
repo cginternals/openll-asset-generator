@@ -27,7 +27,7 @@ namespace llassetgen {
         Vec2<T> position{0, 0};
         Vec2<T> size{0, 0};
 
-        Rect(Vec2<T> _position, Vec2<T> _size);
+        Rect(const Vec2<T>& _position, const Vec2<T>& _size);
     };
 
     template <class T>
@@ -70,7 +70,7 @@ namespace llassetgen {
     }
 
     template <class T>
-    Rect<T>::Rect(Vec2<T> _position, Vec2<T> _size) : position{_position}, size{_size} {}
+    Rect<T>::Rect(const Vec2<T>& _position, const Vec2<T>& _size) : position{_position}, size{_size} {}
 
     template <class T>
     std::ostream& operator<<(std::ostream& out, const Vec2<T>& vec) {
