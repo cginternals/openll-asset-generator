@@ -207,7 +207,8 @@ namespace llassetgen {
 
         for (DimensionType y = 0; y < height; ++y)
             for (DimensionType x = 0; x < width; ++x)
-                for (DimensionType i = 0; i < 4; ++i) transformAt({x, y}, target[i], distance[i]);
+                for (DimensionType i = 0; i < 4; ++i)
+                    transformAt({x, y}, target[i], distance[i]);
 
         for (DimensionType y = 0; y < height; ++y)
             for (DimensionType x = 0; x < width; ++x)
@@ -216,7 +217,8 @@ namespace llassetgen {
 
         for (DimensionType y = 0; y < height; ++y)
             for (DimensionType x = 0; x < width; ++x)
-                if (inputAt({x, y})) outputAt({x, y}) *= -1;
+                if (inputAt({x, y}))
+                    outputAt({x, y}) *= -1;
     }
 
 
@@ -232,7 +234,7 @@ namespace llassetgen {
             DimensionType end = (next) ? j : j-1;
             if(fill)
                 for(DimensionType i = begin; i < end; ++i) {
-                    if(begin == 0 && !prev)
+                    if(begin == 0)
                         outputAt(offset+i*pitch) = square(end-i);
                     else
                         outputAt(offset+i*pitch) = square((i < (end+begin)/2) ? i-begin+1 : end-i);
@@ -243,8 +245,8 @@ namespace llassetgen {
         }
         if(fill)
             for(DimensionType i = begin; i < length; ++i) {
-                if(begin == 0 && !prev)
-                    outputAt(offset+i*pitch) = 1E20F;
+                if(begin == 0)
+                    outputAt(offset+i*pitch) = std::numeric_limits<OutputType>::max();
                 else if(!prev)
                     outputAt(offset+i*pitch) = square(i-begin+1);
                 else
