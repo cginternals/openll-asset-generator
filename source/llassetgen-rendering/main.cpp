@@ -16,9 +16,7 @@ int main(int argc, char** argv) {
     QApplication a(argc, argv);
 
     QString path(a.applicationDirPath());
-    auto bla = path.toStdString();
     QString fileName(path + "/../../data/arial_regular_300_512.png");
-    bla = fileName.toStdString();
     QGraphicsScene scene;
     scene.addPixmap(QPixmap(fileName));
     QGraphicsView view(&scene);
