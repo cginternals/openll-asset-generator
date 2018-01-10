@@ -2,10 +2,10 @@
 # External dependencies
 #
 
-find_package(Qt5Core 5.9 REQUIRED)
-find_package(Qt5Gui 5.9 REQUIRED)
-find_package(Qt5Widgets 5.9 REQUIRED)
-find_package(Qt5OpenGL 5.9 REQUIRED)
+find_package(Qt5Core 5.2 REQUIRED)
+find_package(Qt5Gui 5.2 REQUIRED)
+find_package(Qt5Widgets 5.2 REQUIRED)
+find_package(Qt5OpenGL 5.2 REQUIRED)
 
 
 #
