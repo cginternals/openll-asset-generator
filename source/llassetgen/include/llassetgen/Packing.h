@@ -83,7 +83,7 @@ namespace llassetgen {
         /**
          * Returns the next bigger atlas size to test for packing.
          */
-        LLASSETGEN_API Vec2<PackingSizeType> nextLargerAtlasSize(Vec2<PackingSizeType> previous);
+        LLASSETGEN_API Vec2<PackingSizeType> nextLargerAtlasSize(const Vec2<PackingSizeType>& previous);
 
         class LLASSETGEN_API ShelfNextFitPacker {
            public:

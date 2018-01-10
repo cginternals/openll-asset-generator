@@ -77,7 +77,7 @@ namespace llassetgen {
             return exponent;
         }
 
-        Vec2<PackingSizeType> nextLargerAtlasSize(Vec2<PackingSizeType> previous) {
+        Vec2<PackingSizeType> nextLargerAtlasSize(const Vec2<PackingSizeType>& previous) {
             if (previous.x > previous.y) {
                 return {previous.x, 2 * previous.y};
             }
