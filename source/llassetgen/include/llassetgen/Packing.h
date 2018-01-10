@@ -27,7 +27,7 @@ namespace llassetgen {
         LLASSETGEN_API explicit Packing(Vec2<PackingSizeType> _atlasSize);
     };
 
-    namespace impl_packing {
+    namespace internal {
         template <class Iter>
         constexpr int assertCorrectIteratorType() {
             using IterTraits = typename std::iterator_traits<Iter>;
@@ -123,13 +123,13 @@ namespace llassetgen {
      */
     template <class ForwardIter>
     Packing shelfPackAtlas(ForwardIter sizesBegin, ForwardIter sizesEnd, bool allowRotations) {
-        impl_packing::assertCorrectIteratorType<ForwardIter>();
+        internal::assertCorrectIteratorType<ForwardIter>();
 
         auto rectCount = static_cast<size_t>(std::distance(sizesBegin, sizesEnd));
-        Packing packing{impl_packing::predictAtlasSize(sizesBegin, sizesEnd)};
+        Packing packing{internal::predictAtlasSize(sizesBegin, sizesEnd)};
         packing.rects.reserve(rectCount);
         while (!shelfPackFixedSizeAtlas(sizesBegin, sizesEnd, allowRotations, packing)) {
-            packing.atlasSize = impl_packing::nextLargerAtlasSize(packing.atlasSize);
+            packing.atlasSize = internal::nextLargerAtlasSize(packing.atlasSize);
             packing.rects.clear();
         }
 
@@ -161,9 +161,9 @@ namespace llassetgen {
      */
     template <class ForwardIter>
     bool shelfPackFixedSizeAtlas(ForwardIter sizesBegin, ForwardIter sizesEnd, bool allowRotations, Packing& packing) {
-        impl_packing::assertCorrectIteratorType<ForwardIter>();
+        internal::assertCorrectIteratorType<ForwardIter>();
 
-        impl_packing::ShelfNextFitPacker packer{packing};
+        internal::ShelfNextFitPacker packer{packing};
 
         if (allowRotations) {
             return std::all_of(sizesBegin, sizesEnd,

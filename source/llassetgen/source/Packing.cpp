@@ -6,7 +6,7 @@
 namespace llassetgen {
     Packing::Packing(Vec2<PackingSizeType> _atlasSize) : atlasSize{_atlasSize} {}
 
-    namespace impl_packing {
+    namespace internal {
         bool ShelfNextFitPacker::packNext(Vec2<PackingSizeType> rectSize) {
             if (currentShelfSize.x + rectSize.x > packing.atlasSize.x) {
                 openNewShelf();
