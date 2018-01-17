@@ -16,7 +16,6 @@ namespace llassetgen {
 	Image::Image(const FT_Bitmap &ft_bitmap) {
 		height = ft_bitmap.rows;
 		width = ft_bitmap.width;
-		stride = width;
 		min_x = 0;
 		min_y = 0;
 		max_x = width;
@@ -37,12 +36,16 @@ namespace llassetgen {
 			default:
 				bit_depth = 8;
 		}
+		stride = size_t(std::ceil(float(width * bit_depth) / 8));
 
-		data = std::shared_ptr<uint8_t>(new uint8_t[height * width * bit_depth / 8]);
+		data = std::shared_ptr<uint8_t>(new uint8_t[height * stride]);
 		for (size_t y = 0; y < height; y++) {
-			for (size_t x = 0; x < width; x++){
-				data.get()[y * stride * bit_depth / 8 + x * bit_depth / 8] = 0xFF - ft_bitmap.buffer[y * ft_bitmap.pitch + x * bit_depth / 8];
+			for (size_t x = 0; x < stride; x++){
+				data.get()[y * stride + x] = 0xFF - ft_bitmap.buffer[y * ft_bitmap.pitch + x];
 			}
+			size_t padding_bits = size_t((float(width * bit_depth) / 8 - std::floor(float(width * bit_depth) / 8)) * 8);
+			uint8_t mask = ~(0xFF >> padding_bits);
+			data.get()[y * stride + stride - 1] &= mask;
 		}
 	}
 
@@ -156,23 +159,31 @@ namespace llassetgen {
 		}
 
 		if (setjmp(png_jmpbuf(png))){
-			std::cerr << "pnglib caused a longjump due to an error";
+			std::cerr << "pnglib caused a longjump due to an error" << std::endl;
+			std::cerr << "could not write file " << filepath;
 			abort();
 		}
 
 		png_set_write_fn(png, (png_voidp)&out_file, write_data, flush_data);
 
-		png_set_IHDR(png, info, width, height,
-			bit_depth, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE,
-			PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+		png_set_IHDR(	png, 
+						info, 
+						width, 
+						height,
+						bit_depth, 
+						PNG_COLOR_TYPE_GRAY, 
+						PNG_INTERLACE_NONE,
+						PNG_COMPRESSION_TYPE_BASE, 
+						PNG_FILTER_TYPE_BASE);
+
 		png_write_info(png, info);
-		
+
 		if (bit_depth > 8) {
 			png_set_swap(png);
 		}
 	
 		for (int y = 0; y < height; y++) {
-			png_write_row(png, reinterpret_cast<png_bytep>(&data.get()[y * stride * bit_depth / 8]));
+			png_write_row(png, reinterpret_cast<png_bytep>(&data.get()[y * stride]));
 		}
 	
 		png_write_end(png, nullptr);

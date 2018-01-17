@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include <ft2build.h>
 #include <freetype/freetype.h>
@@ -9,35 +10,52 @@ using namespace llassetgen;
 
 int main(int argc, char** argv) {
     llassetgen::init();
-
+	
 	// creating the face
 	FT_Face face;
 	std::string font_file = "C:/Windows/Fonts/Arial.ttf"; // path to local font
-	char letter = 'A';
-	assert(FT_New_Face(freetype, font_file.c_str(), 0, &face) == 0);
-	assert(FT_Set_Pixel_Sizes(face, 64, 64) == 0);
-
+	char letter = 'J';
+	
+	FT_Error face_created = FT_New_Face(freetype, font_file.c_str(), 0, &face);
+	if (face_created != 0) {
+		std::cerr << "Failed to create freetype face";
+		abort();
+	}
+	
+	FT_Error pixel_size_set = FT_Set_Pixel_Sizes(face, 64, 64);
+	if (pixel_size_set != 0) {
+		std::cerr << "Failed to set pixel size";
+		abort();
+	}
+	
 	// load letter
-	assert(FT_Load_Glyph(face, FT_Get_Char_Index(face, letter), FT_LOAD_RENDER) == 0); // load default 8-bit //| FT_LOAD_MONOCHROME for 1-bit
+	FT_Error glyph_loaded = FT_Load_Glyph(face, FT_Get_Char_Index(face, letter), FT_LOAD_RENDER | FT_LOAD_MONOCHROME); // load default 8-bit //| FT_LOAD_MONOCHROME for 1-bit
+	if (glyph_loaded != 0) {
+		std::cerr << "Failed to render glyph";
+		abort();
+	}
+
 	Image ft_8bit(face->glyph->bitmap);
 
 	// view on (10,10),(20,20)
 	Image view_on_ft_8bit(ft_8bit.view(10, 20, 10, 20));
+	
 	// invert view
 	for (int i = 0; i <view_on_ft_8bit.get_height(); i++) {
 		for (int j = 0; j < view_on_ft_8bit.get_width(); j++) {
 			view_on_ft_8bit.put(j, i, 0xFF - view_on_ft_8bit.at(j, i));
 		}
 	}
+	
 	// save whole image.
 	ft_8bit.exportPng("D:/Desktop/A_glyph1_out.png");
-
+/*
 	// create blank image with 40x30 pixels and 32 bit
-	Image blank_32bit(40, 30, 32);
+	Image blank_32bit(1000, 1000, 32);
 	// set pixels
 	blank_32bit.put(3, 4, 34567);
 	blank_32bit.put(4, 5, 1234);
-
+	
 	// get pixels and test
 	for (int i = 0; i < blank_32bit.get_height(); i++) {
 		for (int j = 0; j < blank_32bit.get_width(); j++) {
@@ -64,7 +82,7 @@ int main(int argc, char** argv) {
 		}
 	}
 	loaded_png.exportPng("D:/Desktop/A_glyph2_out.png");
-
+*/
 	/*
 	std::unique_ptr<DistanceTransform> dt(new DeadReckoning());
     if(argc == 5 && strcmp(argv[1], "-dt-from-glyph") == 0) {
