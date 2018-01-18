@@ -22,25 +22,51 @@ namespace llassetgen {
 		max_y = height;
 
 		switch (ft_bitmap.pixel_mode) {
-			case FT_PIXEL_MODE_MONO:
-				bit_depth = 1;
-				break;
-			case FT_PIXEL_MODE_GRAY2:
-				// We haven't found a single font using this format, however.
-				bit_depth = 2;
-				break;
-			case FT_PIXEL_MODE_GRAY4:
-				// We haven't found a single font using this format, however.
-				bit_depth = 4;
-				break;	
-			default:
-				bit_depth = 8;
+		case FT_PIXEL_MODE_MONO:
+			bit_depth = 1;
+			break;
+		case FT_PIXEL_MODE_GRAY2:
+			// We haven't found a single font using this format, however.
+			bit_depth = 2;
+			break;
+		case FT_PIXEL_MODE_GRAY4:
+			// We haven't found a single font using this format, however.
+			bit_depth = 4;
+			break;
+		default:
+			bit_depth = 8;
 		}
+		
+		load(ft_bitmap);
+	}
+
+	void Image::load(const FT_Bitmap &ft_bitmap) {
+		assert(height == ft_bitmap.rows);
+		assert(width == ft_bitmap.width);
+
+		uint8_t ft_bit_depth;
+		switch (ft_bitmap.pixel_mode) {
+		case FT_PIXEL_MODE_MONO:
+			ft_bit_depth = 1;
+			break;
+		case FT_PIXEL_MODE_GRAY2:
+			// We haven't found a single font using this format, however.
+			ft_bit_depth = 2;
+			break;
+		case FT_PIXEL_MODE_GRAY4:
+			// We haven't found a single font using this format, however.
+			ft_bit_depth = 4;
+			break;
+		default:
+			ft_bit_depth = 8;
+		}
+		assert(ft_bit_depth == bit_depth);
+		
 		stride = size_t(std::ceil(float(width * bit_depth) / 8));
 
 		data = std::shared_ptr<uint8_t>(new uint8_t[height * stride]);
 		for (size_t y = 0; y < height; y++) {
-			for (size_t x = 0; x < stride; x++){
+			for (size_t x = 0; x < stride; x++) {
 				data.get()[y * stride + x] = 0xFF - ft_bitmap.buffer[y * ft_bitmap.pitch + x];
 			}
 			size_t padding_bits = size_t((float(width * bit_depth) / 8 - std::floor(float(width * bit_depth) / 8)) * 8);
@@ -48,9 +74,9 @@ namespace llassetgen {
 			data.get()[y * stride + stride - 1] &= mask;
 		}
 	}
-
+	
 	Image::Image(const size_t _width, const size_t _height, const size_t _bit_depth) {
-		assert(_bit_depth == 1 || _bit_depth == 2 || _bit_depth == 4 || _bit_depth == 8 || _bit_depth == 16 || _bit_depth == 24 || _bit_depth == 32);
+		assert(_bit_depth == 1 || _bit_depth == 2 || _bit_depth == 4 || _bit_depth == 8 || _bit_depth == 16);
 		width = _width;
 		height = _height;
 		bit_depth = _bit_depth;

@@ -35,11 +35,13 @@ int main(int argc, char** argv) {
 		abort();
 	}
 
+	//Image ft_8bit(face->glyph->bitmap.width, face->glyph->bitmap.rows, 1);
+	//ft_8bit.load(face->glyph->bitmap);
+
 	Image ft_8bit(face->glyph->bitmap);
 
 	// view on (10,10),(20,20)
 	Image view_on_ft_8bit(ft_8bit.view(10, 20, 10, 20));
-	
 	// invert view
 	for (int i = 0; i <view_on_ft_8bit.get_height(); i++) {
 		for (int j = 0; j < view_on_ft_8bit.get_width(); j++) {
@@ -49,28 +51,28 @@ int main(int argc, char** argv) {
 	
 	// save whole image.
 	ft_8bit.exportPng("D:/Desktop/A_glyph1_out.png");
-/*
-	// create blank image with 40x30 pixels and 32 bit
-	Image blank_32bit(1000, 1000, 32);
+
+	// create blank image with 40x30 pixels and 16 bit
+	Image blank_16bit(40, 30, 16);
 	// set pixels
-	blank_32bit.put(3, 4, 34567);
-	blank_32bit.put(4, 5, 1234);
+	blank_16bit.put(3, 4, 267);
+	blank_16bit.put(4, 5, 344);
 	
 	// get pixels and test
-	for (int i = 0; i < blank_32bit.get_height(); i++) {
-		for (int j = 0; j < blank_32bit.get_width(); j++) {
+	for (int i = 0; i < blank_16bit.get_height(); i++) {
+		for (int j = 0; j < blank_16bit.get_width(); j++) {
 			if (j == 3 && i == 4) {
-				assert(blank_32bit.at(j, i) == 34567);
+				assert(blank_16bit.at(j, i) == 267);
 			}
 			else if (j == 4 && i == 5) {
-				assert(blank_32bit.at(j, i) == 1234);
+				assert(blank_16bit.at(j, i) == 344);
 			}
 			else {
-				assert(blank_32bit.at(j, i) == 0);
+				assert(blank_16bit.at(j, i) == 0);
 			}
 		}
 	}
-
+	blank_16bit.exportPng("D:/Desktop/blank.png");
 		
 	Image loaded_png("D:/Desktop/A_glyph.png");
 	// view on (10,10),(20,20)
@@ -82,7 +84,7 @@ int main(int argc, char** argv) {
 		}
 	}
 	loaded_png.exportPng("D:/Desktop/A_glyph2_out.png");
-*/
+
 	/*
 	std::unique_ptr<DistanceTransform> dt(new DeadReckoning());
     if(argc == 5 && strcmp(argv[1], "-dt-from-glyph") == 0) {
