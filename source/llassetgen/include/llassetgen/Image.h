@@ -15,11 +15,14 @@
 namespace llassetgen {
 	class Image {
 		public:
-			LLASSETGEN_API Image(const std::string filepath);
+			LLASSETGEN_API Image(const std::string &filepath);
 			LLASSETGEN_API Image(const size_t width, const size_t height, const size_t bit_depth);
-			LLASSETGEN_API void exportPng(const std::string filepath);
-			LLASSETGEN_API uint32_t at(const size_t x, const size_t y);
-			LLASSETGEN_API void put(const size_t x, const size_t y, const uint32_t data);
+			template<typename pixelType>
+			LLASSETGEN_API void exportPng(const std::string & filepath, pixelType min = std::numeric_limits<pixelType>::min(), pixelType max = std::numeric_limits<pixelType>::max());
+			template <typename pixelType>
+			LLASSETGEN_API pixelType at(const size_t x, const size_t y);
+			template <typename pixelType>
+			LLASSETGEN_API void put(const size_t x, const size_t y, const pixelType data);
 			LLASSETGEN_API Image(const FT_Bitmap & ft_bitmap);
 			LLASSETGEN_API void load(const FT_Bitmap & ft_bitmap);
 			LLASSETGEN_API size_t get_width();

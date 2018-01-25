@@ -76,11 +76,11 @@ namespace llassetgen {
 	}
 	
 	Image::Image(const size_t _width, const size_t _height, const size_t _bit_depth) {
-		assert(_bit_depth == 1 || _bit_depth == 2 || _bit_depth == 4 || _bit_depth == 8 || _bit_depth == 16);
+		assert(_bit_depth == 1 || _bit_depth == 2 || _bit_depth == 4 || _bit_depth == 8 || _bit_depth == 16 || _bit_depth == 24 || _bit_depth == 32);
 		width = _width;
 		height = _height;
 		bit_depth = _bit_depth;
-		stride = _width * (bit_depth / 8);
+		stride = (size_t)std::ceil(float(_width * (float(bit_depth) / 8.0f)));
 		min_x = 0;
 		min_y = 0;
 		max_x = width;
@@ -117,8 +117,9 @@ namespace llassetgen {
 		bit_depth = _bit_depth;
 	}
 
-	uint32_t Image::at(const size_t x, const size_t y) {
- 		size_t offset_x = x + min_x;
+	template<typename pixelType>
+	pixelType Image::at(const size_t x, const size_t y) {
+		size_t offset_x = x + min_x;
 		size_t offset_y = y + min_y;
 		assert(offset_x < max_x && offset_x >= min_x && offset_y < max_y && offset_y >= min_y);
 		if (bit_depth <= 8) {
@@ -126,45 +127,55 @@ namespace llassetgen {
 			size_t bit_pos = offset_x % (8 / bit_depth);
 			byte <<= bit_pos * bit_depth;
 			byte >>= 8 - bit_depth;
-			return (uint32_t)byte;
-		} else {
+			uint32_t casted = static_cast<uint32_t>(byte);
+			return *reinterpret_cast<pixelType*>(&casted);
+		}
+		else {
 			uint32_t return_data = 0;
 			for (size_t byte_pos = 0; byte_pos < bit_depth / 8; ++byte_pos) {
 				return_data <<= 8;
 				return_data |= data.get()[offset_y * stride + offset_x * bit_depth / 8 + byte_pos];
 			}
-			return return_data;
+			return *reinterpret_cast<pixelType*>(&return_data);
 		}
 	}
 
-	void Image::put(const size_t x, const size_t y, const uint32_t in) {
+	template LLASSETGEN_API float Image::at<float>(const size_t x, const size_t y);
+	template LLASSETGEN_API uint32_t Image::at<uint32_t>(const size_t x, const size_t y);
+	template LLASSETGEN_API uint16_t Image::at<uint16_t>(const size_t x, const size_t y);
+	template LLASSETGEN_API uint8_t Image::at<uint8_t>(const size_t x, const size_t y);
+
+	template<typename pixelType>
+	void Image::put(const size_t x, const size_t y, pixelType in) {
 		size_t offset_x = x + min_x;
 		size_t offset_y = y + min_y;
 		assert(offset_x < max_x && offset_x >= min_x && offset_y < max_y && offset_y >= min_y);
 		if (bit_depth <= 8) {
 			uint8_t mask = 0xFF;
-			uint8_t in_byte = (uint8_t)in;
+			uint8_t in_byte = static_cast<uint8_t>(*reinterpret_cast<uint32_t*>(&in));
 			mask <<= 8 - bit_depth;
-			in_byte <<= 8 - bit_depth;
-
 			mask >>= 8 - bit_depth;
-			in_byte >>= 8 - bit_depth;
 
 			size_t bit_pos = offset_x % (8 / bit_depth);
 			in_byte <<= 8 - bit_pos * bit_depth - bit_depth;
 			mask <<= 8 - bit_pos * bit_depth - bit_depth;
-
 			data.get()[offset_y * stride + offset_x * bit_depth / 8] = data.get()[offset_y * stride + offset_x * bit_depth / 8] & ~mask | in_byte;
 		} else {
-			uint32_t in_int = in;
+			uint32_t in_int = *reinterpret_cast<uint32_t*>(&in);
 			for (int byte_pos = bit_depth / 8 - 1; byte_pos >= 0; byte_pos--) {
-				data.get()[offset_y * stride + offset_x * bit_depth / 8 + byte_pos] = (uint8_t)in_int;
+				data.get()[offset_y * stride + offset_x * bit_depth / 8 + byte_pos] = static_cast<uint8_t>(in_int);
 				in_int >>= 8;
 			}
 		}
 	}
 
-	void Image::exportPng(const std::string filepath) {
+	template LLASSETGEN_API void Image::put<float>(const size_t x, const size_t y, const float in);
+	template LLASSETGEN_API void Image::put<uint32_t>(const size_t x, const size_t y, const uint32_t in);
+	template LLASSETGEN_API void Image::put<uint16_t>(const size_t x, const size_t y, const uint16_t in);
+	template LLASSETGEN_API void Image::put<uint8_t>(const size_t x, const size_t y, const uint8_t in);
+
+	template <typename pixelType>
+	void Image::exportPng(const std::string &filepath, pixelType min, pixelType max) {
 		std::ofstream out_file(filepath, std::ofstream::out | std::ofstream::binary);
 		if (!out_file.good()) {
 			std::cerr << "could not open file " << filepath;
@@ -184,7 +195,7 @@ namespace llassetgen {
 			abort();
 		}
 
-		if (setjmp(png_jmpbuf(png))){
+		if (setjmp(png_jmpbuf(png))) {
 			std::cerr << "pnglib caused a longjump due to an error" << std::endl;
 			std::cerr << "could not write file " << filepath;
 			abort();
@@ -192,31 +203,54 @@ namespace llassetgen {
 
 		png_set_write_fn(png, (png_voidp)&out_file, write_data, flush_data);
 
-		png_set_IHDR(	png, 
-						info, 
-						width, 
-						height,
-						bit_depth, 
-						PNG_COLOR_TYPE_GRAY, 
-						PNG_INTERLACE_NONE,
-						PNG_COMPRESSION_TYPE_BASE, 
-						PNG_FILTER_TYPE_BASE);
+		png_set_IHDR(png,
+			info,
+			width,
+			height,
+			(bit_depth <= 16) ? bit_depth : 16,
+			PNG_COLOR_TYPE_GRAY,
+			PNG_INTERLACE_NONE,
+			PNG_COMPRESSION_TYPE_BASE,
+			PNG_FILTER_TYPE_BASE);
 
 		png_write_info(png, info);
 
 		if (bit_depth > 8) {
 			png_set_swap(png);
 		}
-	
-		for (int y = 0; y < height; y++) {
-			png_write_row(png, reinterpret_cast<png_bytep>(&data.get()[y * stride]));
+
+		if (bit_depth >= 24) {
+			std::unique_ptr<uint16_t[]> row(new uint16_t[width]);
+			// possible 32 float or 32 or 24 bit int data
+			// scale down to 16 bit int grayscale
+			
+			if (max > pow(2, bit_depth)) {
+				max = pow(2, bit_depth);
+			}
+
+			for (size_t y = 0; y < height; y++) {
+				for (size_t x = 0; x < width; x++) {
+					pixelType pixel_value = at<pixelType>(x, y);
+					row[x] = static_cast<uint16_t>(0xFFFF * float(pixel_value - min) / float(max - min));
+				}
+				png_write_row(png, reinterpret_cast<png_bytep>(row.get()));
+			}
+		} else {
+			for (int y = 0; y < height; y++) {
+				png_write_row(png, reinterpret_cast<png_bytep>(&data.get()[y * stride]));
+			}
 		}
-	
+
 		png_write_end(png, nullptr);
 
 		png_destroy_write_struct(&png, &info);
 		out_file.close();
 	}
+
+	template LLASSETGEN_API void Image::exportPng<uint32_t>(const std::string &filepath, uint32_t min, uint32_t max);
+	template LLASSETGEN_API void Image::exportPng<uint16_t>(const std::string &filepath, uint16_t min, uint16_t max);
+	template LLASSETGEN_API void Image::exportPng<uint8_t>(const std::string &filepath, uint8_t min, uint8_t max);
+	template LLASSETGEN_API void Image::exportPng<float>(const std::string &filepath, float min, float max);
 
 	void Image::read_data(png_structp png, png_bytep data, png_size_t length) {
 		png_voidp a = png_get_io_ptr(png);
@@ -233,7 +267,7 @@ namespace llassetgen {
 		((std::ostream*)a)->flush();
 	}
 
-	Image::Image(const std::string filepath)
+	Image::Image(const std::string &filepath)
 	{
 		std::ifstream in_file(filepath, std::ifstream::in | std::ifstream::binary);
 		
@@ -282,18 +316,16 @@ namespace llassetgen {
 		uint32_t color_type = png_get_color_type(png, info);
 
 		if (color_type == PNG_COLOR_TYPE_GRAY) {
-			if (bit_depth < 8)
+			if (bit_depth < 8) {
 				png_set_expand_gray_1_2_4_to_8(png);
-			bit_depth = 8;
-		}
-		else {
+				bit_depth = 8;
+			}
+		} else {
 			if (png_get_valid(png, info, PNG_INFO_tRNS)) {
 				png_set_tRNS_to_alpha(png);
-			}
-			if (color_type == PNG_COLOR_TYPE_PALETTE) {
+			} if (color_type == PNG_COLOR_TYPE_PALETTE) {
 				png_set_palette_to_rgb(png);
-			}
-			else	if (color_type == PNG_COLOR_TYPE_RGB ||
+			} else if (color_type == PNG_COLOR_TYPE_RGB ||
 				color_type == PNG_COLOR_TYPE_RGBA ||
 				color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
 				png_set_rgb_to_gray_fixed(png, 1, -1, -1);
@@ -324,7 +356,7 @@ namespace llassetgen {
 		data = std::shared_ptr<uint8_t>(new uint8_t[height * stride]);
 		for (size_t y = 0; y < height; y++) {
 			for (size_t x = 0; x < width; x++) {
-				put(x, y, multi_channel_data.get()[y * stride * channels + x * bit_depth / 8 * channels]);
+				put<uint16_t>(x, y, multi_channel_data.get()[y * stride * channels + x * bit_depth / 8 * channels]);
 			}
 		}
 	}
