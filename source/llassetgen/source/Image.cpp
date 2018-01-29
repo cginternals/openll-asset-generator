@@ -223,15 +223,11 @@ namespace llassetgen {
 			std::unique_ptr<uint16_t[]> row(new uint16_t[width]);
 			// possible 32 float or 32 or 24 bit int data
 			// scale down to 16 bit int grayscale
-			
-			if (max > pow(2, bit_depth)) {
-				max = pow(2, bit_depth);
-			}
 
 			for (size_t y = 0; y < height; y++) {
 				for (size_t x = 0; x < width; x++) {
 					pixelType pixel_value = at<pixelType>(x, y);
-					row[x] = static_cast<uint16_t>(0xFFFF * float(pixel_value - min) / float(max - min));
+					row[x] = static_cast<uint16_t>(float(pixel_value - min) / float(max - min) * 0xFFFF);
 				}
 				png_write_row(png, reinterpret_cast<png_bytep>(row.get()));
 			}

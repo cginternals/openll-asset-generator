@@ -88,11 +88,11 @@ int main(int argc, char** argv) {
 	Image float_image(256, 256, 32);
 	for (int x = 0; x < float_image.get_width(); x++) {
 		for (int y = 0; y < float_image.get_height(); y++) {
-			float_image.put<float>(x, y, float(x + y) / float(float_image.get_width() + float_image.get_height()));
+			float_image.put<float>(x, y, float(x + y));
 		}
 	}
 
-	float_image.exportPng<float>("D:/Desktop/float.png", 0.0f, 1.0f);
+	float_image.exportPng<float>("D:/Desktop/float.png", 0.0f, float(float_image.get_width() + float_image.get_height()));
 
 	/*
 	std::unique_ptr<DistanceTransform> dt(new DeadReckoning());
