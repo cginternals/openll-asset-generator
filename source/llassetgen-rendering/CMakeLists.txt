@@ -2,6 +2,11 @@
 # External dependencies
 #
 
+find_package(glm REQUIRED)
+find_package(glbinding REQUIRED)
+find_package(globjects REQUIRED)
+find_package(cpplocate REQUIRED)
+
 find_package(Qt5Core 5.2 REQUIRED)
 find_package(Qt5Gui 5.2 REQUIRED)
 find_package(Qt5Widgets 5.2 REQUIRED)
@@ -23,10 +28,18 @@ message(STATUS "Application ${target}")
 # Sources
 #
 
+set(CMAKE_AUTOMOC TRUE)
+
 set(sources
     main.cpp
+	
+	WindowQt.cpp
+    datapath.inl
 )
 
+set(headers
+	WindowQt.h
+)
 
 #
 # Create executable
@@ -36,6 +49,7 @@ set(sources
 add_executable(${target}
     MACOSX_BUNDLE
     ${sources}
+	${headers}
 )
 
 # Create namespaced alias
@@ -61,6 +75,9 @@ target_include_directories(${target}
     PRIVATE
     ${DEFAULT_INCLUDE_DIRECTORIES}
     ${PROJECT_BINARY_DIR}/source/include
+	
+	PUBLIC
+	${GLM_INCLUDE_DIR}
 )
 
 
@@ -76,6 +93,11 @@ target_link_libraries(${target}
 	Qt5::OpenGL
 	Qt5::Gui
 	Qt5::Widgets
+	
+	PUBLIC
+	glbinding::glbinding
+	globjects::globjects
+	cpplocate::cpplocate
 )
 
 
@@ -116,6 +138,7 @@ target_link_libraries(${target}
 perform_health_checks(
     ${target}
     ${sources}
+	${headers}
 )
 
 
