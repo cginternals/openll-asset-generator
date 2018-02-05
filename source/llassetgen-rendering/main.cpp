@@ -42,7 +42,6 @@
 //#include "GLWidget.h"
 
 #include "WindowQt.h"
-#include "datapath.inl"
 
 using namespace gl;
 /*Taken from cginternals/globjects, edited*/
