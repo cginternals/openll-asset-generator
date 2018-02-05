@@ -5,7 +5,6 @@
 find_package(glm REQUIRED)
 find_package(glbinding REQUIRED)
 find_package(globjects REQUIRED)
-find_package(cpplocate REQUIRED)
 
 find_package(Qt5Core 5.2 REQUIRED)
 find_package(Qt5Gui 5.2 REQUIRED)
@@ -34,7 +33,6 @@ set(sources
     main.cpp
 	
 	WindowQt.cpp
-    datapath.inl
 )
 
 set(headers
@@ -97,7 +95,6 @@ target_link_libraries(${target}
 	PUBLIC
 	glbinding::glbinding
 	globjects::globjects
-	cpplocate::cpplocate
 )
 
 

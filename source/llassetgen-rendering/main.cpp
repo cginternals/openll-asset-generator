@@ -45,7 +45,7 @@
 #include "datapath.inl"
 
 using namespace gl;
-/*Taken from cginternals/globjects*/
+/*Taken from cginternals/globjects, edited*/
 
 class Window : public WindowQt
 {
@@ -81,15 +81,8 @@ public:
         m_program = new globjects::Program();
         m_vao = new globjects::VertexArray();
 
-        /*
-        const auto dataPath = common::retrieveDataPath("llassetgen", "dataPath");
-        m_program->attach(
-            globjects::Shader::fromFile(GL_VERTEX_SHADER, dataPath + "llassetgen-rendering/shader.vert"),
-            globjects::Shader::fromFile(GL_FRAGMENT_SHADER, dataPath + "llassetgen-rendering/shader.frag"));
-        */
-        const std::string dataPath = "C:/Users/Anne/Documents/gitOpenFag/openll-asset-generator/data/llassetgen-rendering"; 
-        //ToDo absoluter Pfad funktioniert, aber relativer Pfad nicht!!
-        //const std::string dataPath = "/data/llassetgen-rendering";
+        //openll-asset-generator/data/llassetgen-rendering"; 
+        const std::string dataPath = "./data/llassetgen-rendering";
         m_program->attach(
             globjects::Shader::fromFile(GL_VERTEX_SHADER, dataPath + "/shader.vert"),
             globjects::Shader::fromFile(GL_FRAGMENT_SHADER, dataPath + "/shader.frag"));
@@ -146,15 +139,7 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
 
-    /*
-    QString path(app.applicationDirPath());
-    QString fileName(path + "/../../data/llassetgen-rendering/arial_regular_300_512.png");
-    QGraphicsScene scene;
-    scene.addPixmap(QPixmap(fileName));
-    QGraphicsView view(&scene);
-    view.show();
-    */
-    
+
     // from globjects
     QSurfaceFormat format;
 #ifdef __APPLE__
@@ -174,24 +159,5 @@ int main(int argc, char** argv) {
 
     window.show();
     
-
-    /*
-    QSurfaceFormat format;
-    format.setDepthBufferSize(24); //4
-    //format.setSamples(24); //for Multi-sampling; default: off
-    format.setStencilBufferSize(8);
-    format.setVersion(3, 2);
-    format.setRenderableType(QSurfaceFormat::OpenGL);
-    //format.setProfile(QSurfaceFormat::CoreProfile); //seems to be default?
-    //QSurfaceFormat::setDefaultFormat(format); //why tho
-
-    GLWidget widget;
-    widget.show();
-    */
-
-
-    //TabDialog tabdialog(fileName);
-    //tabdialog.show();
-
     return app.exec();
 }
