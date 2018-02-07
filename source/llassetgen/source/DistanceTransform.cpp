@@ -207,7 +207,8 @@ namespace llassetgen {
 
         for (DimensionType y = 0; y < height; ++y)
             for (DimensionType x = 0; x < width; ++x)
-                for (DimensionType i = 0; i < 4; ++i) transformAt({x, y}, target[i], distance[i]);
+                for (DimensionType i = 0; i < 4; ++i)
+                    transformAt({x, y}, target[i], distance[i]);
 
         for (DimensionType y = 0; y < height; ++y)
             for (DimensionType x = 0; x < width; ++x)
@@ -216,7 +217,43 @@ namespace llassetgen {
 
         for (DimensionType y = 0; y < height; ++y)
             for (DimensionType x = 0; x < width; ++x)
-                if (inputAt({x, y})) outputAt({x, y}) *= -1;
+                if (inputAt({x, y}))
+                    outputAt({x, y}) *= -1;
+    }
+
+
+
+    template<bool fill>
+    void ParabolaEnvelope::edgeDetection(DimensionType offset, DimensionType pitch, DimensionType length) {
+        InputType prev = 0;
+        DimensionType begin = 0;
+        for(DimensionType j = 0; j < length; ++j) {
+            InputType next = inputAt(offset+j*pitch);
+            if(next == prev)
+                continue;
+            DimensionType end = (next) ? j : j-1;
+            if(fill)
+                for(DimensionType i = begin; i < end; ++i) {
+                    if(begin == 0)
+                        outputAt(offset+i*pitch) = square(end-i);
+                    else
+                        outputAt(offset+i*pitch) = square((i < (end+begin)/2) ? i-begin+1 : end-i);
+                }
+            prev = next;
+            begin = end+1;
+            outputAt(offset+end*pitch) = 0;
+        }
+        if(fill)
+            for(DimensionType i = begin; i < length; ++i) {
+                if(begin == 0)
+                    outputAt(offset+i*pitch) = std::numeric_limits<OutputType>::max();
+                else if(!prev)
+                    outputAt(offset+i*pitch) = square(i-begin+1);
+                else
+                    outputAt(offset+i*pitch) = square((i < (length+begin)/2) ? i-begin+1 : length-i);
+            }
+        if(prev)
+            outputAt(offset+(length-1)*pitch) = 0;
     }
 
     void ParabolaEnvelope::transformLine(DimensionType offset, DimensionType pitch, DimensionType length) {
@@ -241,7 +278,7 @@ namespace llassetgen {
             while (parabolas[++parabola].begin < i)
                 ;
             --parabola;
-            outputAt(offset + i * pitch) = parabolas[parabola].value + square(i - parabolas[parabola].apex);
+            outputAt(offset+i*pitch) = std::sqrt(parabolas[parabola].value+square(i-parabolas[parabola].apex)) * (inputAt(offset+i*pitch) ? -1 : 1);
         }
     }
 
@@ -252,14 +289,12 @@ namespace llassetgen {
         parabolas.reset(new Parabola[length + 1]);
         lineBuffer.reset(new OutputType[length]);
 
-        for (DimensionType y = 0; y < height; ++y)
-            for (DimensionType x = 0; x < width; ++x) outputAt({x, y}) = (inputAt({x, y})) ? 0 : 1E20;
+        for(DimensionType y = 0; y < height; ++y)
+            edgeDetection<true>(y*width, 1, width);
 
-        for (DimensionType y = 0; y < height; ++y) transformLine(y * width, 1, width);
-
-        for (DimensionType x = 0; x < width; ++x) transformLine(x, width, height);
-
-        for (DimensionType x = 0; x < width; ++x)
-            for (DimensionType y = 0; y < height; ++y) outputAt({x, y}) = std::sqrt(outputAt({x, y}));
+        for(DimensionType x = 0; x < width; ++x) {
+            edgeDetection<false>(x, width, height);
+            transformLine(x, width, height);
+        }
     }
 }
