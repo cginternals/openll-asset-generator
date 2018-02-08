@@ -1,6 +1,6 @@
 #pragma once
 
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 #include <memory>
 #include <string>
@@ -9,8 +9,6 @@
 #include "Image.h"
 
 #include <llassetgen/llassetgen_api.h>
-
-
 
 struct FT_LibraryRec_;
 

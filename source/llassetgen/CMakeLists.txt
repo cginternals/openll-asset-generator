@@ -207,6 +207,13 @@ perform_health_checks(
 
 
 #
+# Source Code Formatting
+#
+
+add_clang_format_target(${target} ${sources} ${headers})
+
+
+#
 # Deployment
 #
 

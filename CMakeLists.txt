@@ -3,7 +3,7 @@
 #
 
 # CMake version
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
 
 #
 # Configure CMake environment
@@ -31,6 +31,7 @@ if (${CMAKE_VERSION} VERSION_GREATER "3.2")
 endif()
 
 # Include custom cmake modules
+include(cmake/ClangFormat.cmake)
 include(cmake/GetGitRevisionDescription.cmake)
 include(cmake/HealthCheck.cmake)
 include(cmake/GenerateTemplateExportHeader.cmake)
@@ -59,7 +60,7 @@ set(META_VERSION_PATCH       "0")
 set(META_VERSION_REVISION    "${GIT_REV}")
 set(META_VERSION             "${META_VERSION_MAJOR}.${META_VERSION_MINOR}.${META_VERSION_PATCH}")
 set(META_NAME_VERSION        "${META_PROJECT_NAME} v${META_VERSION} (${META_VERSION_REVISION})")
-set(META_CMAKE_INIT_SHA      "b3df141dcef8bb88c9ba7193d86aeddde94bda2f")
+set(META_CMAKE_INIT_SHA      "83d7cbc29a6fcb74a98498e5b0fcebd953d9d5cc")
 
 string(MAKE_C_IDENTIFIER ${META_PROJECT_NAME} META_PROJECT_ID)
 string(TOUPPER ${META_PROJECT_ID} META_PROJECT_ID)
@@ -114,6 +115,13 @@ add_check_template_target(${META_CMAKE_INIT_SHA})
 # Configure health check tools
 enable_cppcheck(On)
 enable_clang_tidy(On)
+
+
+#
+# Source Code Formatting Setup
+#
+
+enable_clang_format(On)
 
 
 #
