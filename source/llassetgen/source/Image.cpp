@@ -36,7 +36,7 @@ namespace llassetgen {
 		default:
 			bit_depth = 8;
 		}
-		
+
 		load(ft_bitmap);
 	}
 
@@ -61,7 +61,7 @@ namespace llassetgen {
 			ft_bit_depth = 8;
 		}
 		assert(ft_bit_depth == bit_depth);
-		
+
 		stride = size_t(std::ceil(float(width * bit_depth) / 8));
 
 		data = std::shared_ptr<uint8_t>(new uint8_t[height * stride]);
@@ -74,7 +74,7 @@ namespace llassetgen {
 			data.get()[y * stride + stride - 1] &= mask;
 		}
 	}
-	
+
 	Image::Image(const size_t _width, const size_t _height, const size_t _bit_depth) {
 		assert(_bit_depth == 1 || _bit_depth == 2 || _bit_depth == 4 || _bit_depth == 8 || _bit_depth == 16 || _bit_depth == 24 || _bit_depth == 32);
 		width = _width;
@@ -159,7 +159,7 @@ namespace llassetgen {
 			size_t bit_pos = offset_x % (8 / bit_depth);
 			in_byte <<= 8 - bit_pos * bit_depth - bit_depth;
 			mask <<= 8 - bit_pos * bit_depth - bit_depth;
-			data.get()[offset_y * stride + offset_x * bit_depth / 8] = data.get()[offset_y * stride + offset_x * bit_depth / 8] & ~mask | in_byte;
+			data.get()[offset_y * stride + offset_x * bit_depth / 8] = (data.get()[offset_y * stride + offset_x * bit_depth / 8] & ~mask) | in_byte;
 		} else {
 			uint32_t in_int = *reinterpret_cast<uint32_t*>(&in);
 			for (int byte_pos = bit_depth / 8 - 1; byte_pos >= 0; byte_pos--) {
@@ -232,7 +232,7 @@ namespace llassetgen {
 				png_write_row(png, reinterpret_cast<png_bytep>(row.get()));
 			}
 		} else {
-			for (int y = 0; y < height; y++) {
+			for (size_t y = 0; y < height; y++) {
 				png_write_row(png, reinterpret_cast<png_bytep>(&data.get()[y * stride]));
 			}
 		}
@@ -257,7 +257,7 @@ namespace llassetgen {
 		png_voidp a = png_get_io_ptr(png);
 		((std::ostream*)a)->write((char*)data, length);
 	}
-	
+
 	void Image::flush_data(png_structp png) {
 		png_voidp a = png_get_io_ptr(png);
 		((std::ostream*)a)->flush();
@@ -266,7 +266,7 @@ namespace llassetgen {
 	Image::Image(const std::string &filepath)
 	{
 		std::ifstream in_file(filepath, std::ifstream::in | std::ifstream::binary);
-		
+
 		png_byte pngsig[8];
 		in_file.read((char*)pngsig, 8);
 		if (!in_file.good()) {
@@ -335,7 +335,7 @@ namespace llassetgen {
 
 		png_read_update_info(png, info);
 		uint8_t channels = png_get_channels(png, info);
-		
+
 		stride = width * (bit_depth / 8);
 
 		std::unique_ptr<png_bytep> row_ptrs(new png_bytep[height]);

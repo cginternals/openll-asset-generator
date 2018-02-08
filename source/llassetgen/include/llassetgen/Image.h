@@ -30,7 +30,7 @@ namespace llassetgen {
 			LLASSETGEN_API size_t get_bit_depth();
 			LLASSETGEN_API Image view(const size_t _min_x, const size_t _max_x, const size_t _min_y, const size_t _max_y);
 		private:
-			Image::Image(const size_t _min_x, const size_t _max_x, const size_t _min_y, const size_t _max_y, const uint8_t _bit_depth, const size_t _stride, const std::shared_ptr<uint8_t> _data);
+			Image(const size_t _min_x, const size_t _max_x, const size_t _min_y, const size_t _max_y, const uint8_t _bit_depth, const size_t _stride, const std::shared_ptr<uint8_t> _data);
 			size_t stride;
 			size_t height, width;
 			size_t min_x, max_x, min_y, max_y;
