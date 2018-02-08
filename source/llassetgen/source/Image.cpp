@@ -4,10 +4,21 @@
 #include <iostream>
 #include <fstream>
 
+/*
+ * If we sort png.h below the freetype includes, an compile error will be
+ * generated warning about multiple includes of setjmp (on some version of
+ * libpng). Because we don't use the setjmp functionality of freetype, this is
+ * not applicable in this case. Unfortunately, the compile error can only be
+ * fixed by editing png.h or reordering the includes.
+ *
+ * See https://sourceforge.net/p/enlightenment/mailman/message/12595025/ for
+ * some discussion on this topic.
+ */
+// clang-format off
+#include <png.h> // NOLINT
 #include <ft2build.h>
-#include FT_IMAGE_H
-
-#include <png.h>
+#include FT_FREETYPE_H
+// clang-format on
 
 #include <llassetgen/Image.h>
 
