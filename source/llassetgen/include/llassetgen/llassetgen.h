@@ -1,14 +1,8 @@
 #pragma once
 
 #include <cassert>
-#include <cmath>
-#include <memory>
-#include <string>
 
 #include "DistanceTransform.h"
-#include "Image.h"
-
-#include <llassetgen/llassetgen_api.h>
 
 struct FT_LibraryRec_;
 

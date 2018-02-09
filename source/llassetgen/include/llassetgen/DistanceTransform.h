@@ -1,11 +1,7 @@
 #pragma once
 
 #include <llassetgen/Vec2.h>
-#include <llassetgen/llassetgen.h>
-#include <llassetgen/llassetgen_api.h>
-
-struct FT_Bitmap_;
-struct png_struct_def;
+#include <llassetgen/Image.h>
 
 namespace llassetgen {
     class DistanceTransform {
@@ -28,7 +24,7 @@ namespace llassetgen {
 
         DistanceTransform(DimensionType _width, DimensionType _height) { resetInput(_width, _height, true); }
 
-        void resetInput(DimensionType width, DimensionType height, bool clear);
+        void resetInput(DimensionType _width, DimensionType _height, bool clear);
         bool inputAt(DimensionType offset);
         bool inputAt(PositionType pos);
         bool inputAtClamped(PositionType pos);

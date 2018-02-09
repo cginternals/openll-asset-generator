@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <limits>
 #include <iostream>
+#include <cassert>
+#include <cmath>
 
 /*
  * If we sort png.h below the freetype includes, an compile error will be

@@ -1,16 +1,11 @@
 #pragma once
 
 #include <llassetgen/llassetgen_api.h>
-#include <llassetgen/llassetgen.h>
 
-#include <vector>
 #include <string>
-#include <memory>
 
-#include <png.h>
-
-#include <ft2build.h>
-#include FT_IMAGE_H
+struct FT_Bitmap_;
+struct png_struct_def;
 
 namespace llassetgen {
 	class Image {
@@ -23,8 +18,8 @@ namespace llassetgen {
 			LLASSETGEN_API pixelType at(const size_t x, const size_t y);
 			template <typename pixelType>
 			LLASSETGEN_API void put(const size_t x, const size_t y, const pixelType data);
-			LLASSETGEN_API Image(const FT_Bitmap & ft_bitmap);
-			LLASSETGEN_API void load(const FT_Bitmap & ft_bitmap);
+			LLASSETGEN_API Image(const FT_Bitmap_ & ft_bitmap);
+			LLASSETGEN_API void load(const FT_Bitmap_ & ft_bitmap);
 			LLASSETGEN_API size_t get_width();
 			LLASSETGEN_API size_t get_height();
 			LLASSETGEN_API size_t get_bit_depth();
@@ -36,8 +31,8 @@ namespace llassetgen {
 			size_t min_x, max_x, min_y, max_y;
 			uint8_t bit_depth;
 			std::shared_ptr<uint8_t> data;
-			static void read_data(png_structp png, png_bytep data, png_size_t length);
-			static void write_data(png_structp png, png_bytep data, png_size_t length);
-			static void flush_data(png_structp png);
+			static void read_data(png_struct_def* png, uint8_t* data, size_t length);
+			static void write_data(png_struct_def* png, uint8_t* data, size_t length);
+			static void flush_data(png_struct_def* png);
 	};
 }

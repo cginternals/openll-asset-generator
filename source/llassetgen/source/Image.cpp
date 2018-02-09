@@ -3,6 +3,8 @@
 #include <memory>
 #include <iostream>
 #include <fstream>
+#include <cassert>
+#include <cmath>
 
 /*
  * If we sort png.h below the freetype includes, an compile error will be
