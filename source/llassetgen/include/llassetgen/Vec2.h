@@ -1,5 +1,7 @@
 #pragma once
 
+#include <llassetgen/llassetgen_api.h>
+
 namespace llassetgen {
     template <class T>
     struct Vec2 {
