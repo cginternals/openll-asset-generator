@@ -2,6 +2,18 @@
 
 #include <llassetgen/llassetgen_api.h>
 
+#include <algorithm>
+
+template <typename T>
+T square(T value) {
+    return value * value;
+}
+
+template <typename T>
+T clamp(T val, T min, T max) {
+    return std::max(min, std::min(max, val));
+}
+
 namespace llassetgen {
     template <class T>
     struct Vec2 {
