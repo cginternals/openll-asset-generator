@@ -22,16 +22,6 @@
 
 #include <llassetgen/DistanceTransform.h>
 
-template <typename T>
-T square(T value) {
-    return value * value;
-}
-
-template <typename T>
-T clamp(T val, T min, T max) {
-    return std::max(min, std::min(max, val));
-}
-
 namespace llassetgen {
     void DistanceTransform::resetInput(DimensionType _width, DimensionType _height, bool clear) {
         assert(_width > 0 && _height > 0);
