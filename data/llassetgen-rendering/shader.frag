@@ -25,10 +25,10 @@ float tex(float t, vec2 uv)
 void main()
 {	
     float s = texture(glyphs, v_uv).r;
-    if(s < 0.3)
-        discard;
+    //if(s < 0.3)
+    //    discard;
 
-    vec4 fc = color; //vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 fc = color;
 
     float a = tex(0.5, v_uv);
 

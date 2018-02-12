@@ -10,6 +10,9 @@ class QSurfaceFormat;
 class QOpenGLContext;
 
 class WindowQt : public QWindow {
+
+    Q_OBJECT
+
    public:
     WindowQt();
     explicit WindowQt(const QSurfaceFormat& format);
@@ -28,6 +31,9 @@ class WindowQt : public QWindow {
     QOpenGLContext* context();
 
     void updateGL();
+
+   public slots:
+    virtual void backgroundColorRChanged();
 
    protected:
     QScopedPointer<QOpenGLContext> m_context;

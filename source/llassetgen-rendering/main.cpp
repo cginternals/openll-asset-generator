@@ -1,3 +1,5 @@
+#pragma once
+
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -8,8 +10,12 @@
 #pragma warning(push)
 #pragma warning(disable: 4127)
 #include <QApplication>
+#include <QBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
 #include <QMainWindow>
 #include <QResizeEvent>
+#include <QValidator>
 #pragma warning(pop)
 
 #include <glm/glm.hpp>
@@ -34,11 +40,7 @@
 #include "WindowQt.h"
 
 using namespace gl;
-namespace {
-    globjects::Texture* g_texture = nullptr;
 
-    int g_samplerIndex = 0;
-}
 
 /*Taken from cginternals/globjects,
  * example: qtexample, texture
@@ -47,9 +49,15 @@ namespace {
 
 class Window : public WindowQt {
    public:
-    Window(QSurfaceFormat& format) : WindowQt(format) {}
+    Window(QSurfaceFormat& format) : WindowQt(format) {
+        m_samplerIndex = 0;
+        m_texture = nullptr;
+        m_backgroundColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
+    }
 
-    virtual ~Window() {}
+    virtual ~Window() {
+        m_texture->unref();
+    }
 
     virtual void initializeGL() override {
         globjects::init();
@@ -77,17 +85,15 @@ class Window : public WindowQt {
         auto path = QApplication::applicationDirPath();
         auto* image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_rgb.png");
 
-        auto format = image->format();
-        
         // mirrored: Qt flips images after
         // loading; meant as convenience, but
         // we need it to flip back here.
         auto imageFormatted = image->convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);  
         auto imageData = imageFormatted.bits();
 
-        g_texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
-        g_texture->ref();
-        g_texture->image2D(0, GL_RGBA8, image->width(), image->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
+        m_texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
+        m_texture->ref();
+        m_texture->image2D(0, GL_RGBA8, image->width(), image->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
         // Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might ignore
         // this, since we use black&white image data here?
 
@@ -109,7 +115,7 @@ class Window : public WindowQt {
         m_vao->binding(0)->setBuffer(m_cornerBuffer, 0, sizeof(glm::vec2));
         m_vao->binding(0)->setFormat(2, GL_FLOAT, GL_FALSE, 0);
 
-        m_program->setUniform("glyphs", g_samplerIndex);
+        m_program->setUniform("glyphs", m_samplerIndex);
 
         m_vao->enable(0);
     }
@@ -124,16 +130,16 @@ class Window : public WindowQt {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        if (g_texture) {
-            g_texture->bindActive(g_samplerIndex);
+        if (m_texture) {
+            m_texture->bindActive(m_samplerIndex);
         }
 
         m_program->use();
         m_vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         m_program->release();
 
-        if (g_texture) {
-            g_texture->unbindActive(g_samplerIndex);
+        if (m_texture) {
+            m_texture->unbindActive(m_samplerIndex);
         }
 
         glDisable(GL_BLEND);
@@ -152,10 +158,23 @@ class Window : public WindowQt {
         doneCurrent();
     }
 
+   public slots:
+    virtual void backgroundColorRChanged()
+    {
+        int red = 255; // TODO: get red value from GUI
+        m_backgroundColor.r = red / 255.f;
+    }
+
+
    protected:
     globjects::ref_ptr<globjects::Buffer> m_cornerBuffer;
     globjects::ref_ptr<globjects::Program> m_program;
     globjects::ref_ptr<globjects::VertexArray> m_vao;
+
+    globjects::Texture* m_texture;
+
+    glm::vec4 m_backgroundColor;
+    int m_samplerIndex;
 };
 
 int main(int argc, char** argv) {
@@ -183,18 +202,42 @@ int main(int argc, char** argv) {
 
     Window* glwindow = new Window(format);
 
+
+
+    // GUI
+    auto colorValidator = new QIntValidator(0, 255);
+    auto *backgroundR = new QLineEdit();
+    auto *labelR = new QLabel("Background Red:");
+    backgroundR->setValidator(colorValidator);
+    backgroundR->setPlaceholderText("255");
+
+    QObject::connect(backgroundR, SIGNAL(editingFinished()), glwindow, SLOT(backgroundColorRChanged()));
+
+
+    //TODO: current layout won't show and label etc.
+    // have a look at: http://doc.qt.io/qt-5/qtwidgets-layouts-basiclayouts-example.html
+
     QMainWindow window;
     window.setMinimumSize(640, 480);
     window.setWindowTitle("Open Font Asset Generator");
-    window.setCentralWidget(QWidget::createWindowContainer(glwindow));
+
+    auto *mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+    auto *guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+    auto *glLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+    guiLayout->addWidget(labelR);
+    guiLayout->addWidget(backgroundR);
+    glLayout->addWidget(QWidget::createWindowContainer(glwindow));
+    mainLayout->addLayout(guiLayout);
+    mainLayout->addLayout(glLayout);
+    
+
+    // since window already has a special, we have to put our layout on a widget and then set it as central widget
+    auto central = new QWidget();
+    central->setLayout(mainLayout);
+    
+    window.setCentralWidget(central);
 
     window.show();
 
-    auto appResult = app.exec();
-
-    // I am aware that this code possibly isn't reached when app is killed... TODO Qt aboutToQuit() Signal Slot
-    g_texture->unref();
-    // g_quad->unref();
-
-    return appResult;
+    return app.exec();
 }

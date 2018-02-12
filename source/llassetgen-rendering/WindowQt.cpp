@@ -129,3 +129,5 @@ void WindowQt::paintGL() {}
 void WindowQt::enterEvent(QEvent* /*unused*/) {}
 
 void WindowQt::leaveEvent(QEvent* /*unused*/) {}
+
+void WindowQt::backgroundColorRChanged() {}
