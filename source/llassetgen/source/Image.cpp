@@ -125,7 +125,7 @@ namespace llassetgen {
     }
 
 	template<typename pixelType>
-	pixelType Image::at(const Vec2<size_t> pos) const {
+	pixelType Image::getPixel(const Vec2<size_t> pos) const {
         assert(is_valid(pos));
         Vec2<size_t> offset = min + pos;
 		if (bit_depth <= 8) {
@@ -145,13 +145,13 @@ namespace llassetgen {
 		}
 	}
 
-	template LLASSETGEN_API float Image::at<float>(const Vec2<size_t> pos) const;
-	template LLASSETGEN_API uint32_t Image::at<uint32_t>(const Vec2<size_t> pos) const;
-	template LLASSETGEN_API uint16_t Image::at<uint16_t>(const Vec2<size_t> pos) const;
-	template LLASSETGEN_API uint8_t Image::at<uint8_t>(const Vec2<size_t> pos) const;
+	template LLASSETGEN_API float Image::getPixel<float>(const Vec2<size_t> pos) const;
+	template LLASSETGEN_API uint32_t Image::getPixel<uint32_t>(const Vec2<size_t> pos) const;
+	template LLASSETGEN_API uint16_t Image::getPixel<uint16_t>(const Vec2<size_t> pos) const;
+	template LLASSETGEN_API uint8_t Image::getPixel<uint8_t>(const Vec2<size_t> pos) const;
 
 	template<typename pixelType>
-	void Image::put(const Vec2<size_t> pos, pixelType in) const {
+	void Image::setPixel(const Vec2<size_t> pos, pixelType in) const {
 		assert(is_valid(pos));
         Vec2<size_t> offset = min + pos;
 		if (bit_depth <= 8) {
@@ -173,10 +173,10 @@ namespace llassetgen {
 		}
 	}
 
-	template LLASSETGEN_API void Image::put<float>(const Vec2<size_t> pos, const float in) const;
-	template LLASSETGEN_API void Image::put<uint32_t>(const Vec2<size_t> pos, const uint32_t in) const;
-	template LLASSETGEN_API void Image::put<uint16_t>(const Vec2<size_t> pos, const uint16_t in) const;
-	template LLASSETGEN_API void Image::put<uint8_t>(const Vec2<size_t> pos, const uint8_t in) const;
+	template LLASSETGEN_API void Image::setPixel<float>(const Vec2<size_t> pos, const float in) const;
+	template LLASSETGEN_API void Image::setPixel<uint32_t>(const Vec2<size_t> pos, const uint32_t in) const;
+	template LLASSETGEN_API void Image::setPixel<uint16_t>(const Vec2<size_t> pos, const uint16_t in) const;
+	template LLASSETGEN_API void Image::setPixel<uint8_t>(const Vec2<size_t> pos, const uint8_t in) const;
 
 	template <typename pixelType>
 	void Image::exportPng(const std::string &filepath, pixelType black, pixelType white) {
@@ -230,7 +230,7 @@ namespace llassetgen {
 
 			for (size_t y = 0; y < get_height(); y++) {
 				for (size_t x = 0; x < get_width(); x++) {
-                    row[x] = clamp(static_cast<float>(at<pixelType>({x, y}) - black) / (white - black), 0.0F, 1.0F) * std::numeric_limits<uint16_t>::max();
+                    row[x] = clamp(static_cast<float>(getPixel<pixelType>({x, y}) - black) / (white - black), 0.0F, 1.0F) * std::numeric_limits<uint16_t>::max();
 				}
 				png_write_row(png, reinterpret_cast<png_bytep>(row.get()));
 			}
@@ -353,7 +353,7 @@ namespace llassetgen {
 		data = std::shared_ptr<uint8_t>(new uint8_t[get_height() * stride]);
 		for (size_t y = 0; y < get_height(); y++) {
 			for (size_t x = 0; x < get_width(); x++) {
-				put<uint16_t>({x, y}, multi_channel_data.get()[y * stride * channels + x * bit_depth / 8 * channels]);
+				setPixel<uint16_t>({x, y}, multi_channel_data.get()[y * stride * channels + x * bit_depth / 8 * channels]);
 			}
 		}
 	}

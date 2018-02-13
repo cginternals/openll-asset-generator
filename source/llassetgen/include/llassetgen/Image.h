@@ -18,9 +18,9 @@ namespace llassetgen {
 			LLASSETGEN_API void exportPng(const std::string & filepath, pixelType black = std::numeric_limits<pixelType>::min(), pixelType white = std::numeric_limits<pixelType>::max());
             LLASSETGEN_API bool is_valid(const Vec2<size_t> pos) const;
         	template <typename pixelType>
-			LLASSETGEN_API pixelType at(const Vec2<size_t> pos) const;
+			LLASSETGEN_API pixelType getPixel(const Vec2<size_t> pos) const;
 			template <typename pixelType>
-			LLASSETGEN_API void put(const Vec2<size_t> pos, const pixelType data) const;
+			LLASSETGEN_API void setPixel(const Vec2<size_t> pos, const pixelType data) const;
 			LLASSETGEN_API Image(const FT_Bitmap_ & ft_bitmap);
 			LLASSETGEN_API void load(const FT_Bitmap_ & ft_bitmap);
 			LLASSETGEN_API size_t get_width() const;
