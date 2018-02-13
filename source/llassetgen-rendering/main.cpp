@@ -11,6 +11,7 @@
 #pragma warning(disable: 4127)
 #include <QApplication>
 #include <QBoxLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
@@ -125,6 +126,8 @@ class Window : public WindowQt {
     }
 
     virtual void paintGL() override {
+        // TODO: paintGL is not triggered when background color changes!
+        glClearColor(m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnable(GL_BLEND);
@@ -159,9 +162,9 @@ class Window : public WindowQt {
     }
 
    public slots:
-    virtual void backgroundColorRChanged()
+    virtual void backgroundColorRChanged(QString value)
     {
-        int red = 255; // TODO: get red value from GUI
+        int red = value.toInt(); 
         m_backgroundColor.r = red / 255.f;
     }
 
@@ -210,28 +213,26 @@ int main(int argc, char** argv) {
     auto *labelR = new QLabel("Background Red:");
     backgroundR->setValidator(colorValidator);
     backgroundR->setPlaceholderText("255");
+    backgroundR->setMaximumWidth(50);
 
-    QObject::connect(backgroundR, SIGNAL(editingFinished()), glwindow, SLOT(backgroundColorRChanged()));
-
-
-    //TODO: current layout won't show and label etc.
-    // have a look at: http://doc.qt.io/qt-5/qtwidgets-layouts-basiclayouts-example.html
+    QObject::connect(backgroundR, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorRChanged(QString)));
 
     QMainWindow window;
     window.setMinimumSize(640, 480);
     window.setWindowTitle("Open Font Asset Generator");
 
-    auto *mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+    auto guiGroupBox = new QGroupBox("Parameters");
     auto *guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
-    auto *glLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+    
     guiLayout->addWidget(labelR);
     guiLayout->addWidget(backgroundR);
-    glLayout->addWidget(QWidget::createWindowContainer(glwindow));
-    mainLayout->addLayout(guiLayout);
-    mainLayout->addLayout(glLayout);
-    
+    guiGroupBox->setLayout(guiLayout);
 
-    // since window already has a special, we have to put our layout on a widget and then set it as central widget
+    auto *mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+    mainLayout->addWidget(guiGroupBox);
+    mainLayout->addWidget(QWidget::createWindowContainer(glwindow));
+
+    // since window already has a special layout, we have to put our layout on a widget and then set it as central widget
     auto central = new QWidget();
     central->setLayout(mainLayout);
     

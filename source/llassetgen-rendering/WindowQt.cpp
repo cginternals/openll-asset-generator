@@ -130,4 +130,4 @@ void WindowQt::enterEvent(QEvent* /*unused*/) {}
 
 void WindowQt::leaveEvent(QEvent* /*unused*/) {}
 
-void WindowQt::backgroundColorRChanged() {}
+void WindowQt::backgroundColorRChanged(QString /*unused*/) {}
