@@ -53,7 +53,7 @@ class Window : public WindowQt {
     Window(QSurfaceFormat& format) : WindowQt(format) {
         m_samplerIndex = 0;
         m_texture = nullptr;
-        m_backgroundColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
+        m_backgroundColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
     }
 
     virtual ~Window() {
@@ -126,7 +126,7 @@ class Window : public WindowQt {
     }
 
     virtual void paintGL() override {
-        // TODO: paintGL is not triggered when background color changes!
+
         glClearColor(m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -166,8 +166,22 @@ class Window : public WindowQt {
     {
         int red = value.toInt(); 
         m_backgroundColor.r = red / 255.f;
+        paint();
     }
 
+    virtual void backgroundColorGChanged(QString value)
+    {
+        int green = value.toInt();
+        m_backgroundColor.g = green / 255.f;
+        paint();
+    }
+
+    virtual void backgroundColorBChanged(QString value)
+    {
+        int blue = value.toInt();
+        m_backgroundColor.b = blue / 255.f;
+        paint();
+    }
 
    protected:
     globjects::ref_ptr<globjects::Buffer> m_cornerBuffer;
@@ -208,14 +222,6 @@ int main(int argc, char** argv) {
 
 
     // GUI
-    auto colorValidator = new QIntValidator(0, 255);
-    auto *backgroundR = new QLineEdit();
-    auto *labelR = new QLabel("Background Red:");
-    backgroundR->setValidator(colorValidator);
-    backgroundR->setPlaceholderText("255");
-    backgroundR->setMaximumWidth(50);
-
-    QObject::connect(backgroundR, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorRChanged(QString)));
 
     QMainWindow window;
     window.setMinimumSize(640, 480);
@@ -223,10 +229,53 @@ int main(int argc, char** argv) {
 
     auto guiGroupBox = new QGroupBox("Parameters");
     auto *guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+
+    auto colorValidator = new QIntValidator(0, 255);
+
+    //Background Color RED
+    auto *backgroundR = new QLineEdit();
+    auto *labelR = new QLabel("Background Red:");
+    labelR->setMaximumWidth(90);
+    backgroundR->setValidator(colorValidator);
+    backgroundR->setPlaceholderText("255");
+    backgroundR->setMaximumWidth(45);
+
+    QObject::connect(backgroundR, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorRChanged(QString)));
     
     guiLayout->addWidget(labelR);
-    guiLayout->addWidget(backgroundR);
+    guiLayout->addWidget(backgroundR, 0, Qt::AlignLeft);
     guiGroupBox->setLayout(guiLayout);
+
+
+    //Background Color GREEN
+    auto *backgroundG = new QLineEdit();
+    auto *labelG = new QLabel("Background Green:");
+    labelG->setMaximumWidth(90);
+    backgroundG->setValidator(colorValidator);
+    backgroundG->setPlaceholderText("255");
+    backgroundG->setMaximumWidth(45);
+
+    QObject::connect(backgroundG, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorGChanged(QString)));
+
+    guiLayout->addWidget(labelG);
+    guiLayout->addWidget(backgroundG, 0, Qt::AlignLeft);
+    guiGroupBox->setLayout(guiLayout);
+
+
+    //Background Color BLUE
+    auto *backgroundB = new QLineEdit();
+    auto *labelB = new QLabel("Background Blue:");
+    labelB->setMaximumWidth(90);
+    backgroundB->setValidator(colorValidator);
+    backgroundB->setPlaceholderText("255");
+    backgroundB->setMaximumWidth(45);
+
+    QObject::connect(backgroundB, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorBChanged(QString)));
+
+    guiLayout->addWidget(labelB);
+    guiLayout->addWidget(backgroundB, 0, Qt::AlignLeft);
+    guiGroupBox->setLayout(guiLayout);
+
 
     auto *mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
     mainLayout->addWidget(guiGroupBox);

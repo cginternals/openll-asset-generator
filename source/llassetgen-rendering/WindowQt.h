@@ -34,6 +34,8 @@ class WindowQt : public QWindow {
 
    public slots:
     virtual void backgroundColorRChanged(QString value);
+    virtual void backgroundColorGChanged(QString value);
+    virtual void backgroundColorBChanged(QString value);
 
    protected:
     QScopedPointer<QOpenGLContext> m_context;
