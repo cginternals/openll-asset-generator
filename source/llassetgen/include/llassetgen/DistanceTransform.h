@@ -1,42 +1,24 @@
 #pragma once
 
-#include <llassetgen/Vec2.h>
 #include <llassetgen/Image.h>
 
 namespace llassetgen {
     class DistanceTransform {
        public:
-        using DimensionType = int;
-        using InputType = unsigned char;
+        using DimensionType = size_t;
+        using InputType = uint8_t;
         using OutputType = float;
         using PositionType = Vec2<DimensionType>;
 
        protected:
-        std::unique_ptr<InputType[]> input;
-        std::unique_ptr<OutputType[]> output;
-        template <typename PixelType>
-        void exportPngInternal(png_struct_def*, OutputType, OutputType);
+        template<typename PixelType, bool flipped = false, bool invalidBounds = false>
+        PixelType getPixel(PositionType pos);
+        template<typename PixelType, bool flipped = false>
+        void setPixel(PositionType pos, PixelType value);
 
        public:
-        DimensionType width, height;
-
-        DistanceTransform() : width(0), height(0) {}
-
-        DistanceTransform(DimensionType _width, DimensionType _height) { resetInput(_width, _height, true); }
-
-        void resetInput(DimensionType _width, DimensionType _height, bool clear);
-        bool inputAt(DimensionType offset);
-        bool inputAt(PositionType pos);
-        bool inputAtClamped(PositionType pos);
-        void inputAt(PositionType pos, bool bit);
-        OutputType& outputAt(DimensionType offset);
-        OutputType& outputAt(PositionType pos);
-        OutputType outputAtClamped(PositionType pos);
-
-        LLASSETGEN_API void importFreeTypeBitmap(FT_Bitmap_* bitmap, DimensionType padding);
-        LLASSETGEN_API void importPng(std::string path);
-        LLASSETGEN_API void exportPng(std::string path, OutputType blackDistance, OutputType whiteDistance,
-                                      DimensionType bitDepth);
+        const Image &input, &output;
+        DistanceTransform(const Image& _input, const Image& _output);
 
         virtual void transform() = 0;
     };
@@ -48,6 +30,7 @@ namespace llassetgen {
         void transformAt(PositionType pos, PositionType target, OutputType distance);
 
        public:
+        LLASSETGEN_API DeadReckoning(const Image& _input, const Image& _output) :DistanceTransform(_input, _output) {}
         LLASSETGEN_API void transform();
     };
 
@@ -59,11 +42,13 @@ namespace llassetgen {
         std::unique_ptr<Parabola[]> parabolas;
         std::unique_ptr<OutputType[]> lineBuffer;
 
-        template<bool fill>
-        void edgeDetection(DimensionType offset, DimensionType pitch, DimensionType length);
-        void transformLine(DimensionType offset, DimensionType pitch, DimensionType length);
+        template<bool flipped, bool fill>
+        void edgeDetection(DimensionType offset, DimensionType length);
+        template<bool flipped>
+        void transformLine(DimensionType offset, DimensionType length);
 
        public:
-        void transform();
+        LLASSETGEN_API ParabolaEnvelope(const Image& _input, const Image& _output) :DistanceTransform(_input, _output) {}
+        LLASSETGEN_API void transform();
     };
 }

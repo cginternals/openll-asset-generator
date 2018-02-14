@@ -110,8 +110,7 @@ namespace llassetgen {
 		return Image(_min, _max, stride, bit_depth, data);
 	}
 
-	Image::Image(const Vec2<size_t> _min, const Vec2<size_t> _max, const size_t _stride, const uint8_t _bit_depth, const std::shared_ptr<uint8_t>_data)
-	{
+	Image::Image(const Vec2<size_t> _min, const Vec2<size_t> _max, const size_t _stride, const uint8_t _bit_depth, const std::shared_ptr<uint8_t>_data) {
 		min = _min;
 		max = _max;
         stride = _stride;
@@ -266,8 +265,7 @@ namespace llassetgen {
 		((std::ostream*)a)->flush();
 	}
 
-	Image::Image(const std::string &filepath)
-	{
+	Image::Image(const std::string &filepath) {
 		std::ifstream in_file(filepath, std::ifstream::in | std::ifstream::binary);
 
 		png_byte pngsig[8];

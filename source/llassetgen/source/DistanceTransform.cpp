@@ -1,171 +1,34 @@
-#include <algorithm>
-#include <limits>
 #include <iostream>
 #include <cassert>
 #include <cmath>
 
-/*
- * If we sort png.h below the freetype includes, an compile error will be
- * generated warning about multiple includes of setjmp (on some version of
- * libpng). Because we don't use the setjmp functionality of freetype, this is
- * not applicable in this case. Unfortunately, the compile error can only be
- * fixed by editing png.h or reordering the includes.
- *
- * See https://sourceforge.net/p/enlightenment/mailman/message/12595025/ for
- * some discussion on this topic.
- */
-// clang-format off
-#include <png.h> // NOLINT
-#include <ft2build.h>
-#include FT_FREETYPE_H
-// clang-format on
-
 #include <llassetgen/DistanceTransform.h>
 
 namespace llassetgen {
-    void DistanceTransform::resetInput(DimensionType _width, DimensionType _height, bool clear) {
-        assert(_width > 0 && _height > 0);
-        width = _width;
-        height = _height;
-        DimensionType size = (width * height + 7) / 8;
-        input.reset(new InputType[size]);
-        if (clear) memset(input.get(), 0, size);
+    template<typename PixelType, bool flipped, bool invalidBounds>
+    PixelType DistanceTransform::getPixel(PositionType pos) {
+        const Image& image = std::is_same<PixelType, InputType>::value ? input : output;
+        if(invalidBounds && !image.is_valid(pos))
+            return 0;
+        if(flipped)
+            std::swap(pos.x, pos.y);
+        PixelType value = image.getPixel<PixelType>(pos);
+        return std::is_same<PixelType, InputType>::value ? (value >= std::numeric_limits<InputType>::max()/2) : value; // TODO
     }
 
-    bool DistanceTransform::inputAt(DimensionType offset) {
-        assert(offset < width * height && input.get());
-        return (input[offset / 8] >> (offset % 8)) & 1;
+    template<typename PixelType, bool flipped>
+    void DistanceTransform::setPixel(PositionType pos, PixelType value) {
+        const Image& image = std::is_same<PixelType, InputType>::value ? input : output;
+        if(flipped)
+            std::swap(pos.x, pos.y);
+        image.setPixel<PixelType>(pos, value);
     }
 
-    bool DistanceTransform::inputAt(PositionType pos) {
-        assert(pos.x < width && pos.y < height);
-        return inputAt(pos.y * width + pos.x);
+    DistanceTransform::DistanceTransform(const Image& _input, const Image& _output) :input(_input), output(_output) {
+        assert(input.get_width() == output.get_width() && input.get_height() == output.get_height());
     }
 
-    bool DistanceTransform::inputAtClamped(PositionType pos) {
-        if (static_cast<int>(pos.x) < 0 || static_cast<int>(pos.y) < 0 || pos.x >= width || pos.y >= height) return 0;
-        return inputAt(pos);
-    }
-
-    void DistanceTransform::inputAt(PositionType pos, bool bit) {
-        assert(pos.x < width && pos.y < height && input.get());
-        DimensionType i = pos.y * width + pos.x;
-        InputType mask = 1 << (i % 8);
-        i /= 8;
-        if (bit)
-            input[i] |= mask;
-        else
-            input[i] &= ~mask;
-    }
-
-    DistanceTransform::OutputType& DistanceTransform::outputAt(DimensionType offset) {
-        assert(offset < width * height && output.get());
-        return output[offset];
-    }
-
-    DistanceTransform::OutputType& DistanceTransform::outputAt(PositionType pos) {
-        assert(pos.x < width && pos.y < height && output.get());
-        return output[pos.y * width + pos.x];
-    }
-
-    DistanceTransform::OutputType DistanceTransform::outputAtClamped(PositionType pos) {
-        assert(output.get());
-        if (static_cast<int>(pos.x) < 0 || static_cast<int>(pos.y) < 0 || pos.x >= width || pos.y >= height)
-            return std::numeric_limits<OutputType>::infinity();
-        return output[pos.y * width + pos.x];
-    }
-
-    void DistanceTransform::importFreeTypeBitmap(FT_Bitmap* bitmap, DimensionType padding) {
-        assert(bitmap);
-        resetInput(bitmap->width + padding * 2, bitmap->rows + padding * 2, true);
-        for (DimensionType y = 0; y < static_cast<int>(bitmap->rows); ++y)
-            for (DimensionType x = 0; x < static_cast<int>(bitmap->width); ++x)
-                inputAt({padding + x, padding + y}, (bitmap->buffer[y * bitmap->pitch + (x / 8)] >> (7 - x % 8)) & 1);
-    }
-
-    void DistanceTransform::importPng(std::string path) {
-        FILE* file = fopen(path.c_str(), "rb");
-        assert(file);
-        int bitDepth = 0, colorType = 0;
-        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-        png_infop pngInfo = png_create_info_struct(png);
-        if (setjmp(png_jmpbuf(png)))
-            assert(false);
-        else {
-            png_init_io(png, file);
-            png_read_info(png, pngInfo);
-            png_set_strip_16(png);
-            if (colorType == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png);
-            if (colorType == PNG_COLOR_TYPE_GRAY && bitDepth < 8) png_set_expand_gray_1_2_4_to_8(png);
-            assert(png_set_interlace_handling(png) == 1);
-            png_read_update_info(png, pngInfo);
-            png_get_IHDR(png, pngInfo, reinterpret_cast<png_uint_32*>(&width), reinterpret_cast<png_uint_32*>(&height),
-                         &bitDepth, &colorType, nullptr, nullptr, nullptr);
-            assert(colorType == PNG_COLOR_TYPE_GRAY);
-            assert(bitDepth == 8);
-            DimensionType index = 0;
-            InputType byte = 0, bit = 0;
-            resetInput(width, height, false);
-            std::unique_ptr<InputType[]> rowBuffer(new InputType[width]);
-            for (DimensionType y = 0; y < height; ++y) {
-                png_read_row(png, reinterpret_cast<png_bytep>(rowBuffer.get()), nullptr);
-                for (DimensionType x = 0; x < width; ++x) {
-                    byte |= (rowBuffer[x] >= std::numeric_limits<InputType>::max() / 2 ? 1 : 0) << bit;
-                    if (++bit >= 8) {
-                        input[index++] = byte;
-                        byte = bit = 0;
-                    }
-                }
-            }
-        }
-        png_read_end(png, nullptr);
-        png_destroy_read_struct(&png, &pngInfo, nullptr);
-        fclose(file);
-    }
-
-    template <typename PixelType>
-    void DistanceTransform::exportPngInternal(png_struct* png, OutputType blackDistance, OutputType whiteDistance) {
-        std::unique_ptr<PixelType[]> rowBuffer(new PixelType[width]);
-        for (DimensionType y = 0; y < height; ++y) {
-            for (DimensionType x = 0; x < width; ++x)
-                rowBuffer[x] = clamp((outputAt({x, y}) - blackDistance) / (whiteDistance - blackDistance), 0.0F, 1.0F) *
-                               std::numeric_limits<PixelType>::max();
-            png_write_row(png, reinterpret_cast<png_bytep>(rowBuffer.get()));
-        }
-    }
-
-    void DistanceTransform::exportPng(std::string path, OutputType blackDistance, OutputType whiteDistance,
-                                      DimensionType bitDepth) {
-        assert(width > 0 && height > 0 && output.get());
-        FILE* file = fopen(path.c_str(), "wb");
-        assert(file);
-        png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-        png_infop pngInfo = png_create_info_struct(png);
-        if (setjmp(png_jmpbuf(png)))
-            assert(false);
-        else {
-            png_init_io(png, file);
-            png_set_IHDR(png, pngInfo, width, height, bitDepth, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE,
-                         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-            png_write_info(png, pngInfo);
-            png_set_swap(png);
-            switch (bitDepth) {
-                case 8:
-                    exportPngInternal<unsigned char>(png, blackDistance, whiteDistance);
-                    break;
-                case 16:
-                    exportPngInternal<unsigned short>(png, blackDistance, whiteDistance);
-                    break;
-                default:
-                    assert(false);
-            }
-        }
-        png_write_end(png, nullptr);
-        png_destroy_write_struct(&png, &pngInfo);
-        fclose(file);
-    }
-
-    DeadReckoning::PositionType& DeadReckoning::posAt(PositionType pos) {
+    /*DeadReckoning::PositionType& DeadReckoning::posAt(PositionType pos) {
         assert(pos.x < width && pos.y < height && posBuffer.get());
         return posBuffer[pos.y * width + pos.x];
     }
@@ -289,5 +152,5 @@ namespace llassetgen {
             edgeDetection<false>(x, width, height);
             transformLine(x, width, height);
         }
-    }
+    }*/
 }
