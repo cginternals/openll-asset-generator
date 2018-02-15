@@ -194,19 +194,8 @@ class Window : public WindowQt {
     int m_samplerIndex;
 };
 
-int main(int argc, char** argv) {
-    llassetgen::init();
-
-    std::unique_ptr<llassetgen::DistanceTransform> dt(new llassetgen::DeadReckoning());
-
-    // TODO: don't export, but use as texture directly
-    dt->importPng("./data/llassetgen-rendering/testfontatlas.png");
-    dt->transform();
-    dt->exportPng("./data/llassetgen-rendering/testfontatlasDT.png", -20, 50, 8);
-    // TODO: exported png is corrupted, wait for master merge?
-
-    QApplication app(argc, argv);
-
+QMainWindow* setupGUI() {
+    
     // from globjects
     QSurfaceFormat format;
 #ifdef __APPLE__
@@ -219,13 +208,9 @@ int main(int argc, char** argv) {
 
     Window* glwindow = new Window(format);
 
-
-
-    // GUI
-
-    QMainWindow window;
-    window.setMinimumSize(640, 480);
-    window.setWindowTitle("Open Font Asset Generator");
+    QMainWindow* window = new QMainWindow();
+    window->setMinimumSize(640, 480);
+    window->setWindowTitle("Open Font Asset Generator");
 
     auto guiGroupBox = new QGroupBox("Parameters");
     auto *guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
@@ -241,11 +226,10 @@ int main(int argc, char** argv) {
     backgroundR->setMaximumWidth(45);
 
     QObject::connect(backgroundR, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorRChanged(QString)));
-    
+
     guiLayout->addWidget(labelR);
     guiLayout->addWidget(backgroundR, 0, Qt::AlignLeft);
     guiGroupBox->setLayout(guiLayout);
-
 
     //Background Color GREEN
     auto *backgroundG = new QLineEdit();
@@ -260,7 +244,6 @@ int main(int argc, char** argv) {
     guiLayout->addWidget(labelG);
     guiLayout->addWidget(backgroundG, 0, Qt::AlignLeft);
     guiGroupBox->setLayout(guiLayout);
-
 
     //Background Color BLUE
     auto *backgroundB = new QLineEdit();
@@ -284,10 +267,27 @@ int main(int argc, char** argv) {
     // since window already has a special layout, we have to put our layout on a widget and then set it as central widget
     auto central = new QWidget();
     central->setLayout(mainLayout);
-    
-    window.setCentralWidget(central);
 
-    window.show();
+    window->setCentralWidget(central);
+
+    window->show();
+
+    return window;
+}
+
+int main(int argc, char** argv) {
+    llassetgen::init();
+
+    std::unique_ptr<llassetgen::DistanceTransform> dt(new llassetgen::DeadReckoning());
+
+    // TODO: don't export, but use as texture directly
+    dt->importPng("./data/llassetgen-rendering/testfontatlas.png");
+    dt->transform();
+    dt->exportPng("./data/llassetgen-rendering/testfontatlasDT.png", -20, 50, 8);
+    // TODO: exported png is corrupted, wait for master merge?
+
+    QApplication app(argc, argv);
+    QMainWindow *w = setupGUI();
 
     return app.exec();
 }
