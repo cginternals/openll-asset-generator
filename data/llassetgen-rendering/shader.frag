@@ -6,6 +6,7 @@ layout (location = 0) out vec4 fragColor;
 in vec4 color;
 in vec2 v_uv;
 uniform sampler2D glyphs;
+uniform vec4 fontColor;
 
 
 const int channel = 0;
@@ -25,10 +26,11 @@ float tex(float t, vec2 uv)
 void main()
 {	
     float s = texture(glyphs, v_uv).r;
-    //if(s < 0.3)
-    //    discard;
+    if(s < 0.3)
+        discard;
 
-    vec4 fc = color;
+    //vec4 fc = color; //TODO if we want vertex-based color
+	vec4 fc = fontColor; //if we want uniform font color
 
     float a = tex(0.5, v_uv);
 

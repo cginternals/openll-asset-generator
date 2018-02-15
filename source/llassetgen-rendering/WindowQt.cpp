@@ -135,3 +135,9 @@ void WindowQt::backgroundColorRChanged(QString /*unused*/) {}
 void WindowQt::backgroundColorGChanged(QString /*unused*/) {}
 
 void WindowQt::backgroundColorBChanged(QString /*unused*/) {}
+
+void WindowQt::fontColorRChanged(QString /*unused*/) {}
+
+void WindowQt::fontColorGChanged(QString /*unused*/) {}
+
+void WindowQt::fontColorBChanged(QString /*unused*/) {}

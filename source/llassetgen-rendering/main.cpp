@@ -11,6 +11,7 @@
 #pragma warning(disable: 4127)
 #include <QApplication>
 #include <QBoxLayout>
+#include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
@@ -54,6 +55,7 @@ class Window : public WindowQt {
         m_samplerIndex = 0;
         m_texture = nullptr;
         m_backgroundColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        m_fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     }
 
     virtual ~Window() {
@@ -117,6 +119,7 @@ class Window : public WindowQt {
         m_vao->binding(0)->setFormat(2, GL_FLOAT, GL_FALSE, 0);
 
         m_program->setUniform("glyphs", m_samplerIndex);
+        m_program->setUniform("fontColor", m_fontColor);
 
         m_vao->enable(0);
     }
@@ -138,6 +141,7 @@ class Window : public WindowQt {
         }
 
         m_program->use();
+        m_program->setUniform("fontColor", m_fontColor);
         m_vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         m_program->release();
 
@@ -183,6 +187,27 @@ class Window : public WindowQt {
         paint();
     }
 
+    virtual void fontColorRChanged(QString value)
+    {
+        int red = value.toInt();
+        m_fontColor.r = red / 255.f;
+        paint();
+    }
+
+    virtual void fontColorGChanged(QString value)
+    {
+        int green = value.toInt();
+        m_fontColor.g = green / 255.f;
+        paint();
+    }
+
+    virtual void fontColorBChanged(QString value)
+    {
+        int blue = value.toInt();
+        m_fontColor.b = blue / 255.f;
+        paint();
+    }
+
    protected:
     globjects::ref_ptr<globjects::Buffer> m_cornerBuffer;
     globjects::ref_ptr<globjects::Program> m_program;
@@ -191,10 +216,11 @@ class Window : public WindowQt {
     globjects::Texture* m_texture;
 
     glm::vec4 m_backgroundColor;
+    glm::vec4 m_fontColor;
     int m_samplerIndex;
 };
 
-QMainWindow* setupGUI() {
+void setupGUI(QMainWindow* window) {
     
     // from globjects
     QSurfaceFormat format;
@@ -208,18 +234,64 @@ QMainWindow* setupGUI() {
 
     Window* glwindow = new Window(format);
 
-    QMainWindow* window = new QMainWindow();
+    
     window->setMinimumSize(640, 480);
     window->setWindowTitle("Open Font Asset Generator");
 
-    auto guiGroupBox = new QGroupBox("Parameters");
-    auto *guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
-
     auto colorValidator = new QIntValidator(0, 255);
+
+    // FONT COLOR
+    auto fontColorGroupBox = new QGroupBox("Font Color");
+    fontColorGroupBox->setMaximumHeight(150);
+    auto fontColorLayout = new QFormLayout();
+
+    fontColorGroupBox->setLayout(fontColorLayout);
+
+    //font Color RED
+    auto *fontR = new QLineEdit();
+    auto *labelFontR = new QLabel("R:");
+    labelFontR->setMaximumWidth(90);
+    fontR->setValidator(colorValidator);
+    fontR->setPlaceholderText("0");
+    fontR->setMaximumWidth(45);
+
+    QObject::connect(fontR, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorRChanged(QString)));
+    fontColorLayout->addRow(labelFontR, fontR);
+
+    //font Color GREEN
+    auto *fontG = new QLineEdit();
+    auto *labelFontG = new QLabel("G:");
+    labelFontG->setMaximumWidth(90);
+    fontG->setValidator(colorValidator);
+    fontG->setPlaceholderText("0");
+    fontG->setMaximumWidth(45);
+
+    QObject::connect(fontG, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorGChanged(QString)));
+    fontColorLayout->addRow(labelFontG, fontG);
+
+    //font Color BLUE
+    auto *fontB = new QLineEdit();
+    auto *labelFontB = new QLabel("B:");
+    labelFontB->setMaximumWidth(90);
+    fontB->setValidator(colorValidator);
+    fontB->setPlaceholderText("0");
+    fontB->setMaximumWidth(45);
+
+    QObject::connect(fontB, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorBChanged(QString)));
+    fontColorLayout->addRow(labelFontB, fontB);
+
+
+    // BACKGROUND COLOR
+
+    auto backgroundColorGroupBox = new QGroupBox("Background Color");
+    backgroundColorGroupBox->setMaximumHeight(150);
+    auto backgroundColorLayout = new QFormLayout();
+    
+    backgroundColorGroupBox->setLayout(backgroundColorLayout);
 
     //Background Color RED
     auto *backgroundR = new QLineEdit();
-    auto *labelR = new QLabel("Background Red:");
+    auto *labelR = new QLabel("R");
     labelR->setMaximumWidth(90);
     backgroundR->setValidator(colorValidator);
     backgroundR->setPlaceholderText("255");
@@ -227,13 +299,11 @@ QMainWindow* setupGUI() {
 
     QObject::connect(backgroundR, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorRChanged(QString)));
 
-    guiLayout->addWidget(labelR);
-    guiLayout->addWidget(backgroundR, 0, Qt::AlignLeft);
-    guiGroupBox->setLayout(guiLayout);
+    backgroundColorLayout->addRow(labelR, backgroundR);
 
     //Background Color GREEN
     auto *backgroundG = new QLineEdit();
-    auto *labelG = new QLabel("Background Green:");
+    auto *labelG = new QLabel("G");
     labelG->setMaximumWidth(90);
     backgroundG->setValidator(colorValidator);
     backgroundG->setPlaceholderText("255");
@@ -241,13 +311,11 @@ QMainWindow* setupGUI() {
 
     QObject::connect(backgroundG, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorGChanged(QString)));
 
-    guiLayout->addWidget(labelG);
-    guiLayout->addWidget(backgroundG, 0, Qt::AlignLeft);
-    guiGroupBox->setLayout(guiLayout);
+    backgroundColorLayout->addRow(labelG, backgroundG);
 
     //Background Color BLUE
     auto *backgroundB = new QLineEdit();
-    auto *labelB = new QLabel("Background Blue:");
+    auto *labelB = new QLabel("Blue");
     labelB->setMaximumWidth(90);
     backgroundB->setValidator(colorValidator);
     backgroundB->setPlaceholderText("255");
@@ -255,13 +323,16 @@ QMainWindow* setupGUI() {
 
     QObject::connect(backgroundB, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorBChanged(QString)));
 
-    guiLayout->addWidget(labelB);
-    guiLayout->addWidget(backgroundB, 0, Qt::AlignLeft);
-    guiGroupBox->setLayout(guiLayout);
+    backgroundColorLayout->addRow(labelB, backgroundB);
 
+
+    // gather all parameters into one layout (separate from the gl window)
+    auto *guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+    guiLayout->addWidget(backgroundColorGroupBox, 0, Qt::AlignLeft);
+    guiLayout->addWidget(fontColorGroupBox, 0, Qt::AlignLeft);
 
     auto *mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
-    mainLayout->addWidget(guiGroupBox);
+    mainLayout->addLayout(guiLayout, 0);
     mainLayout->addWidget(QWidget::createWindowContainer(glwindow));
 
     // since window already has a special layout, we have to put our layout on a widget and then set it as central widget
@@ -269,10 +340,6 @@ QMainWindow* setupGUI() {
     central->setLayout(mainLayout);
 
     window->setCentralWidget(central);
-
-    window->show();
-
-    return window;
 }
 
 int main(int argc, char** argv) {
@@ -287,7 +354,10 @@ int main(int argc, char** argv) {
     // TODO: exported png is corrupted, wait for master merge?
 
     QApplication app(argc, argv);
-    QMainWindow *w = setupGUI();
+
+    QMainWindow* window = new QMainWindow();
+    setupGUI(window);
+    window->show();
 
     return app.exec();
 }
