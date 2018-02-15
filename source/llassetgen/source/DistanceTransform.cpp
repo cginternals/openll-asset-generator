@@ -28,58 +28,67 @@ namespace llassetgen {
         assert(input.get_width() == output.get_width() && input.get_height() == output.get_height());
     }
 
-    /*DeadReckoning::PositionType& DeadReckoning::posAt(PositionType pos) {
-        assert(pos.x < width && pos.y < height && posBuffer.get());
-        return posBuffer[pos.y * width + pos.x];
+
+
+    DeadReckoning::PositionType& DeadReckoning::posAt(PositionType pos) {
+        assert(pos.x < input.get_width() && pos.y < input.get_height() && posBuffer.get());
+        return posBuffer[pos.y * input.get_width() + pos.x];
     }
 
     void DeadReckoning::transformAt(PositionType pos, PositionType target, OutputType distance) {
         target += pos;
-        if (outputAtClamped(target) + distance < outputAt(pos)) {
+        if (output.is_valid(target) && getPixel<OutputType>(target) + distance < getPixel<OutputType>(pos)) {
             posAt(pos) = target = posAt(target);
-            outputAt(pos) = std::sqrt(square(pos.x - target.x) + square(pos.y - target.y));
+            setPixel<OutputType>(pos, std::sqrt(square(pos.x - target.x) + square(pos.y - target.y)));
         }
     }
 
     void DeadReckoning::transform() {
-        assert(width > 0 && height > 0);
-        output.reset(new OutputType[width * height]);
-        posBuffer.reset(new PositionType[width * height]);
+        assert(input.get_width() > 0 && input.get_height() > 0);
+        posBuffer.reset(new PositionType[input.get_width() * input.get_height()]);
 
-        for (DimensionType y = 0; y < height; ++y)
-            for (DimensionType x = 0; x < width; ++x) {
+        for (DimensionType y = 0; y < input.get_height(); ++y)
+            for (DimensionType x = 0; x < input.get_width(); ++x) {
                 PositionType pos = {x, y};
-                bool center = inputAt(pos);
+                bool center = getPixel<InputType, false>(pos);
                 posAt(pos) = pos;
-                outputAt(pos) =
-                    (center && (inputAtClamped({x - 1, y}) != center || inputAtClamped({x + 1, y}) != center ||
-                                inputAtClamped({x, y - 1}) != center || inputAtClamped({x, y + 1}) != center))
-                        ? 0
-                        : std::numeric_limits<OutputType>::infinity();
+                setPixel<OutputType>(pos,
+                    (center && (getPixel<InputType, false, true>({x - 1, y}) != center || getPixel<InputType, false, true>({x + 1, y}) != center ||
+                                getPixel<InputType, false, true>({x, y - 1}) != center || getPixel<InputType, false, true>({x, y + 1}) != center))
+                    ? 0
+                    : std::numeric_limits<OutputType>::infinity()
+                );
             }
 
         const OutputType distance[] = {std::sqrt(2.0F), 1.0F, std::sqrt(2.0F), 1.0F};
-        const PositionType target[] = {{-1, -1}, {0, -1}, {+1, -1}, {-1, 0}};
+        const PositionType target[] = {
+            {static_cast<DimensionType>(-1), static_cast<DimensionType>(-1)},
+            {static_cast<DimensionType>( 0), static_cast<DimensionType>(-1)},
+            {static_cast<DimensionType>(+1), static_cast<DimensionType>(-1)},
+            {static_cast<DimensionType>(-1), static_cast<DimensionType>( 0)}
+        };
 
-        for (DimensionType y = 0; y < height; ++y)
-            for (DimensionType x = 0; x < width; ++x)
+        for (DimensionType y = 0; y < input.get_height(); ++y)
+            for (DimensionType x = 0; x < input.get_width(); ++x)
                 for (DimensionType i = 0; i < 4; ++i)
                     transformAt({x, y}, target[i], distance[i]);
 
-        for (DimensionType y = 0; y < height; ++y)
-            for (DimensionType x = 0; x < width; ++x)
+        for (DimensionType y = 0; y < input.get_height(); ++y)
+            for (DimensionType x = 0; x < input.get_width(); ++x)
                 for (DimensionType i = 0; i < 4; ++i)
-                    transformAt({width - x - 1, height - y - 1}, -(target[3 - i]), distance[3 - i]);
+                    transformAt({input.get_width() - x - 1, input.get_height() - y - 1}, -(target[3 - i]), distance[3 - i]);
 
-        for (DimensionType y = 0; y < height; ++y)
-            for (DimensionType x = 0; x < width; ++x)
-                if (inputAt({x, y}))
-                    outputAt({x, y}) *= -1;
+        for (DimensionType y = 0; y < input.get_height(); ++y)
+            for (DimensionType x = 0; x < input.get_width(); ++x) {
+                Vec2<DimensionType> pos(x, y);
+                if (getPixel<InputType, false>(pos))
+                    setPixel<OutputType>(pos, -getPixel<OutputType>(pos));
+            }
     }
 
 
 
-    template<bool fill>
+    /*template<bool fill>
     void ParabolaEnvelope::edgeDetection(DimensionType offset, DimensionType pitch, DimensionType length) {
         InputType prev = 0;
         DimensionType begin = 0;
