@@ -88,78 +88,75 @@ namespace llassetgen {
 
 
 
-    /*template<bool fill>
-    void ParabolaEnvelope::edgeDetection(DimensionType offset, DimensionType pitch, DimensionType length) {
+    template<bool flipped, bool fill>
+    void ParabolaEnvelope::edgeDetection(DimensionType offset, DimensionType length) {
         InputType prev = 0;
         DimensionType begin = 0;
         for(DimensionType j = 0; j < length; ++j) {
-            InputType next = inputAt(offset+j*pitch);
+            InputType next = getPixel<InputType, flipped>({j, offset});
             if(next == prev)
                 continue;
             DimensionType end = (next) ? j : j-1;
             if(fill)
-                for(DimensionType i = begin; i < end; ++i) {
-                    if(begin == 0)
-                        outputAt(offset+i*pitch) = square(end-i);
-                    else
-                        outputAt(offset+i*pitch) = square((i < (end+begin)/2) ? i-begin+1 : end-i);
-                }
+                for(DimensionType i = begin; i < end; ++i)
+                    setPixel<OutputType, flipped>({i, offset}, square((begin == 0)
+                        ? (end-i)
+                        : ((i < (end+begin)/2) ? i-begin+1 : end-i)
+                    ));
             prev = next;
             begin = end+1;
-            outputAt(offset+end*pitch) = 0;
+            setPixel<OutputType, flipped>({end, offset}, 0);
         }
         if(fill)
-            for(DimensionType i = begin; i < length; ++i) {
-                if(begin == 0)
-                    outputAt(offset+i*pitch) = std::numeric_limits<OutputType>::max();
-                else if(!prev)
-                    outputAt(offset+i*pitch) = square(i-begin+1);
-                else
-                    outputAt(offset+i*pitch) = square((i < (length+begin)/2) ? i-begin+1 : length-i);
-            }
+            for(DimensionType i = begin; i < length; ++i)
+                setPixel<OutputType, flipped>({i, offset}, (begin == 0)
+                    ? std::numeric_limits<OutputType>::max()
+                    : square((!prev)
+                        ? (i-begin+1)
+                        : ((i < (length+begin)/2) ? i-begin+1 : length-i)
+                    )
+                );
         if(prev)
-            outputAt(offset+(length-1)*pitch) = 0;
+            setPixel<OutputType, flipped>({length-1, offset}, 0);
     }
 
-    void ParabolaEnvelope::transformLine(DimensionType offset, DimensionType pitch, DimensionType length) {
+    template<bool flipped>
+    void ParabolaEnvelope::transformLine(DimensionType offset, DimensionType length) {
         parabolas[0].apex = 0;
         parabolas[0].begin = -std::numeric_limits<OutputType>::infinity();
-        parabolas[0].value = outputAt(offset + 0 * pitch);
+        parabolas[0].value = getPixel<OutputType, flipped>({0, offset});
         parabolas[1].begin = +std::numeric_limits<OutputType>::infinity();
         for (DimensionType parabola = 0, i = 1; i < length; ++i) {
             OutputType begin;
             do {
                 DimensionType apex = parabolas[parabola].apex;
-                begin = (outputAt(offset + i * pitch) + square(i) - (parabolas[parabola].value + square(apex))) /
-                        (2 * (i - apex));
+                begin = (getPixel<OutputType, flipped>({i, offset}) + square(i) - (parabolas[parabola].value + square(apex))) / (2 * (i - apex));
             } while (begin <= parabolas[parabola--].begin);
             parabola += 2;
             parabolas[parabola].apex = i;
             parabolas[parabola].begin = begin;
-            parabolas[parabola].value = outputAt(offset + i * pitch);
+            parabolas[parabola].value = getPixel<OutputType, flipped>({i, offset});
             parabolas[parabola + 1].begin = std::numeric_limits<OutputType>::infinity();
         }
         for (DimensionType parabola = 0, i = 0; i < length; ++i) {
-            while (parabolas[++parabola].begin < i)
-                ;
+            while (parabolas[++parabola].begin < i);
             --parabola;
-            outputAt(offset+i*pitch) = std::sqrt(parabolas[parabola].value+square(i-parabolas[parabola].apex)) * (inputAt(offset+i*pitch) ? -1 : 1);
+            setPixel<OutputType, flipped>({i, offset}, std::sqrt(parabolas[parabola].value+square(i-parabolas[parabola].apex)) * (getPixel<InputType, flipped>({i, offset}) ? -1 : 1));
         }
     }
 
     void ParabolaEnvelope::transform() {
-        assert(width > 0 && height > 0);
-        output.reset(new OutputType[width * height]);
-        DimensionType length = std::max(width, height);
+        assert(input.get_width() > 0 && input.get_height() > 0);
+        DimensionType length = std::max(input.get_width(), input.get_height());
         parabolas.reset(new Parabola[length + 1]);
         lineBuffer.reset(new OutputType[length]);
 
-        for(DimensionType y = 0; y < height; ++y)
-            edgeDetection<true>(y*width, 1, width);
+        for(DimensionType y = 0; y < input.get_height(); ++y)
+            edgeDetection<false, true>(y, input.get_width());
 
-        for(DimensionType x = 0; x < width; ++x) {
-            edgeDetection<false>(x, width, height);
-            transformLine(x, width, height);
+        for(DimensionType x = 0; x < input.get_width(); ++x) {
+            edgeDetection<true, false>(x, input.get_height());
+            transformLine<true>(x, input.get_height());
         }
-    }*/
+    }
 }
