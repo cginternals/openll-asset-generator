@@ -10,7 +10,6 @@ class QSurfaceFormat;
 class QOpenGLContext;
 
 class WindowQt : public QWindow {
-
     Q_OBJECT
 
    public:
