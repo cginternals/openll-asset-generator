@@ -41,11 +41,17 @@
 
 using namespace gl;
 
-/*Taken from cginternals/globjects,
+/* Taken from cginternals/globjects,
  * example: qtexample, texture
  * edited
  */
 
+/*
+ * This class is used to display GL rendered content in a Qt Window.
+ * It overrides all functions from WindowQt which use GL functionality.
+ * It handles the GL context and loads the shader from file.
+ * Some functions are connected to the GUI using Qt signals and slots.
+ */
 class Window : public WindowQt {
    public:
     explicit Window(const QSurfaceFormat &format) : WindowQt(format) {
@@ -91,8 +97,8 @@ class Window : public WindowQt {
         m_texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
         m_texture->ref();
         m_texture->image2D(0, GL_RGBA8, image->width(), image->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
-        // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might ignore
-        // this, since we use black&white image data here?
+        // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
+        // ignore this, since we use black&white image data here?
 
         m_cornerBuffer = new globjects::Buffer();
         m_program = new globjects::Program();
@@ -206,6 +212,9 @@ class Window : public WindowQt {
     int m_samplerIndex;
 };
 
+/* This function creates GUI elements and connects them to their correspondent functions using Qt signal-slot.
+ * A QApplication offers a window, that must not be destroyed to make QApplication work properly.
+ */
 void setupGUI(QMainWindow *window) {
     // from globjects
     QSurfaceFormat format;
