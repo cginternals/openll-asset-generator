@@ -9,6 +9,10 @@
 class QSurfaceFormat;
 class QOpenGLContext;
 
+/* This class is taken from cginternals/globjects examples: qtexample, texture
+ * and edited accordingly. It redirects GL functionality to its subclass(es), so that 
+ * GL functions which are included via Qt don't interfere with GL functions included via glbinding.
+ */
 class WindowQt : public QWindow {
     Q_OBJECT
 
@@ -24,7 +28,14 @@ class WindowQt : public QWindow {
     virtual void enterEvent(QEvent* event);
     virtual void leaveEvent(QEvent* event);
 
+    /*
+     * Make OpenGL Context current context.
+     */
     void makeCurrent();
+    /*
+     * Call this when OpenGL Context was made current,
+     * after finishing the algorithm that needed that current context.
+     */
     void doneCurrent();
 
     QOpenGLContext* context();
