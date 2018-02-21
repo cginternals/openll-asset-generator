@@ -78,8 +78,7 @@ class Window : public WindowQt {
         // get glyph atlas
 
         // TODO load using own png loader instead of Qt (blocked: wait for this feature to be merged into master, then
-        // pull). Loading from relative path is different here because of Qt. TODO: make it consistent, preferably for
-        // all OS
+        // pull). TODO: Make sure this file structure is the same on other OS
         auto path = QApplication::applicationDirPath();
         auto *image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_rgb.png");
 
@@ -92,16 +91,15 @@ class Window : public WindowQt {
         m_texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
         m_texture->ref();
         m_texture->image2D(0, GL_RGBA8, image->width(), image->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
-        // Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might ignore
+        // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might ignore
         // this, since we use black&white image data here?
 
         m_cornerBuffer = new globjects::Buffer();
         m_program = new globjects::Program();
         m_vao = new globjects::VertexArray();
 
-        // TODO: make sure that the relative path works on other OS, too
         // openll-asset-generator/data/llassetgen-rendering
-        const std::string dataPath = "./data/llassetgen-rendering";
+        const std::string dataPath = path.toStdString() + "/../../data/llassetgen-rendering";
         m_program->attach(globjects::Shader::fromFile(GL_VERTEX_SHADER, dataPath + "/shader.vert"),
                           globjects::Shader::fromFile(GL_FRAGMENT_SHADER, dataPath + "/shader.frag"));
 
