@@ -306,7 +306,7 @@ void setupGUI(QMainWindow *window) {
 
     // Background Color BLUE
     auto *backgroundB = new QLineEdit();
-    auto *labelB = new QLabel("Blue");
+    auto *labelB = new QLabel("B");
     labelB->setMaximumWidth(90);
     backgroundB->setValidator(colorValidator);
     backgroundB->setPlaceholderText("255");
