@@ -73,9 +73,6 @@ target_include_directories(${target}
     PRIVATE
     ${DEFAULT_INCLUDE_DIRECTORIES}
     ${PROJECT_BINARY_DIR}/source/include
-	
-	PUBLIC
-	${GLM_INCLUDE_DIR}
 )
 
 
