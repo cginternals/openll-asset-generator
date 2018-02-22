@@ -129,7 +129,7 @@ void WindowQt::paintGL() { updateGL(); }
 
 void WindowQt::initializeGL() {}
 
-void WindowQt::deinitializeGL(){};
+void WindowQt::deinitializeGL() {}
 
 void WindowQt::resizeGL(QResizeEvent* /*unused*/) {}
 
