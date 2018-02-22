@@ -1,13 +1,10 @@
 #include "WindowQt.h"
 
-#pragma warning(push)
-#pragma warning(disable: 4127 4800 4244)
 #include <QApplication>
 #include <QDebug>
 #include <QOpenGLContext>
 #include <QResizeEvent>
 #include <QSurfaceFormat>
-#pragma warning(pop)
 
 QSurfaceFormat defaultFormat() {
     QSurfaceFormat format;
@@ -35,7 +32,15 @@ WindowQt::WindowQt(const QSurfaceFormat& format)
     }
 }
 
-WindowQt::~WindowQt() {}
+WindowQt::~WindowQt() {
+    if (m_initialized) {
+        makeCurrent();
+
+        deinitializeGL();
+
+        doneCurrent();
+    }
+}
 
 QOpenGLContext* WindowQt::context() { return m_context.data(); }
 
@@ -120,11 +125,13 @@ bool WindowQt::event(QEvent* event) {
     }
 }
 
+void WindowQt::paintGL() { updateGL(); }
+
 void WindowQt::initializeGL() {}
 
-void WindowQt::resizeGL(QResizeEvent* /*unused*/) {}
+void WindowQt::deinitializeGL(){};
 
-void WindowQt::paintGL() {}
+void WindowQt::resizeGL(QResizeEvent* /*unused*/) {}
 
 void WindowQt::enterEvent(QEvent* /*unused*/) {}
 

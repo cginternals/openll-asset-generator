@@ -5,8 +5,6 @@
 #include <ft2build.h>  // NOLINT include order required by freetype
 #include FT_FREETYPE_H
 
-#pragma warning(push)
-#pragma warning(disable: 4127)
 #include <QApplication>
 #include <QBoxLayout>
 #include <QFormLayout>
@@ -16,7 +14,6 @@
 #include <QMainWindow>
 #include <QResizeEvent>
 #include <QValidator>
-#pragma warning(pop)
 
 #include <glm/glm.hpp>
 
@@ -61,7 +58,7 @@ class Window : public WindowQt {
         m_fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     }
 
-    virtual ~Window() { m_texture->unref(); }
+    virtual ~Window() {}
 
     virtual void initializeGL() override {
         globjects::init();
@@ -95,32 +92,52 @@ class Window : public WindowQt {
         auto imageData = imageFormatted.bits();
 
         m_texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
-        m_texture->ref();
         m_texture->image2D(0, GL_RGBA8, image->width(), image->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
         // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
         // ignore this, since we use black&white image data here?
 
-        m_cornerBuffer = new globjects::Buffer();
-        m_program = new globjects::Program();
-        m_vao = new globjects::VertexArray();
+        m_cornerBuffer = globjects::Buffer::create();
+        m_program = globjects::Program::create();
+        m_vao = globjects::VertexArray::create();
 
         // openll-asset-generator/data/llassetgen-rendering
         const std::string dataPath = path.toStdString() + "/../../data/llassetgen-rendering";
-        m_program->attach(globjects::Shader::fromFile(GL_VERTEX_SHADER, dataPath + "/shader.vert"),
-                          globjects::Shader::fromFile(GL_FRAGMENT_SHADER, dataPath + "/shader.frag"));
+
+        m_vertexShaderSource = globjects::Shader::sourceFromFile(dataPath + "/shader.vert");
+        m_vertexShaderTemplate = globjects::Shader::applyGlobalReplacements(m_vertexShaderSource.get());
+        m_vertexShader = globjects::Shader::create(GL_VERTEX_SHADER, m_vertexShaderTemplate.get());
+
+        m_fragmentShaderSource = globjects::Shader::sourceFromFile(dataPath + "/shader.frag");
+        m_fragmentShaderTemplate = globjects::Shader::applyGlobalReplacements(m_fragmentShaderSource.get());
+        m_fragmentShader = globjects::Shader::create(GL_FRAGMENT_SHADER, m_fragmentShaderTemplate.get());
+
+        m_program->attach(m_vertexShader.get(), m_fragmentShader.get());
 
         m_cornerBuffer->setData(
             std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0, 1), glm::vec2(1, 1)}},
             GL_STATIC_DRAW);
 
         m_vao->binding(0)->setAttribute(0);
-        m_vao->binding(0)->setBuffer(m_cornerBuffer, 0, sizeof(glm::vec2));
-        m_vao->binding(0)->setFormat(2, GL_FLOAT, GL_FALSE, 0);
+        m_vao->binding(0)->setBuffer(m_cornerBuffer.get(), 0, sizeof(glm::vec2));
+        m_vao->binding(0)->setFormat(2, GL_FLOAT);
+        m_vao->enable(0);
 
         m_program->setUniform("glyphs", m_samplerIndex);
         m_program->setUniform("fontColor", m_fontColor);
+    }
 
-        m_vao->enable(0);
+    virtual void deinitializeGL() override {
+        m_texture.reset(nullptr);
+
+        m_cornerBuffer.reset(nullptr);
+        m_program.reset(nullptr);
+        m_vertexShaderSource.reset(nullptr);
+        m_vertexShaderTemplate.reset(nullptr);
+        m_vertexShader.reset(nullptr);
+        m_fragmentShaderSource.reset(nullptr);
+        m_fragmentShaderTemplate.reset(nullptr);
+        m_fragmentShader.reset(nullptr);
+        m_vao.reset(nullptr);
     }
 
     virtual void resizeGL(QResizeEvent *event) override {
@@ -155,7 +172,12 @@ class Window : public WindowQt {
 
         switch (event->key()) {
             case Qt::Key_F5:
-                globjects::File::reloadAll();
+                m_vertexShaderSource->reload();
+                m_fragmentShaderSource->reload();
+                updateGL();
+                break;
+            case Qt::Key_Escape:
+                qApp->quit();
                 break;
             default:
                 break;
@@ -201,11 +223,17 @@ class Window : public WindowQt {
     }
 
    protected:
-    globjects::ref_ptr<globjects::Buffer> m_cornerBuffer;
-    globjects::ref_ptr<globjects::Program> m_program;
-    globjects::ref_ptr<globjects::VertexArray> m_vao;
+    std::unique_ptr<globjects::Buffer> m_cornerBuffer;
+    std::unique_ptr<globjects::Program> m_program;
+    std::unique_ptr<globjects::File> m_vertexShaderSource;
+    std::unique_ptr<globjects::AbstractStringSource> m_vertexShaderTemplate;
+    std::unique_ptr<globjects::Shader> m_vertexShader;
+    std::unique_ptr<globjects::File> m_fragmentShaderSource;
+    std::unique_ptr<globjects::AbstractStringSource> m_fragmentShaderTemplate;
+    std::unique_ptr<globjects::Shader> m_fragmentShader;
+    std::unique_ptr<globjects::VertexArray> m_vao;
 
-    globjects::Texture *m_texture;
+    std::unique_ptr<globjects::Texture> m_texture;
 
     glm::vec4 m_backgroundColor;
     glm::vec4 m_fontColor;
@@ -338,13 +366,14 @@ int main(int argc, char **argv) {
 
     std::unique_ptr<llassetgen::DistanceTransform> dt(new llassetgen::DeadReckoning());
 
-    // TODO: don't export, but use as texture directly
-    dt->importPng("./data/llassetgen-rendering/testfontatlas.png");
-    dt->transform();
-    dt->exportPng("./data/llassetgen-rendering/testfontatlasDT.png", -20, 50, 8);
-    // TODO: exported png is corrupted, wait for update/fix
-
     QApplication app(argc, argv);
+
+    auto path = app.applicationDirPath();
+    dt->importPng(path.toStdString() + "/../../data/llassetgen-rendering/testfontatlas.png");
+    dt->transform();
+    dt->exportPng(path.toStdString() + "/../../data/llassetgen-rendering/testfontatlasDT.png", -20, 50, 8);
+    // TODO: don't export, but use as texture directly
+    // TODO: exported png is corrupted, wait for update/fix
 
     QMainWindow *window = new QMainWindow();
     setupGUI(window);

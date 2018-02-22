@@ -1,16 +1,13 @@
 #pragma once
 
-#pragma warning(push)
-#pragma warning(disable: 4127)
 #include <QScopedPointer>
 #include <QWindow>
-#pragma warning(pop)
 
 class QSurfaceFormat;
 class QOpenGLContext;
 
 /* This class is taken from cginternals/globjects examples: qtexample, texture
- * and edited accordingly. It redirects GL functionality to its subclass(es), so that 
+ * and edited accordingly. It redirects GL functionality to its subclass(es), so that
  * GL functions which are included via Qt don't interfere with GL functions included via glbinding.
  */
 class WindowQt : public QWindow {
@@ -61,6 +58,7 @@ class WindowQt : public QWindow {
     void paint();
 
     virtual void initializeGL();
+    virtual void deinitializeGL();
     virtual void resizeGL(QResizeEvent* event);
     virtual void paintGL();
 };
