@@ -99,25 +99,25 @@ namespace llassetgen {
             DimensionType end = (next) ? j : j-1;
             if(fill)
                 for(DimensionType i = begin; i < end; ++i)
-                    setPixel<OutputType, flipped>({i, offset}, square((begin == 0)
-                        ? (end-i)
-                        : ((i < (end+begin)/2) ? i-begin+1 : end-i)
+                    setPixel<OutputType, flipped>({i, offset}, square(begin == 0
+                        ? (end-i) // Falling slope
+                        : ((i < (end+begin)/2) ? i-begin+1 : end-i) // Rising and falling slope
                     ));
             prev = next;
             begin = end+1;
-            setPixel<OutputType, flipped>({end, offset}, 0);
+            setPixel<OutputType, flipped>({end, offset}, 0); // Mark edge
         }
         if(fill)
             for(DimensionType i = begin; i < length; ++i)
                 setPixel<OutputType, flipped>({i, offset}, (begin == 0)
-                    ? std::numeric_limits<OutputType>::max()
-                    : square((!prev)
-                        ? (i-begin+1)
-                        : ((i < (length+begin)/2) ? i-begin+1 : length-i)
+                    ? std::numeric_limits<OutputType>::max() // Empty
+                    : square(prev
+                        ? ((i < (length-1+begin)/2) ? i-begin+1 : length-1-i) // Rising and falling slope
+                        : (i-begin+1) // Rising slope
                     )
                 );
         if(prev)
-            setPixel<OutputType, flipped>({length-1, offset}, 0);
+            setPixel<OutputType, flipped>({length-1, offset}, 0); // Mark edge
     }
 
     template<bool flipped>

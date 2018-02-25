@@ -17,7 +17,8 @@ namespace llassetgen {
         void setPixel(PositionType pos, PixelType value);
 
        public:
-        const Image &input, &output;
+        const Image& input;
+        const Image& output;
         DistanceTransform(const Image& _input, const Image& _output);
 
         virtual void transform() = 0;
@@ -37,7 +38,8 @@ namespace llassetgen {
     class ParabolaEnvelope : public DistanceTransform {
         struct Parabola {
             DimensionType apex;
-            OutputType begin, value;
+            OutputType begin;
+            OutputType value;
         };
         std::unique_ptr<Parabola[]> parabolas;
         std::unique_ptr<OutputType[]> lineBuffer;
