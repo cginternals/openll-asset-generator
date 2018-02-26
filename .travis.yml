@@ -15,8 +15,6 @@ env:
   global:
     - CMAKE_OPTIONS="-DOPTION_BUILD_EXAMPLES=On"
     - PATH="/usr/local/opt/qt/bin:$PATH"
-    - PATH="/usr/local/Cellar/glbinding/2.1.4:$PATH"
-    - PATH="/usr/local/Cellar/globjects/1.0.0_1:$PATH"
     
   matrix:
     - CMAKE_CONFIGURATION=release BUILD_DIR=build
@@ -34,7 +32,7 @@ before_install:
   - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -qq cmake3 cppcheck clang-tidy-3.8 libfreetype6-dev libpng-dev qt5-default libglm-dev libglbinding-dev libglobjects-dev; fi
   # libpng is already installed by default
   - if [ $TRAVIS_OS_NAME == osx ]; then brew tap cginternals/homebrew-cginternals; fi
-  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype qt5 glm glbinding globjects; export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH;$(brew --prefix qt);$(brew --prefix glbinding);$(brew --prefix globjects)"; fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype qt5 glm glbinding globjects; export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH;$(brew --prefix qt);$(brew --prefix glbinding);$(brew --prefix globjects)"; export PATH="$PATH;$(brew --prefix glbinding);$(brew --prefix globjects)"; fi
 
 before_script:
   - ./configure
