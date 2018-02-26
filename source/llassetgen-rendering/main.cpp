@@ -72,10 +72,10 @@ class Window : public WindowQt {
         globjects::DebugMessage::enable();
 
 #ifdef __APPLE__
-        Shader::clearGlobalReplacements();
-        Shader::globalReplace("#version 140", "#version 150");
+        globjects::Shader::clearGlobalReplacements();
+        globjects::Shader::globalReplace("#version 140", "#version 150");
 
-        debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
+        globjects::debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
 #endif
 
         // get glyph atlas
