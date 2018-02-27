@@ -20,7 +20,7 @@ class WindowQt : public QWindow {
 
     virtual void resizeEvent(QResizeEvent* event) override;
     virtual void exposeEvent(QExposeEvent* event) override;
-    bool event(QEvent* event);
+    bool event(QEvent* event) override;
 
     virtual void enterEvent(QEvent* event);
     virtual void leaveEvent(QEvent* event);
