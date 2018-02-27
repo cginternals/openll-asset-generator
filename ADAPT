@@ -14,7 +14,7 @@ CMakeLists.txt:
 [√]  Set META_PROJECT_*
 [√]  Set META_VERSION_*
 [√]  Set META_AUTHOR_*
-[ ]  Set META_CMAKE_INIT_SHA (to the commit hash of the applied cmake-init template, e.g., to 83d7cbc29a6fcb74a98498e5b0fcebd953d9d5cc)
+[√]  Set META_CMAKE_INIT_SHA (to the commit hash of the applied cmake-init template, e.g., to 83d7cbc29a6fcb74a98498e5b0fcebd953d9d5cc)
 [ ]  Adjust INSTALL_* to the desired install locations for all systems (defaults should be fine for a start)
 --------------------------------------------------------------------
 
