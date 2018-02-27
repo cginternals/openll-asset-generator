@@ -25,16 +25,14 @@ namespace llassetgen {
 
         bool ShelfNextFitPacker::packNextRotatable(Vec2<PackingSizeType> rectSize) {
             PackingSizeType minSide, maxSide;
-            Vec2<PackingSizeType> rotated;
             std::tie(minSide, maxSide) = std::minmax(rectSize.x, rectSize.y);
             PackingSizeType remainingWidth = packing.atlasSize.x - currentShelfSize.x;
             PackingSizeType remainingHeight = packing.atlasSize.y - usedHeight;
 
-            if (currentShelfSize.y >= maxSide && remainingWidth >= minSide) {
-                rotated = {minSide, maxSide};
-            } else if (remainingWidth >= maxSide && remainingHeight >= minSide) {
-                rotated = {maxSide, minSide};
-            } else {
+            bool fitsUpright = currentShelfSize.y >= maxSide && remainingWidth >= minSide;
+            bool fitsSideways = remainingWidth >= maxSide && remainingHeight >= minSide;
+            bool upright = fitsUpright;
+            if (!fitsUpright && !fitsSideways) {
                 openNewShelf();
                 if (usedHeight + minSide > packing.atlasSize.y) {
                     return false;
@@ -45,13 +43,18 @@ namespace llassetgen {
                         return false;
                     }
 
-                    rotated = {minSide, maxSide};
+                    upright = true;
                 } else {
-                    rotated = {maxSide, minSide};
+                    upright = false;
                 }
             }
 
-            store(rotated);
+            if (upright) {
+                store({minSide, maxSide});
+            } else {
+                store({maxSide, minSide});
+            }
+
             return true;
         }
 
