@@ -8,7 +8,7 @@ struct FT_Bitmap_;
 struct png_struct_def;
 
 namespace llassetgen {
-    class DistanceTransform {
+    class LLASSETGEN_API DistanceTransform {
        public:
         using DimensionType = int;
         using InputType = unsigned char;
@@ -19,7 +19,7 @@ namespace llassetgen {
         std::unique_ptr<InputType[]> input;
         std::unique_ptr<OutputType[]> output;
         template <typename PixelType>
-        void exportPngInternal(png_struct_def*, OutputType, OutputType);
+        LLASSETGEN_NO_EXPORT void exportPngInternal(png_struct_def*, OutputType, OutputType);
 
        public:
         DimensionType width, height;
@@ -28,34 +28,33 @@ namespace llassetgen {
 
         DistanceTransform(DimensionType _width, DimensionType _height) { resetInput(_width, _height, true); }
 
-        void resetInput(DimensionType width, DimensionType height, bool clear);
-        bool inputAt(DimensionType offset);
-        bool inputAt(PositionType pos);
-        bool inputAtClamped(PositionType pos);
-        void inputAt(PositionType pos, bool bit);
-        OutputType& outputAt(DimensionType offset);
-        OutputType& outputAt(PositionType pos);
-        OutputType outputAtClamped(PositionType pos);
+        LLASSETGEN_NO_EXPORT void resetInput(DimensionType width, DimensionType height, bool clear);
+        LLASSETGEN_NO_EXPORT bool inputAt(DimensionType offset);
+        LLASSETGEN_NO_EXPORT bool inputAt(PositionType pos);
+        LLASSETGEN_NO_EXPORT bool inputAtClamped(PositionType pos);
+        LLASSETGEN_NO_EXPORT void inputAt(PositionType pos, bool bit);
+        LLASSETGEN_NO_EXPORT OutputType& outputAt(DimensionType offset);
+        LLASSETGEN_NO_EXPORT OutputType& outputAt(PositionType pos);
+        LLASSETGEN_NO_EXPORT OutputType outputAtClamped(PositionType pos);
 
-        LLASSETGEN_API void importFreeTypeBitmap(FT_Bitmap_* bitmap, DimensionType padding);
-        LLASSETGEN_API void importPng(std::string path);
-        LLASSETGEN_API void exportPng(std::string path, OutputType blackDistance, OutputType whiteDistance,
-                                      DimensionType bitDepth);
+        void importFreeTypeBitmap(FT_Bitmap_* bitmap, DimensionType padding);
+        void importPng(std::string path);
+        void exportPng(std::string path, OutputType blackDistance, OutputType whiteDistance, DimensionType bitDepth);
 
         virtual void transform() = 0;
     };
 
-    class DeadReckoning : public DistanceTransform {
+    class LLASSETGEN_API DeadReckoning : public DistanceTransform {
         std::unique_ptr<PositionType[]> posBuffer;
 
-        PositionType& posAt(PositionType pos);
-        void transformAt(PositionType pos, PositionType target, OutputType distance);
+        LLASSETGEN_NO_EXPORT PositionType& posAt(PositionType pos);
+        LLASSETGEN_NO_EXPORT void transformAt(PositionType pos, PositionType target, OutputType distance);
 
        public:
-        LLASSETGEN_API void transform();
+        void transform();
     };
 
-    class ParabolaEnvelope : public DistanceTransform {
+    class LLASSETGEN_API ParabolaEnvelope : public DistanceTransform {
         struct Parabola {
             DimensionType apex;
             OutputType begin, value;
@@ -63,9 +62,9 @@ namespace llassetgen {
         std::unique_ptr<Parabola[]> parabolas;
         std::unique_ptr<OutputType[]> lineBuffer;
 
-        template<bool fill>
-        void edgeDetection(DimensionType offset, DimensionType pitch, DimensionType length);
-        void transformLine(DimensionType offset, DimensionType pitch, DimensionType length);
+        template <bool fill>
+        LLASSETGEN_NO_EXPORT void edgeDetection(DimensionType offset, DimensionType pitch, DimensionType length);
+        LLASSETGEN_NO_EXPORT void transformLine(DimensionType offset, DimensionType pitch, DimensionType length);
 
        public:
         void transform();
