@@ -186,37 +186,37 @@ class Window : public WindowQt {
     }
 
    public slots:
-    virtual void backgroundColorRChanged(QString value) {
+    virtual void backgroundColorRChanged(QString value) override {
         int red = value.toInt();
         m_backgroundColor.r = red / 255.f;
         paint();
     }
 
-    virtual void backgroundColorGChanged(QString value) {
+    virtual void backgroundColorGChanged(QString value) override {
         int green = value.toInt();
         m_backgroundColor.g = green / 255.f;
         paint();
     }
 
-    virtual void backgroundColorBChanged(QString value) {
+    virtual void backgroundColorBChanged(QString value) override {
         int blue = value.toInt();
         m_backgroundColor.b = blue / 255.f;
         paint();
     }
 
-    virtual void fontColorRChanged(QString value) {
+    virtual void fontColorRChanged(QString value) override {
         int red = value.toInt();
         m_fontColor.r = red / 255.f;
         paint();
     }
 
-    virtual void fontColorGChanged(QString value) {
+    virtual void fontColorGChanged(QString value) override {
         int green = value.toInt();
         m_fontColor.g = green / 255.f;
         paint();
     }
 
-    virtual void fontColorBChanged(QString value) {
+    virtual void fontColorBChanged(QString value) override {
         int blue = value.toInt();
         m_fontColor.b = blue / 255.f;
         paint();
