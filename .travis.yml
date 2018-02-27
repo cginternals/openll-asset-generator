@@ -34,8 +34,8 @@ before_install:
   - if [ $TRAVIS_OS_NAME == osx ]; then brew tap cginternals/homebrew-cginternals; fi
   - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype qt5 glm glbinding globjects; export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH;$(brew --prefix qt);$(brew --prefix glbinding);$(brew --prefix globjects)"; export PATH="$PATH;$(brew --prefix glbinding);$(brew --prefix globjects)"; fi
   - if [ $TRAVIS_OS_NAME == osx ]; then echo "Hello, $PATH"; fi
-  - if [ $TRAVIS_OS_NAME == osx ]; then echo "glbinding: $(brew --prefix glbinding)"; fi
-  - if [ $TRAVIS_OS_NAME == osx ]; then echo "globjects: $(brew --prefix globjects)"; fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then echo "glbinding, $(brew --prefix glbinding)"; fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then echo "globjects, $(brew --prefix globjects)"; fi
 
 before_script:
   - ./configure
