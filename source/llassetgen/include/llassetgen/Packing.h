@@ -45,7 +45,7 @@ namespace llassetgen {
         /**
          * Return the smallest integer x so that i <= 2^x.
          */
-        LLASSETGEN_API unsigned int ceilLog2(uint64_t i);
+        LLASSETGEN_API unsigned int ceilLog2(uint64_t num);
 
         /**
          * Find the smallest atlas size that might fit the given rectangles.
