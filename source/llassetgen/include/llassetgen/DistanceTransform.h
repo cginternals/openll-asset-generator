@@ -3,7 +3,7 @@
 #include <llassetgen/Image.h>
 
 namespace llassetgen {
-    class DistanceTransform {
+    class LLASSETGEN_API DistanceTransform {
        public:
         using DimensionType = size_t;
         using InputType = uint8_t;
@@ -12,30 +12,29 @@ namespace llassetgen {
 
        protected:
         template<typename PixelType, bool flipped = false, bool invalidBounds = false>
-        PixelType getPixel(PositionType pos);
+        LLASSETGEN_NO_EXPORT PixelType getPixel(PositionType pos);
         template<typename PixelType, bool flipped = false>
-        void setPixel(PositionType pos, PixelType value);
+        LLASSETGEN_NO_EXPORT void setPixel(PositionType pos, PixelType value);
 
        public:
         const Image& input;
         const Image& output;
         DistanceTransform(const Image& _input, const Image& _output);
-
-        virtual void transform() = 0;
+        LLASSETGEN_NO_EXPORT virtual void transform() = 0;
     };
 
-    class DeadReckoning : public DistanceTransform {
+    class LLASSETGEN_API DeadReckoning : public DistanceTransform {
         std::unique_ptr<PositionType[]> posBuffer;
 
-        PositionType& posAt(PositionType pos);
-        void transformAt(PositionType pos, PositionType target, OutputType distance);
+        LLASSETGEN_NO_EXPORT PositionType& posAt(PositionType pos);
+        LLASSETGEN_NO_EXPORT void transformAt(PositionType pos, PositionType target, OutputType distance);
 
        public:
-        LLASSETGEN_API DeadReckoning(const Image& _input, const Image& _output) :DistanceTransform(_input, _output) {}
-        LLASSETGEN_API void transform();
+        DeadReckoning(const Image& _input, const Image& _output) :DistanceTransform(_input, _output) {}
+        void transform();
     };
 
-    class ParabolaEnvelope : public DistanceTransform {
+    class LLASSETGEN_API ParabolaEnvelope : public DistanceTransform {
         struct Parabola {
             DimensionType apex;
             OutputType begin;
@@ -45,12 +44,12 @@ namespace llassetgen {
         std::unique_ptr<OutputType[]> lineBuffer;
 
         template<bool flipped, bool fill>
-        void edgeDetection(DimensionType offset, DimensionType length);
+        LLASSETGEN_NO_EXPORT void edgeDetection(DimensionType offset, DimensionType length);
         template<bool flipped>
-        void transformLine(DimensionType offset, DimensionType length);
+        LLASSETGEN_NO_EXPORT void transformLine(DimensionType offset, DimensionType length);
 
        public:
-        LLASSETGEN_API ParabolaEnvelope(const Image& _input, const Image& _output) :DistanceTransform(_input, _output) {}
-        LLASSETGEN_API void transform();
+        ParabolaEnvelope(const Image& _input, const Image& _output) :DistanceTransform(_input, _output) {}
+        void transform();
     };
 }
