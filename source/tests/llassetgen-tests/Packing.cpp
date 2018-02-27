@@ -1,5 +1,7 @@
 #include <gmock/gmock.h>
 
+#include <numeric>
+
 #include <llassetgen/llassetgen.h>
 
 using llassetgen::Packing;
@@ -110,3 +112,16 @@ TEST_F(ShelfNextFitPackingTest, TestRotateOnly) { testRotateOnly(); }
 TEST_F(ShelfNextFitPackingTest, TestAcceptAtlasSized) { testAcceptAtlasSized(); }
 TEST_F(ShelfNextFitPackingTest, TestAcceptMultipleTiny) { testAcceptMultipleTiny(); }
 TEST_F(ShelfNextFitPackingTest, TestVariableSizePacking) { testVariableSizePacking(); }
+
+TEST(TestPackingInternals, TestCeilLog2) {
+    for (int i = 0; i < 64; i++) {
+        std::uint64_t twoToTheI = static_cast<std::uint64_t>(1) << i;
+        EXPECT_EQ(i, llassetgen::internal::ceilLog2(twoToTheI));
+        EXPECT_EQ(i + 1, llassetgen::internal::ceilLog2(twoToTheI + 1));
+        if (twoToTheI > 2) {
+            EXPECT_EQ(i, llassetgen::internal::ceilLog2(twoToTheI - 1));
+        }
+    }
+
+    EXPECT_EQ(64, llassetgen::internal::ceilLog2(std::numeric_limits<std::uint64_t>::max()));
+}
