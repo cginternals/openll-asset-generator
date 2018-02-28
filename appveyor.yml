@@ -46,16 +46,16 @@ install:
 - cmd : set PNG_LIBRARY_DEBUG=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib
 
 - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" (
-  'set Qt5Core_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5Core'
-  'set Qt5Gui_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5Gui'
-  'set Qt5OpenGL_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5OpenGL'
-  'set Qt5Widgets_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5Widgets'
+  set Qt5Core_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5Core;
+  set Qt5Gui_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5Gui;
+  set Qt5OpenGL_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5OpenGL;
+  set Qt5Widgets_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5Widgets;
   )
 - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" (
-  'set Qt5Core_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Core'
-  'set Qt5Gui_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Gui'
-  'set Qt5OpenGL_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5OpenGL'
-  'set Qt5Widgets_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Widgets'  
+  set Qt5Core_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Core;
+  set Qt5Gui_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Gui;
+  set Qt5OpenGL_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5OpenGL;
+  set Qt5Widgets_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Widgets;
   )
 
 - nuget install freetype
