@@ -180,35 +180,23 @@ class Window : public WindowQt {
         doneCurrent();
     }
 
-    void applyColorChange(float& color, QString value) {
+    void applyColorChange(float &color, QString value) {
         color = value.toInt() / 255.f;
         paint();
     }
 
    public slots:
-    virtual void backgroundColorRChanged(QString value) override {
-        applyColorChange(backgroundColor.r, value);
-    }
+    virtual void backgroundColorRChanged(QString value) override { applyColorChange(backgroundColor.r, value); }
 
-    virtual void backgroundColorGChanged(QString value) override {
-        applyColorChange(backgroundColor.g, value);
-    }
+    virtual void backgroundColorGChanged(QString value) override { applyColorChange(backgroundColor.g, value); }
 
-    virtual void backgroundColorBChanged(QString value) override {
-        applyColorChange(backgroundColor.b, value);
-    }
+    virtual void backgroundColorBChanged(QString value) override { applyColorChange(backgroundColor.b, value); }
 
-    virtual void fontColorRChanged(QString value) override {
-        applyColorChange(fontColor.r, value);
-    }
+    virtual void fontColorRChanged(QString value) override { applyColorChange(fontColor.r, value); }
 
-    virtual void fontColorGChanged(QString value) override {
-        applyColorChange(fontColor.g, value);
-    }
+    virtual void fontColorGChanged(QString value) override { applyColorChange(fontColor.g, value); }
 
-    virtual void fontColorBChanged(QString value) override {
-        applyColorChange(fontColor.b, value);
-    }
+    virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
    protected:
     std::unique_ptr<globjects::Buffer> cornerBuffer;
@@ -228,7 +216,7 @@ class Window : public WindowQt {
     int samplerIndex = 0;
 };
 
-void prepareColorInput(QLineEdit* input, const QString placeholder) {
+void prepareColorInput(QLineEdit *input, const QString placeholder) {
     auto colorValidator = new QIntValidator(0, 255);
     input->setValidator(colorValidator);
     input->setPlaceholderText(placeholder);
@@ -253,7 +241,6 @@ void setupGUI(QMainWindow *window) {
 
     window->setMinimumSize(640, 480);
     window->setWindowTitle("Open Font Asset Generator");
-
 
     // FONT COLOR
     auto fontColorGroupBox = new QGroupBox("Font Color");
