@@ -180,41 +180,34 @@ class Window : public WindowQt {
         doneCurrent();
     }
 
+    void applyColorChange(float& color, QString value) {
+        color = value.toInt() / 255.f;
+        paint();
+    }
+
    public slots:
     virtual void backgroundColorRChanged(QString value) override {
-        int red = value.toInt();
-        backgroundColor.r = red / 255.f;
-        paint();
+        applyColorChange(backgroundColor.r, value);
     }
 
     virtual void backgroundColorGChanged(QString value) override {
-        int green = value.toInt();
-        backgroundColor.g = green / 255.f;
-        paint();
+        applyColorChange(backgroundColor.g, value);
     }
 
     virtual void backgroundColorBChanged(QString value) override {
-        int blue = value.toInt();
-        backgroundColor.b = blue / 255.f;
-        paint();
+        applyColorChange(backgroundColor.b, value);
     }
 
     virtual void fontColorRChanged(QString value) override {
-        int red = value.toInt();
-        fontColor.r = red / 255.f;
-        paint();
+        applyColorChange(fontColor.r, value);
     }
 
     virtual void fontColorGChanged(QString value) override {
-        int green = value.toInt();
-        fontColor.g = green / 255.f;
-        paint();
+        applyColorChange(fontColor.g, value);
     }
 
     virtual void fontColorBChanged(QString value) override {
-        int blue = value.toInt();
-        fontColor.b = blue / 255.f;
-        paint();
+        applyColorChange(fontColor.b, value);
     }
 
    protected:
