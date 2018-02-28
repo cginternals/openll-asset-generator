@@ -18,22 +18,22 @@ QSurfaceFormat defaultFormat() {
 WindowQt::WindowQt() : WindowQt(defaultFormat()) {}
 
 WindowQt::WindowQt(const QSurfaceFormat& format)
-    : m_context(new QOpenGLContext), m_updatePending(false), m_initialized(false) {
+    : glcontext(new QOpenGLContext), updatePending(false), initialized(false) {
     QSurfaceFormat f(format);
     f.setRenderableType(QSurfaceFormat::OpenGL);
 
     setSurfaceType(OpenGLSurface);
     create();
 
-    m_context->setFormat(format);
-    if (!m_context->create()) {
+    glcontext->setFormat(format);
+    if (!glcontext->create()) {
         qDebug() << "Could not create OpenGL context.";
         QApplication::quit();
     }
 }
 
 WindowQt::~WindowQt() {
-    if (m_initialized) {
+    if (initialized) {
         makeCurrent();
 
         deinitializeGL();
@@ -42,11 +42,11 @@ WindowQt::~WindowQt() {
     }
 }
 
-QOpenGLContext* WindowQt::context() { return m_context.data(); }
+QOpenGLContext* WindowQt::context() { return glcontext.data(); }
 
-void WindowQt::makeCurrent() { m_context->makeCurrent(this); }
+void WindowQt::makeCurrent() { glcontext->makeCurrent(this); }
 
-void WindowQt::doneCurrent() { m_context->doneCurrent(); }
+void WindowQt::doneCurrent() { glcontext->doneCurrent(); }
 
 void WindowQt::resizeEvent(QResizeEvent* event) {
     resize(event);
@@ -62,11 +62,11 @@ void WindowQt::initialize() {
 
     doneCurrent();
 
-    m_initialized = true;
+    initialized = true;
 }
 
 void WindowQt::resize(QResizeEvent* event) {
-    if (!m_initialized) {
+    if (!initialized) {
         initialize();
     }
 
@@ -80,7 +80,7 @@ void WindowQt::resize(QResizeEvent* event) {
 }
 
 void WindowQt::paint() {
-    if (!m_initialized) {
+    if (!initialized) {
         initialize();
     }
 
@@ -88,20 +88,20 @@ void WindowQt::paint() {
         return;
     }
 
-    m_updatePending = false;
+    updatePending = false;
 
     makeCurrent();
 
     paintGL();
 
-    m_context->swapBuffers(this);
+    glcontext->swapBuffers(this);
 
     doneCurrent();
 }
 
 void WindowQt::updateGL() {
-    if (!m_updatePending) {
-        m_updatePending = true;
+    if (!updatePending) {
+        updatePending = true;
         QCoreApplication::postEvent(this, new QEvent(QEvent::UpdateRequest));
     }
 }

@@ -48,10 +48,10 @@ class WindowQt : public QWindow {
     virtual void fontColorBChanged(QString value);
 
    protected:
-    QScopedPointer<QOpenGLContext> m_context;
+    QScopedPointer<QOpenGLContext> glcontext;
 
-    bool m_updatePending;
-    bool m_initialized;
+    bool updatePending;
+    bool initialized;
 
     void initialize();
     void resize(QResizeEvent* event);

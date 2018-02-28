@@ -31,12 +31,12 @@ set(CMAKE_AUTOMOC TRUE)
 
 set(sources
     main.cpp
-	
-	WindowQt.cpp
+    
+    WindowQt.cpp
 )
 
 set(headers
-	WindowQt.h
+    WindowQt.h
 )
 
 #
@@ -47,7 +47,7 @@ set(headers
 add_executable(${target}
     MACOSX_BUNDLE
     ${sources}
-	${headers}
+    ${headers}
 )
 
 # Create namespaced alias
@@ -84,14 +84,14 @@ target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LIBRARIES}
     ${META_PROJECT_NAME}::llassetgen
-	Qt5::Core
-	Qt5::OpenGL
-	Qt5::Gui
-	Qt5::Widgets
-	
-	PUBLIC
-	glbinding::glbinding
-	globjects::globjects
+    Qt5::Core
+    Qt5::OpenGL
+    Qt5::Gui
+    Qt5::Widgets
+    
+    PUBLIC
+    glbinding::glbinding
+    globjects::globjects
 )
 
 
@@ -132,7 +132,7 @@ target_link_libraries(${target}
 perform_health_checks(
     ${target}
     ${sources}
-	${headers}
+    ${headers}
 )
 
 

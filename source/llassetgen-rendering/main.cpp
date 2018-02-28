@@ -51,12 +51,7 @@ using namespace gl;
  */
 class Window : public WindowQt {
    public:
-    explicit Window(const QSurfaceFormat &format) : WindowQt(format) {
-        m_samplerIndex = 0;
-        m_texture = nullptr;
-        m_backgroundColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
-        m_fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
-    }
+    explicit Window(const QSurfaceFormat &format) : WindowQt(format) {}
 
     virtual ~Window() {}
 
@@ -91,53 +86,53 @@ class Window : public WindowQt {
         auto imageFormatted = image->convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
         auto imageData = imageFormatted.bits();
 
-        m_texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
-        m_texture->image2D(0, GL_RGBA8, image->width(), image->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
+        texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
+        texture->image2D(0, GL_RGBA8, image->width(), image->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
         // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
         // ignore this, since we use black&white image data here?
 
-        m_cornerBuffer = globjects::Buffer::create();
-        m_program = globjects::Program::create();
-        m_vao = globjects::VertexArray::create();
+        cornerBuffer = globjects::Buffer::create();
+        program = globjects::Program::create();
+        vao = globjects::VertexArray::create();
 
         // openll-asset-generator/data/llassetgen-rendering
         const std::string dataPath = path.toStdString() + "/../../data/llassetgen-rendering";
 
-        m_vertexShaderSource = globjects::Shader::sourceFromFile(dataPath + "/shader.vert");
-        m_vertexShaderTemplate = globjects::Shader::applyGlobalReplacements(m_vertexShaderSource.get());
-        m_vertexShader = globjects::Shader::create(GL_VERTEX_SHADER, m_vertexShaderTemplate.get());
+        vertexShaderSource = globjects::Shader::sourceFromFile(dataPath + "/shader.vert");
+        vertexShaderTemplate = globjects::Shader::applyGlobalReplacements(vertexShaderSource.get());
+        vertexShader = globjects::Shader::create(GL_VERTEX_SHADER, vertexShaderTemplate.get());
 
-        m_fragmentShaderSource = globjects::Shader::sourceFromFile(dataPath + "/shader.frag");
-        m_fragmentShaderTemplate = globjects::Shader::applyGlobalReplacements(m_fragmentShaderSource.get());
-        m_fragmentShader = globjects::Shader::create(GL_FRAGMENT_SHADER, m_fragmentShaderTemplate.get());
+        fragmentShaderSource = globjects::Shader::sourceFromFile(dataPath + "/shader.frag");
+        fragmentShaderTemplate = globjects::Shader::applyGlobalReplacements(fragmentShaderSource.get());
+        fragmentShader = globjects::Shader::create(GL_FRAGMENT_SHADER, fragmentShaderTemplate.get());
 
-        m_program->attach(m_vertexShader.get(), m_fragmentShader.get());
+        program->attach(vertexShader.get(), fragmentShader.get());
 
-        m_cornerBuffer->setData(
+        cornerBuffer->setData(
             std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0, 1), glm::vec2(1, 1)}},
             GL_STATIC_DRAW);
 
-        m_vao->binding(0)->setAttribute(0);
-        m_vao->binding(0)->setBuffer(m_cornerBuffer.get(), 0, sizeof(glm::vec2));
-        m_vao->binding(0)->setFormat(2, GL_FLOAT);
-        m_vao->enable(0);
+        vao->binding(0)->setAttribute(0);
+        vao->binding(0)->setBuffer(cornerBuffer.get(), 0, sizeof(glm::vec2));
+        vao->binding(0)->setFormat(2, GL_FLOAT);
+        vao->enable(0);
 
-        m_program->setUniform("glyphs", m_samplerIndex);
-        m_program->setUniform("fontColor", m_fontColor);
+        program->setUniform("glyphs", samplerIndex);
+        program->setUniform("fontColor", fontColor);
     }
 
     virtual void deinitializeGL() override {
-        m_texture.reset(nullptr);
+        texture.reset(nullptr);
 
-        m_cornerBuffer.reset(nullptr);
-        m_program.reset(nullptr);
-        m_vertexShaderSource.reset(nullptr);
-        m_vertexShaderTemplate.reset(nullptr);
-        m_vertexShader.reset(nullptr);
-        m_fragmentShaderSource.reset(nullptr);
-        m_fragmentShaderTemplate.reset(nullptr);
-        m_fragmentShader.reset(nullptr);
-        m_vao.reset(nullptr);
+        cornerBuffer.reset(nullptr);
+        program.reset(nullptr);
+        vertexShaderSource.reset(nullptr);
+        vertexShaderTemplate.reset(nullptr);
+        vertexShader.reset(nullptr);
+        fragmentShaderSource.reset(nullptr);
+        fragmentShaderTemplate.reset(nullptr);
+        fragmentShader.reset(nullptr);
+        vao.reset(nullptr);
     }
 
     virtual void resizeGL(QResizeEvent *event) override {
@@ -145,23 +140,23 @@ class Window : public WindowQt {
     }
 
     virtual void paintGL() override {
-        glClearColor(m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
+        glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        if (m_texture) {
-            m_texture->bindActive(m_samplerIndex);
+        if (texture) {
+            texture->bindActive(samplerIndex);
         }
 
-        m_program->use();
-        m_program->setUniform("fontColor", m_fontColor);
-        m_vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        m_program->release();
+        program->use();
+        program->setUniform("fontColor", fontColor);
+        vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        program->release();
 
-        if (m_texture) {
-            m_texture->unbindActive(m_samplerIndex);
+        if (texture) {
+            texture->unbindActive(samplerIndex);
         }
 
         glDisable(GL_BLEND);
@@ -172,8 +167,8 @@ class Window : public WindowQt {
 
         switch (event->key()) {
             case Qt::Key_F5:
-                m_vertexShaderSource->reload();
-                m_fragmentShaderSource->reload();
+                vertexShaderSource->reload();
+                fragmentShaderSource->reload();
                 updateGL();
                 break;
             case Qt::Key_Escape:
@@ -188,56 +183,56 @@ class Window : public WindowQt {
    public slots:
     virtual void backgroundColorRChanged(QString value) override {
         int red = value.toInt();
-        m_backgroundColor.r = red / 255.f;
+        backgroundColor.r = red / 255.f;
         paint();
     }
 
     virtual void backgroundColorGChanged(QString value) override {
         int green = value.toInt();
-        m_backgroundColor.g = green / 255.f;
+        backgroundColor.g = green / 255.f;
         paint();
     }
 
     virtual void backgroundColorBChanged(QString value) override {
         int blue = value.toInt();
-        m_backgroundColor.b = blue / 255.f;
+        backgroundColor.b = blue / 255.f;
         paint();
     }
 
     virtual void fontColorRChanged(QString value) override {
         int red = value.toInt();
-        m_fontColor.r = red / 255.f;
+        fontColor.r = red / 255.f;
         paint();
     }
 
     virtual void fontColorGChanged(QString value) override {
         int green = value.toInt();
-        m_fontColor.g = green / 255.f;
+        fontColor.g = green / 255.f;
         paint();
     }
 
     virtual void fontColorBChanged(QString value) override {
         int blue = value.toInt();
-        m_fontColor.b = blue / 255.f;
+        fontColor.b = blue / 255.f;
         paint();
     }
 
    protected:
-    std::unique_ptr<globjects::Buffer> m_cornerBuffer;
-    std::unique_ptr<globjects::Program> m_program;
-    std::unique_ptr<globjects::File> m_vertexShaderSource;
-    std::unique_ptr<globjects::AbstractStringSource> m_vertexShaderTemplate;
-    std::unique_ptr<globjects::Shader> m_vertexShader;
-    std::unique_ptr<globjects::File> m_fragmentShaderSource;
-    std::unique_ptr<globjects::AbstractStringSource> m_fragmentShaderTemplate;
-    std::unique_ptr<globjects::Shader> m_fragmentShader;
-    std::unique_ptr<globjects::VertexArray> m_vao;
+    std::unique_ptr<globjects::Buffer> cornerBuffer;
+    std::unique_ptr<globjects::Program> program;
+    std::unique_ptr<globjects::File> vertexShaderSource;
+    std::unique_ptr<globjects::AbstractStringSource> vertexShaderTemplate;
+    std::unique_ptr<globjects::Shader> vertexShader;
+    std::unique_ptr<globjects::File> fragmentShaderSource;
+    std::unique_ptr<globjects::AbstractStringSource> fragmentShaderTemplate;
+    std::unique_ptr<globjects::Shader> fragmentShader;
+    std::unique_ptr<globjects::VertexArray> vao;
 
-    std::unique_ptr<globjects::Texture> m_texture;
+    std::unique_ptr<globjects::Texture> texture = nullptr;
 
-    glm::vec4 m_backgroundColor;
-    glm::vec4 m_fontColor;
-    int m_samplerIndex;
+    glm::vec4 backgroundColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+    glm::vec4 fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
+    int samplerIndex = 0;
 };
 
 /* This function creates GUI elements and connects them to their correspondent functions using Qt signal-slot.
