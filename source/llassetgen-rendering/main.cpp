@@ -228,6 +228,13 @@ class Window : public WindowQt {
     int samplerIndex = 0;
 };
 
+void prepareColorInput(QLineEdit* input, const QString placeholder) {
+    auto colorValidator = new QIntValidator(0, 255);
+    input->setValidator(colorValidator);
+    input->setPlaceholderText(placeholder);
+    input->setMaximumWidth(45);
+};
+
 /* This function creates GUI elements and connects them to their correspondent functions using Qt signal-slot.
  * A QApplication offers a window, that must not be destroyed to make QApplication work properly.
  */
@@ -247,7 +254,6 @@ void setupGUI(QMainWindow *window) {
     window->setMinimumSize(640, 480);
     window->setWindowTitle("Open Font Asset Generator");
 
-    auto colorValidator = new QIntValidator(0, 255);
 
     // FONT COLOR
     auto fontColorGroupBox = new QGroupBox("Font Color");
@@ -260,10 +266,7 @@ void setupGUI(QMainWindow *window) {
     auto *fontR = new QLineEdit();
     auto *labelFontR = new QLabel("R:");
     labelFontR->setMaximumWidth(90);
-    fontR->setValidator(colorValidator);
-    fontR->setPlaceholderText("0");
-    fontR->setMaximumWidth(45);
-
+    prepareColorInput(fontR, "0");
     QObject::connect(fontR, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorRChanged(QString)));
     fontColorLayout->addRow(labelFontR, fontR);
 
@@ -271,10 +274,7 @@ void setupGUI(QMainWindow *window) {
     auto *fontG = new QLineEdit();
     auto *labelFontG = new QLabel("G:");
     labelFontG->setMaximumWidth(90);
-    fontG->setValidator(colorValidator);
-    fontG->setPlaceholderText("0");
-    fontG->setMaximumWidth(45);
-
+    prepareColorInput(fontG, "0");
     QObject::connect(fontG, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorGChanged(QString)));
     fontColorLayout->addRow(labelFontG, fontG);
 
@@ -282,10 +282,7 @@ void setupGUI(QMainWindow *window) {
     auto *fontB = new QLineEdit();
     auto *labelFontB = new QLabel("B:");
     labelFontB->setMaximumWidth(90);
-    fontB->setValidator(colorValidator);
-    fontB->setPlaceholderText("0");
-    fontB->setMaximumWidth(45);
-
+    prepareColorInput(fontB, "0");
     QObject::connect(fontB, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorBChanged(QString)));
     fontColorLayout->addRow(labelFontB, fontB);
 
@@ -300,36 +297,24 @@ void setupGUI(QMainWindow *window) {
     auto *backgroundR = new QLineEdit();
     auto *labelR = new QLabel("R");
     labelR->setMaximumWidth(90);
-    backgroundR->setValidator(colorValidator);
-    backgroundR->setPlaceholderText("255");
-    backgroundR->setMaximumWidth(45);
-
+    prepareColorInput(backgroundR, "255");
     QObject::connect(backgroundR, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorRChanged(QString)));
-
     backgroundColorLayout->addRow(labelR, backgroundR);
 
     // Background Color GREEN
     auto *backgroundG = new QLineEdit();
     auto *labelG = new QLabel("G");
     labelG->setMaximumWidth(90);
-    backgroundG->setValidator(colorValidator);
-    backgroundG->setPlaceholderText("255");
-    backgroundG->setMaximumWidth(45);
-
+    prepareColorInput(backgroundG, "255");
     QObject::connect(backgroundG, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorGChanged(QString)));
-
     backgroundColorLayout->addRow(labelG, backgroundG);
 
     // Background Color BLUE
     auto *backgroundB = new QLineEdit();
     auto *labelB = new QLabel("B");
     labelB->setMaximumWidth(90);
-    backgroundB->setValidator(colorValidator);
-    backgroundB->setPlaceholderText("255");
-    backgroundB->setMaximumWidth(45);
-
+    prepareColorInput(backgroundB, "255");
     QObject::connect(backgroundB, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorBChanged(QString)));
-
     backgroundColorLayout->addRow(labelB, backgroundB);
 
     // gather all parameters into one layout (separately from the gl window)
