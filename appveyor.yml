@@ -28,6 +28,8 @@ init:
 - echo %generator%
 
 install:
+- choco upgrade git -y
+
 - mkdir deps
 
 - echo install zlib-msvc-%platform%
