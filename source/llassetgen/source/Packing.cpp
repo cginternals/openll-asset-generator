@@ -3,11 +3,21 @@
 #include <algorithm>
 #include <tuple>
 
+using llassetgen::PackingSizeType;
+
+PackingSizeType ceilDiv(PackingSizeType divident, PackingSizeType divisor) {
+    return (divident + divisor - 1) / divisor;
+}
+
 namespace llassetgen {
     Packing::Packing(Vec2<PackingSizeType> _atlasSize) : atlasSize{_atlasSize} {}
 
     namespace internal {
         bool ShelfNextFitPacker::packNext(Vec2<PackingSizeType> rectSize) {
+            return allowRotations ? packNextWithRotations(rectSize) : packNextNoRotations(rectSize);
+        }
+
+        bool ShelfNextFitPacker::packNextNoRotations(Vec2<PackingSizeType> rectSize) {
             if (currentShelfSize.x + rectSize.x > packing.atlasSize.x) {
                 openNewShelf();
                 if (rectSize.x > packing.atlasSize.x) {
@@ -16,43 +26,33 @@ namespace llassetgen {
             }
 
             if (usedHeight + rectSize.y > packing.atlasSize.y) {
-                return false;
+                if (allowGrowth) {
+                    PackingSizeType finalHeight = usedHeight + rectSize.y;
+                    auto numDoublings = ceilLog2(ceilDiv(finalHeight, packing.atlasSize.y));
+                    packing.atlasSize.y <<= numDoublings;
+                } else {
+                    return false;
+                }
             }
 
             store(rectSize);
             return true;
         }
 
-        bool ShelfNextFitPacker::packNextRotatable(Vec2<PackingSizeType> rectSize) {
+        bool ShelfNextFitPacker::packNextWithRotations(Vec2<PackingSizeType> rectSize) {
             PackingSizeType minSide, maxSide;
             std::tie(minSide, maxSide) = std::minmax(rectSize.x, rectSize.y);
             PackingSizeType remainingWidth = packing.atlasSize.x - currentShelfSize.x;
             PackingSizeType remainingHeight = packing.atlasSize.y - usedHeight;
 
-            bool fitsUpright = currentShelfSize.y >= maxSide && remainingWidth >= minSide;
-            bool fitsSideways = remainingWidth >= maxSide && remainingHeight >= minSide;
-            bool upright = fitsUpright;
-            if (!fitsUpright && !fitsSideways) {
-                openNewShelf();
-                if (usedHeight + minSide > packing.atlasSize.y) {
-                    return false;
-                }
-
-                if (maxSide > packing.atlasSize.x) {
-                    if (usedHeight + maxSide > packing.atlasSize.x) {
-                        return false;
-                    }
-
-                    upright = true;
-                } else {
-                    upright = false;
-                }
-            }
-
-            if (upright) {
+            if (currentShelfSize.y >= maxSide && remainingWidth >= minSide) {
                 store({minSide, maxSide});
-            } else {
+            } else if (remainingWidth >= maxSide && remainingHeight >= minSide) {
                 store({maxSide, minSide});
+            } else {
+                openNewShelf();
+                return maxSide > packing.atlasSize.x ? packNextNoRotations({minSide, maxSide})
+                                                     : packNextNoRotations({maxSide, minSide});
             }
 
             return true;
@@ -92,14 +92,6 @@ namespace llassetgen {
             }
 
             return result;
-        }
-
-        Vec2<PackingSizeType> nextLargerAtlasSize(const Vec2<PackingSizeType>& previous) {
-            if (previous.x > previous.y) {
-                return {previous.x, 2 * previous.y};
-            }
-
-            return {2 * previous.x, previous.y};
         }
     }
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <iterator>
 #include <type_traits>
@@ -80,25 +81,22 @@ namespace llassetgen {
             return {1u << widthExponent, 1u << heightExponent};
         }
 
-        /**
-         * Returns the next bigger atlas size to test for packing.
-         */
-        LLASSETGEN_API Vec2<PackingSizeType> nextLargerAtlasSize(const Vec2<PackingSizeType>& previous);
-
         class LLASSETGEN_API ShelfNextFitPacker {
            public:
-            explicit ShelfNextFitPacker(Packing& _packing) : packing(_packing){};
+            explicit ShelfNextFitPacker(Packing& _packing, bool _allowRotations, bool _allowGrowth)
+                : packing(_packing), allowRotations{_allowRotations}, allowGrowth{_allowGrowth} {};
 
             bool packNext(Vec2<PackingSizeType> rectSize);
 
-            bool packNextRotatable(Vec2<PackingSizeType> rectSize);
-
            private:
+            LLASSETGEN_NO_EXPORT bool packNextNoRotations(Vec2<PackingSizeType> rectSize);
+            LLASSETGEN_NO_EXPORT bool packNextWithRotations(Vec2<PackingSizeType> rectSize);
             LLASSETGEN_NO_EXPORT void openNewShelf();
-
             LLASSETGEN_NO_EXPORT void store(Vec2<PackingSizeType> rectSize);
 
             Packing& packing;
+            bool allowRotations;
+            bool allowGrowth;
             Vec2<PackingSizeType> currentShelfSize{0, 0};
             PackingSizeType usedHeight{0};
         };
@@ -128,10 +126,14 @@ namespace llassetgen {
         auto rectCount = static_cast<size_t>(std::distance(sizesBegin, sizesEnd));
         Packing packing{internal::predictAtlasSize(sizesBegin, sizesEnd)};
         packing.rects.reserve(rectCount);
-        while (!shelfPackFixedSizeAtlas(sizesBegin, sizesEnd, allowRotations, packing)) {
-            packing.atlasSize = internal::nextLargerAtlasSize(packing.atlasSize);
-            packing.rects.clear();
-        }
+
+        internal::ShelfNextFitPacker packer{packing, allowRotations, true};
+        bool success = std::all_of(sizesBegin, sizesEnd,
+                                   [&](Vec2<PackingSizeType> rectSize) { return packer.packNext(rectSize); });
+        // Only happens when a rectangle is wider (and higher, if rotations are enabled)
+        // than the width of the atlas texture, however this should be prevented
+        // by predictAtlasSize.
+        assert(success);
 
         return packing;
     }
@@ -155,7 +157,7 @@ namespace llassetgen {
      *   Instance to store the packing into. The atlas size should already be
      *   set to the desired value. The `rects` vector must be empty, but may
      *   have an appropriate amount of memory reserved to improve performance.
-     *   If the packing fails, the packing is left in an unfinished state.
+     *   If the packing fails, this object is left in an unfinished state.
      * @return
      *   Whether the rectangles fit inside the atlas
      */
@@ -163,13 +165,7 @@ namespace llassetgen {
     bool shelfPackFixedSizeAtlas(ForwardIter sizesBegin, ForwardIter sizesEnd, bool allowRotations, Packing& packing) {
         internal::assertCorrectIteratorType<ForwardIter>();
 
-        internal::ShelfNextFitPacker packer{packing};
-
-        if (allowRotations) {
-            return std::all_of(sizesBegin, sizesEnd,
-                               [&](Vec2<PackingSizeType> rectSize) { return packer.packNextRotatable(rectSize); });
-        }
-
+        internal::ShelfNextFitPacker packer{packing, allowRotations, false};
         return std::all_of(sizesBegin, sizesEnd,
                            [&](Vec2<PackingSizeType> rectSize) { return packer.packNext(rectSize); });
     }
