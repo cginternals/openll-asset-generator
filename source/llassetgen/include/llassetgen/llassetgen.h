@@ -6,6 +6,7 @@
 #include <string>
 
 #include "DistanceTransform.h"
+#include "Packing.h"
 
 #include <llassetgen/llassetgen_api.h>
 

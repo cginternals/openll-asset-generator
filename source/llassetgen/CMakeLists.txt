@@ -35,12 +35,14 @@ set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 set(headers
     ${include_path}/llassetgen.h
     ${include_path}/DistanceTransform.h
-    ${include_path}/Vec2.h
+    ${include_path}/Geometry.h
+    ${include_path}/Packing.h
 )
 
 set(sources
     ${source_path}/llassetgen.cpp
     ${source_path}/DistanceTransform.cpp
+    ${source_path}/Packing.cpp
 )
 
 # Group source files

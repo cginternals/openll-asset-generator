@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ostream>
+
 namespace llassetgen {
     template <class T>
     struct Vec2 {
@@ -18,6 +20,14 @@ namespace llassetgen {
 
         bool operator==(const Vec2& other) const;
         bool operator!=(const Vec2& other) const;
+    };
+
+    template <class T>
+    struct Rect {
+        Vec2<T> position{0, 0};
+        Vec2<T> size{0, 0};
+
+        Rect(const Vec2<T>& _position, const Vec2<T>& _size);
     };
 
     template <class T>
@@ -57,5 +67,14 @@ namespace llassetgen {
     template <class T>
     bool Vec2<T>::operator!=(const Vec2& other) const {
         return !(*this == other);
+    }
+
+    template <class T>
+    Rect<T>::Rect(const Vec2<T>& _position, const Vec2<T>& _size) : position{_position}, size{_size} {}
+
+    template <class T>
+    std::ostream& operator<<(std::ostream& out, const Vec2<T>& vec) {
+        out << '(' << vec.x << ',' << vec.y << ')';
+        return out;
     }
 }
