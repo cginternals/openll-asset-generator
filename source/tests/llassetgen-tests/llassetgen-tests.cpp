@@ -61,6 +61,13 @@ TEST(ImageTest, LoadTTF) {
 	ft_8bit.exportPng<uint8_t>(testfile_path + "glyph1_out.png");
 }
 
+TEST(ImageTest, CreateAndWriteOneBitPNG) {
+	Image blank_1bit(2, 2, 1);
+	blank_1bit.setPixel<uint8_t>(Vec2<size_t>(0, 0), 1);
+	blank_1bit.setPixel<uint8_t>(Vec2<size_t>(1, 1), 1);
+	blank_1bit.exportPng<uint8_t>(testfile_path + "blank_one_bit.png");
+}
+
 TEST(ImageTest, CreateAndWritePNG) {
 	// create blank image with 40x30 pixels and 16 bit
 	Image blank_16bit(8, 8, 16);
@@ -96,6 +103,15 @@ TEST(ImageTest, LoadPNGwithView) {
 		}
 	}
 	loaded_png.exportPng<uint16_t>(testfile_path + "A_glyph2_out.png");
+}
+
+TEST(ImageTest, LoadPNGReducedBitDepth) {
+	Image loaded_png4(testfile_path + "A_glyph.png", 4);
+	loaded_png4.exportPng<uint16_t>(testfile_path + "A_glyph2_out_4bit.png");
+	Image loaded_png2(testfile_path + "A_glyph.png", 2);
+	loaded_png2.exportPng<uint16_t>(testfile_path + "A_glyph2_out_2bit.png");
+	Image loaded_png1(testfile_path + "A_glyph.png", 1);
+	loaded_png1.exportPng<uint16_t>(testfile_path + "A_glyph2_out_1bit.png");
 }
 
 TEST(ImageTest, FloatExport) {

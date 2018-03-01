@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cassert>
 #include <cmath>
+#include <memory>
 
 /*
  * If we sort png.h below the freetype includes, an compile error will be
@@ -265,7 +266,7 @@ namespace llassetgen {
 		((std::ostream*)a)->flush();
 	}
 
-	Image::Image(const std::string &filepath) {
+	Image::Image(const std::string &filepath, int _bit_depth) {
 		std::ifstream in_file(filepath, std::ifstream::in | std::ifstream::binary);
 
 		png_byte pngsig[8];
@@ -307,13 +308,11 @@ namespace llassetgen {
 		min.y = 0;
 		max.x = png_get_image_width(png, info);
 		max.y = png_get_image_height(png, info);
-		bit_depth = png_get_bit_depth(png, info);
 		uint32_t color_type = png_get_color_type(png, info);
 
 		if (color_type == PNG_COLOR_TYPE_GRAY) {
-			if (bit_depth < 8) {
+			if (png_get_bit_depth(png, info) < 8) {
 				png_set_expand_gray_1_2_4_to_8(png);
-				bit_depth = 8;
 			}
 		} else {
 			if (png_get_valid(png, info, PNG_INFO_tRNS)) {
@@ -331,16 +330,16 @@ namespace llassetgen {
 			PNG_COLOR_MASK_COLOR
 			PNG_COLOR_MASK_ALPHA*/
 		}
-
 		png_read_update_info(png, info);
 		uint8_t channels = png_get_channels(png, info);
 
-		stride = get_width() * (bit_depth / 8);
+		uint8_t png_bit_depth = png_get_bit_depth(png, info);
+		uint8_t png_stride = get_width() * (png_bit_depth / 8);
 
 		std::unique_ptr<png_bytep> row_ptrs(new png_bytep[get_height()]);
-		std::unique_ptr<uint8_t> multi_channel_data(new uint8_t[get_height() * stride * channels]);
+		std::unique_ptr<uint8_t> multi_channel_data(new uint8_t[get_height() * png_stride * channels]);
 		for (size_t i = 0; i < get_height(); i++) {
-			row_ptrs.get()[i] = (png_bytep)multi_channel_data.get() + i * stride * channels;
+			row_ptrs.get()[i] = (png_bytep)multi_channel_data.get() + i * png_stride * channels;
 		}
 
 		png_read_image(png, row_ptrs.get());
@@ -348,11 +347,26 @@ namespace llassetgen {
 		png_destroy_read_struct(&png, &info, (png_infopp)0);
 		in_file.close();
 
+		if (_bit_depth != -1) {
+			bit_depth = _bit_depth;
+		} else {
+			bit_depth = png_bit_depth;
+		}
+		
+		stride = size_t(ceil(float(get_width()) * (float(bit_depth) / 8.0f)));
+
 		data = std::shared_ptr<uint8_t>(new uint8_t[get_height() * stride]);
 		for (size_t y = 0; y < get_height(); y++) {
 			for (size_t x = 0; x < get_width(); x++) {
-				setPixel<uint16_t>({x, y}, multi_channel_data.get()[y * stride * channels + x * bit_depth / 8 * channels]);
+				setPixel<uint16_t>({x, y}, reduce_bit_depth(multi_channel_data.get()[y * png_stride * channels + x * png_bit_depth / 8 * channels], png_bit_depth, bit_depth));
 			}
 		}
+	}
+
+	uint16_t Image::reduce_bit_depth(uint16_t in, uint8_t in_bit_depth, uint8_t out_bit_depth) {
+		int in_max = (1 << in_bit_depth) - 1;
+		int out_max = (1 << out_bit_depth) - 1;
+		uint16_t reduced = static_cast<uint16_t>(round(float(in) / float(in_max) * float(out_max)));
+		return reduced;
 	}
 }
