@@ -15,6 +15,9 @@ environment:
 matrix:
   fast_finish: true
 
+cache:
+- c:\tools\vcpkg\installed\
+  
 # skip unsupported combinations
 init:
 - echo %arch%
@@ -28,6 +31,7 @@ init:
 - echo %generator%
 
 install:
+# vcpkg needs git 2.15.0 https://github.com/appveyor/ci/issues/2051
 - choco upgrade git -y
 
 - mkdir deps
@@ -59,6 +63,9 @@ install:
   set Qt5OpenGL_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5OpenGL;
   set Qt5Widgets_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5Widgets;
   )
+  
+- echo %Qt5Core_DIR%
+- echo %PATH%
 
 - nuget install freetype
 - cmd : move freetype* freetype
