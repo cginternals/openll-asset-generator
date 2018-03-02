@@ -8,35 +8,14 @@
 
 using namespace llassetgen;
 
-class llassetgen_tests : public testing::Test {
-
-};
-
-/*
-TEST_F(llassetgen_tests, DeadReckoning) {
-    Image input("input.png"), output(input.get_width(), input.get_height(), sizeof(DistanceTransform::OutputType)*8);
-    std::unique_ptr<DistanceTransform> dt(new DeadReckoning(input, output));
-    dt->transform();
-    output.exportPng<DistanceTransform::OutputType>("DeadReckoning.png", -20, 50);
-    EXPECT_EQ(1, 1);
-}
-
-TEST_F(llassetgen_tests, ParabolaEnvelope) {
-    Image input("input.png"), output(input.get_width(), input.get_height(), sizeof(DistanceTransform::OutputType)*8);
-    std::unique_ptr<DistanceTransform> dt(new ParabolaEnvelope(input, output));
-    dt->transform();
-    output.exportPng<DistanceTransform::OutputType>("ParabolaEnvelope.png", -20, 50);
-    EXPECT_EQ(1, 1);
-}*/
-
-//std::string testfile_path = "./";
-std::string testfile_path = "./source/tests/llassetgen-tests/testfiles/";
+std::string test_source_path = "../source/tests/llassetgen-tests/testfiles/";
+std::string test_destination_path = "../build/";
 
 TEST(ImageTest, LoadTTF) {
     init();
 
     FT_Face face;
-    std::string font_file = testfile_path + "arial.ttf";
+    std::string font_file = test_source_path + "arial.ttf";
     char letter = 'J';
 
     FT_Error face_created = FT_New_Face(freetype, font_file.c_str(), 0, &face);
@@ -60,14 +39,14 @@ TEST(ImageTest, LoadTTF) {
     }
 
     // save whole image.
-    ft_8bit.exportPng<uint8_t>(testfile_path + "glyph1_out.png");
+    ft_8bit.exportPng<uint8_t>(test_destination_path + "glyph1_out.png");
 }
 
 TEST(ImageTest, CreateAndWriteOneBitPNG) {
     Image blank_1bit(2, 2, 1);
     blank_1bit.setPixel<uint8_t>(Vec2<size_t>(0, 0), 1);
     blank_1bit.setPixel<uint8_t>(Vec2<size_t>(1, 1), 1);
-    blank_1bit.exportPng<uint8_t>(testfile_path + "blank_one_bit.png");
+    blank_1bit.exportPng<uint8_t>(test_destination_path + "blank_one_bit.png");
 }
 
 TEST(ImageTest, CreateAndWritePNG) {
@@ -91,11 +70,11 @@ TEST(ImageTest, CreateAndWritePNG) {
             }
         }
     }
-    blank_16bit.exportPng<uint16_t>(testfile_path + "blank.png");
+    blank_16bit.exportPng<uint16_t>(test_destination_path + "blank.png");
 }
 
 TEST(ImageTest, LoadPNGwithView) {
-    Image loaded_png(testfile_path + "A_glyph.png");
+    Image loaded_png(test_source_path + "A_glyph.png");
     // view on (10,10),(20,20)
     Image view_on_loaded_png(loaded_png.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20)));
     // invert view
@@ -104,16 +83,16 @@ TEST(ImageTest, LoadPNGwithView) {
             view_on_loaded_png.setPixel<uint16_t>(Vec2<size_t>(x, y), 0xFF - view_on_loaded_png.getPixel<uint16_t>(Vec2<size_t>(x, y)));
         }
     }
-    loaded_png.exportPng<uint16_t>(testfile_path + "A_glyph2_out.png");
+    loaded_png.exportPng<uint16_t>(test_destination_path + "A_glyph2_out.png");
 }
 
 TEST(ImageTest, LoadPNGReducedBitDepth) {
-    Image loaded_png4(testfile_path + "A_glyph.png", 4);
-    loaded_png4.exportPng<uint16_t>(testfile_path + "A_glyph2_out_4bit.png");
-    Image loaded_png2(testfile_path + "A_glyph.png", 2);
-    loaded_png2.exportPng<uint16_t>(testfile_path + "A_glyph2_out_2bit.png");
-    Image loaded_png1(testfile_path + "A_glyph.png", 1);
-    loaded_png1.exportPng<uint16_t>(testfile_path + "A_glyph2_out_1bit.png");
+    Image loaded_png4(test_source_path + "A_glyph.png", 4);
+    loaded_png4.exportPng<uint16_t>(test_destination_path + "A_glyph2_out_4bit.png");
+    Image loaded_png2(test_source_path + "A_glyph.png", 2);
+    loaded_png2.exportPng<uint16_t>(test_destination_path + "A_glyph2_out_2bit.png");
+    Image loaded_png1(test_source_path + "A_glyph.png", 1);
+    loaded_png1.exportPng<uint16_t>(test_destination_path + "A_glyph2_out_1bit.png");
 }
 
 TEST(ImageTest, FloatExport) {
@@ -123,6 +102,27 @@ TEST(ImageTest, FloatExport) {
             float_image.setPixel<float>(Vec2<size_t>(x, y), float(x + y));
         }
     }
+    float_image.exportPng<float>(test_destination_path + "float.png", 0.0f, float(float_image.get_width() + float_image.get_height()));
+}
 
-    float_image.exportPng<float>(testfile_path + "float.png", 0.0f, float(float_image.get_width() + float_image.get_height()));
+class DistanceTransformTest : public testing::Test {
+
+};
+
+TEST_F(DistanceTransformTest, DeadReckoning) {
+    Image input(test_source_path + "Helvetica.png"), output(input.get_width(), input.get_height(), sizeof(DistanceTransform::OutputType)*8);
+    input.exportPng<DistanceTransform::OutputType>(test_destination_path + "DeadReckoning.png", -20, 50);
+
+    // std::unique_ptr<DistanceTransform> dt(new DeadReckoning(input, output));
+    // dt->transform();
+    // output.exportPng<DistanceTransform::OutputType>(test_destination_path + "DeadReckoning.png", -20, 50);
+    EXPECT_EQ(1, 1);
+}
+
+TEST_F(DistanceTransformTest, ParabolaEnvelope) {
+    Image input(test_source_path + "Helvetica.png"), output(input.get_width(), input.get_height(), sizeof(DistanceTransform::OutputType)*8);
+    std::unique_ptr<DistanceTransform> dt(new ParabolaEnvelope(input, output));
+    dt->transform();
+    output.exportPng<DistanceTransform::OutputType>(test_destination_path + "ParabolaEnvelope.png", -20, 50);
+    EXPECT_EQ(1, 1);
 }
