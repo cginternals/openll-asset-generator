@@ -52,11 +52,11 @@ install:
 - cmd : set PNG_LIBRARY_DEBUG=C:\projects\llassetgen\libpng\build\native\lib_debug\libpng16d.lib
 
 # could not find a way to make this multi-line
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set QT_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5)
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set QT5_DIR=C:\Qt\5.9.2\msvc2015_64\lib\cmake\Qt5)
 
-- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set QT_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5)
+- if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set QT5_DIR=C:\Qt\5.9.2\msvc2017_64\lib\cmake\Qt5)
 
-- echo %QT_DIR%
+- echo %QT5_DIR%
 
 - nuget install freetype
 - cmd : move freetype* freetype
@@ -67,7 +67,7 @@ install:
 - cmd : vcpkg install glm:x64-windows
 - cmd : vcpkg install glbinding:x64-windows
 - cmd : vcpkg install globjects:x64-windows
-- cmd : set PATH=%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
+- cmd : set PATH=%QT5_DIR%;%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
 
 - echo %PATH%
 
@@ -81,7 +81,7 @@ before_build:
     
     cmake --version
     
-    echo %QT_DIR%
+    echo %QT5_DIR%
 
     cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DPNG_LIBRARY_DEBUG=%PNG_LIBRARY_DEBUG% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS% -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
 
