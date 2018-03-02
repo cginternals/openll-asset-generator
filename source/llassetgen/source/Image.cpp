@@ -33,113 +33,113 @@ namespace llassetgen {
 
         switch (ft_bitmap.pixel_mode) {
         case FT_PIXEL_MODE_MONO:
-            bit_depth = 1;
+            bitDepth = 1;
             break;
         case FT_PIXEL_MODE_GRAY2:
             // We haven't found a single font using this format, however.
-            bit_depth = 2;
+            bitDepth = 2;
             break;
         case FT_PIXEL_MODE_GRAY4:
             // We haven't found a single font using this format, however.
-            bit_depth = 4;
+            bitDepth = 4;
             break;
         default:
-            bit_depth = 8;
+            bitDepth = 8;
         }
 
         load(ft_bitmap);
     }
 
     void Image::load(const FT_Bitmap &ft_bitmap) {
-        assert(get_width() == ft_bitmap.width && get_height() == ft_bitmap.rows);
+        assert(getWidth() == ft_bitmap.width && getHeight() == ft_bitmap.rows);
 
-        uint8_t ft_bit_depth;
+        uint8_t ft_bitDepth;
         switch (ft_bitmap.pixel_mode) {
         case FT_PIXEL_MODE_MONO:
-            ft_bit_depth = 1;
+            ft_bitDepth = 1;
             break;
         case FT_PIXEL_MODE_GRAY2:
             // We haven't found a single font using this format, however.
-            ft_bit_depth = 2;
+            ft_bitDepth = 2;
             break;
         case FT_PIXEL_MODE_GRAY4:
             // We haven't found a single font using this format, however.
-            ft_bit_depth = 4;
+            ft_bitDepth = 4;
             break;
         default:
-            ft_bit_depth = 8;
+            ft_bitDepth = 8;
         }
-        assert(ft_bit_depth == bit_depth);
+        assert(ft_bitDepth == bitDepth);
 
-        stride = size_t(std::ceil(float(get_width() * bit_depth) / 8));
+        stride = size_t(std::ceil(float(getWidth() * bitDepth) / 8));
 
-        data = std::shared_ptr<uint8_t>(new uint8_t[get_height() * stride]);
-        for (size_t y = 0; y < get_height(); y++) {
+        data = std::shared_ptr<uint8_t>(new uint8_t[getHeight() * stride]);
+        for (size_t y = 0; y < getHeight(); y++) {
             for (size_t x = 0; x < stride; x++) {
                 data.get()[y * stride + x] = 0xFF - ft_bitmap.buffer[y * ft_bitmap.pitch + x];
             }
-            size_t padding_bits = size_t((float(get_width() * bit_depth) / 8 - std::floor(float(get_width() * bit_depth) / 8)) * 8);
+            size_t padding_bits = size_t((float(getWidth() * bitDepth) / 8 - std::floor(float(getWidth() * bitDepth) / 8)) * 8);
             uint8_t mask = ~(0xFF >> padding_bits);
             data.get()[y * stride + stride - 1] &= mask;
         }
     }
 
-    Image::Image(const size_t width, const size_t height, const uint8_t _bit_depth) {
-        assert(_bit_depth == 1 || _bit_depth == 2 || _bit_depth == 4 || _bit_depth == 8 || _bit_depth == 16 || _bit_depth == 24 || _bit_depth == 32);
+    Image::Image(const size_t width, const size_t height, const uint8_t _bitDepth) {
+        assert(_bitDepth == 1 || _bitDepth == 2 || _bitDepth == 4 || _bitDepth == 8 || _bitDepth == 16 || _bitDepth == 24 || _bitDepth == 32);
         min.x = 0;
         min.y = 0;
         max.x = width;
         max.y = height;
-        bit_depth = _bit_depth;
-        stride = (size_t)std::ceil(float(get_width() * (float(bit_depth) / 8.0f)));
-        data = std::shared_ptr<uint8_t>(new uint8_t[get_height() * stride]());
+        bitDepth = _bitDepth;
+        stride = (size_t)std::ceil(float(getWidth() * (float(bitDepth) / 8.0f)));
+        data = std::shared_ptr<uint8_t>(new uint8_t[getHeight() * stride]());
     }
 
-    size_t Image::get_width() const {
+    size_t Image::getWidth() const {
         return max.x - min.x;
     }
 
-    size_t Image::get_height() const {
+    size_t Image::getHeight() const {
         return max.y - min.y;
     }
 
-    size_t Image::get_bit_depth() const {
-        return bit_depth;
+    size_t Image::getBitDepth() const {
+        return bitDepth;
     }
 
     Image Image::view(const Vec2<size_t> _min, const Vec2<size_t> _max) {
-        return Image(_min, _max, stride, bit_depth, data);
+        return Image(_min, _max, stride, bitDepth, data);
     }
 
-    Image::Image(const Vec2<size_t> _min, const Vec2<size_t> _max, const size_t _stride, const uint8_t _bit_depth, const std::shared_ptr<uint8_t>_data) {
+    Image::Image(const Vec2<size_t> _min, const Vec2<size_t> _max, const size_t _stride, const uint8_t _bitDepth, const std::shared_ptr<uint8_t>_data) {
         min = _min;
         max = _max;
         stride = _stride;
-        bit_depth = _bit_depth;
+        bitDepth = _bitDepth;
         data = _data;
     }
 
-    bool Image::is_valid(const Vec2<size_t> pos) const {
+    bool Image::isValid(const Vec2<size_t> pos) const {
         Vec2<size_t> offset = min + pos;
         return offset.x >= min.x && offset.x < max.x && offset.y >= min.y && offset.y < max.y;
     }
 
     template<typename pixelType>
     pixelType Image::getPixel(const Vec2<size_t> pos) const {
-        assert(is_valid(pos));
+        assert(isValid(pos));
         Vec2<size_t> offset = min + pos;
-        if (bit_depth <= 8) {
-            uint8_t byte = data.get()[offset.y * stride + offset.x * bit_depth / 8];
-            size_t bit_pos = offset.x % (8 / bit_depth);
-            byte <<= bit_pos * bit_depth;
-            byte >>= 8 - bit_depth;
+        if (bitDepth <= 8) {
+            uint8_t byte = data.get()[offset.y * stride + offset.x * bitDepth / 8];
+            size_t bit_pos = offset.x % (8 / bitDepth);
+            byte <<= bit_pos * bitDepth;
+            byte >>= 8 - bitDepth;
             uint32_t casted = static_cast<uint32_t>(byte);
             return *reinterpret_cast<pixelType*>(&casted);
         } else {
             uint32_t return_data = 0;
-            for (size_t byte_pos = 0; byte_pos < bit_depth / 8; ++byte_pos) {
+            for (size_t byte_pos = 0; byte_pos < bitDepth / 8; ++byte_pos) {
                 return_data <<= 8;
-                return_data |= data.get()[offset.y * stride + offset.x * bit_depth / 8 + byte_pos];
+                return_data |= data.get()[offset.y * stride + offset.x * bitDepth / 8 + byte_pos];
             }
             return *reinterpret_cast<pixelType*>(&return_data);
         }
@@ -152,22 +152,22 @@ namespace llassetgen {
 
     template<typename pixelType>
     void Image::setPixel(const Vec2<size_t> pos, pixelType in) const {
-        assert(is_valid(pos));
+        assert(isValid(pos));
         Vec2<size_t> offset = min + pos;
-        if (bit_depth <= 8) {
+        if (bitDepth <= 8) {
             uint8_t mask = 0xFF;
             uint8_t in_byte = static_cast<uint8_t>(*reinterpret_cast<uint32_t*>(&in));
-            mask <<= 8 - bit_depth;
-            mask >>= 8 - bit_depth;
+            mask <<= 8 - bitDepth;
+            mask >>= 8 - bitDepth;
 
-            size_t bit_pos = offset.x % (8 / bit_depth);
-            in_byte <<= 8 - bit_pos * bit_depth - bit_depth;
-            mask <<= 8 - bit_pos * bit_depth - bit_depth;
-            data.get()[offset.y * stride + offset.x * bit_depth / 8] = (data.get()[offset.y * stride + offset.x * bit_depth / 8] & ~mask) | in_byte;
+            size_t bit_pos = offset.x % (8 / bitDepth);
+            in_byte <<= 8 - bit_pos * bitDepth - bitDepth;
+            mask <<= 8 - bit_pos * bitDepth - bitDepth;
+            data.get()[offset.y * stride + offset.x * bitDepth / 8] = (data.get()[offset.y * stride + offset.x * bitDepth / 8] & ~mask) | in_byte;
         } else {
             uint32_t in_int = *reinterpret_cast<uint32_t*>(&in);
-            for (int byte_pos = bit_depth / 8 - 1; byte_pos >= 0; byte_pos--) {
-                data.get()[offset.y * stride + offset.x * bit_depth / 8 + byte_pos] = static_cast<uint8_t>(in_int);
+            for (int byte_pos = bitDepth / 8 - 1; byte_pos >= 0; byte_pos--) {
+                data.get()[offset.y * stride + offset.x * bitDepth / 8 + byte_pos] = static_cast<uint8_t>(in_int);
                 in_int >>= 8;
             }
         }
@@ -205,13 +205,13 @@ namespace llassetgen {
             abort();
         }
 
-        png_set_write_fn(png, (png_voidp)&out_file, write_data, flush_data);
+        png_set_write_fn(png, (png_voidp)&out_file, writeData, flushData);
 
         png_set_IHDR(png,
             info,
-            get_width(),
-            get_height(),
-            (bit_depth < 16) ? bit_depth : 16,
+            getWidth(),
+            getHeight(),
+            (bitDepth < 16) ? bitDepth : 16,
             PNG_COLOR_TYPE_GRAY,
             PNG_INTERLACE_NONE,
             PNG_COMPRESSION_TYPE_BASE,
@@ -219,23 +219,23 @@ namespace llassetgen {
 
         png_write_info(png, info);
 
-        if (bit_depth > 8) {
+        if (bitDepth > 8) {
             png_set_swap(png);
         }
 
-        if (bit_depth >= 24) {
-            std::unique_ptr<uint16_t[]> row(new uint16_t[get_width()]);
+        if (bitDepth >= 24) {
+            std::unique_ptr<uint16_t[]> row(new uint16_t[getWidth()]);
             // possible 32 float or 32 or 24 bit int data
             // scale down to 16 bit int grayscale
 
-            for (size_t y = 0; y < get_height(); y++) {
-                for (size_t x = 0; x < get_width(); x++) {
+            for (size_t y = 0; y < getHeight(); y++) {
+                for (size_t x = 0; x < getWidth(); x++) {
                     row[x] = clamp(static_cast<float>(getPixel<pixelType>({x, y}) - black) / (white - black), 0.0F, 1.0F) * std::numeric_limits<uint16_t>::max();
                 }
                 png_write_row(png, reinterpret_cast<png_bytep>(row.get()));
             }
         } else {
-            for (size_t y = 0; y < get_height(); y++) {
+            for (size_t y = 0; y < getHeight(); y++) {
                 png_write_row(png, reinterpret_cast<png_bytep>(&data.get()[y * stride]));
             }
         }
@@ -251,22 +251,22 @@ namespace llassetgen {
     template LLASSETGEN_API void Image::exportPng<uint8_t>(const std::string &filepath, uint8_t min, uint8_t max);
     template LLASSETGEN_API void Image::exportPng<float>(const std::string &filepath, float min, float max);
 
-    void Image::read_data(png_structp png, png_bytep data, png_size_t length) {
+    void Image::readData(png_structp png, png_bytep data, png_size_t length) {
         png_voidp a = png_get_io_ptr(png);
         ((std::istream*)a)->read((char*)data, length);
     }
 
-    void Image::write_data(png_structp png, png_bytep data, png_size_t length) {
+    void Image::writeData(png_structp png, png_bytep data, png_size_t length) {
         png_voidp a = png_get_io_ptr(png);
         ((std::ostream*)a)->write((char*)data, length);
     }
 
-    void Image::flush_data(png_structp png) {
+    void Image::flushData(png_structp png) {
         png_voidp a = png_get_io_ptr(png);
         ((std::ostream*)a)->flush();
     }
 
-    Image::Image(const std::string &filepath, uint8_t _bit_depth) {
+    Image::Image(const std::string &filepath, uint8_t _bitDepth) {
         std::ifstream in_file(filepath, std::ifstream::in | std::ifstream::binary);
 
         png_byte pngsig[8];
@@ -298,7 +298,7 @@ namespace llassetgen {
             abort();
         }
 
-        png_set_read_fn(png, (png_voidp)&in_file, read_data);
+        png_set_read_fn(png, (png_voidp)&in_file, readData);
 
         png_set_sig_bytes(png, 8);
 
@@ -333,12 +333,12 @@ namespace llassetgen {
         png_read_update_info(png, info);
         uint8_t channels = png_get_channels(png, info);
 
-        uint8_t png_bit_depth = png_get_bit_depth(png, info);
-        uint8_t png_stride = get_width() * (png_bit_depth / 8);
+        uint8_t png_bitDepth = png_get_bit_depth(png, info);
+        uint8_t png_stride = getWidth() * (png_bitDepth / 8);
 
-        std::unique_ptr<png_bytep> row_ptrs(new png_bytep[get_height()]);
-        std::unique_ptr<uint8_t> multi_channel_data(new uint8_t[get_height() * png_stride * channels]);
-        for (size_t i = 0; i < get_height(); i++) {
+        std::unique_ptr<png_bytep> row_ptrs(new png_bytep[getHeight()]);
+        std::unique_ptr<uint8_t> multi_channel_data(new uint8_t[getHeight() * png_stride * channels]);
+        for (size_t i = 0; i < getHeight(); i++) {
             row_ptrs.get()[i] = (png_bytep)multi_channel_data.get() + i * png_stride * channels;
         }
 
@@ -347,20 +347,20 @@ namespace llassetgen {
         png_destroy_read_struct(&png, &info, (png_infopp)0);
         in_file.close();
 
-        bit_depth = (_bit_depth) ? _bit_depth : png_bit_depth;
-        stride = size_t(ceil(float(get_width()) * (float(bit_depth) / 8.0f)));
+        bitDepth = (_bitDepth) ? _bitDepth : png_bitDepth;
+        stride = size_t(ceil(float(getWidth()) * (float(bitDepth) / 8.0f)));
 
-        data = std::shared_ptr<uint8_t>(new uint8_t[get_height() * stride]);
-        for (size_t y = 0; y < get_height(); y++) {
-            for (size_t x = 0; x < get_width(); x++) {
-                setPixel<uint16_t>({x, y}, reduce_bit_depth(multi_channel_data.get()[y * png_stride * channels + x * png_bit_depth / 8 * channels], png_bit_depth, bit_depth));
+        data = std::shared_ptr<uint8_t>(new uint8_t[getHeight() * stride]);
+        for (size_t y = 0; y < getHeight(); y++) {
+            for (size_t x = 0; x < getWidth(); x++) {
+                setPixel<uint16_t>({x, y}, reduceBitDepth(multi_channel_data.get()[y * png_stride * channels + x * png_bitDepth / 8 * channels], png_bitDepth, bitDepth));
             }
         }
     }
 
-    uint16_t Image::reduce_bit_depth(uint16_t in, uint8_t in_bit_depth, uint8_t out_bit_depth) {
-        int in_max = (1 << in_bit_depth) - 1;
-        int out_max = (1 << out_bit_depth) - 1;
+    uint16_t Image::reduceBitDepth(uint16_t in, uint8_t in_bitDepth, uint8_t out_bitDepth) {
+        int in_max = (1 << in_bitDepth) - 1;
+        int out_max = (1 << out_bitDepth) - 1;
         uint16_t reduced = static_cast<uint16_t>(round(float(in) / float(in_max) * float(out_max)));
         return reduced;
     }

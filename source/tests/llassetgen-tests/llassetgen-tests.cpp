@@ -32,8 +32,8 @@ TEST(ImageTest, LoadTTF) {
     // view on (10,10),(20,20)
     Image view_on_ft_8bit(ft_8bit.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20)));
     // invert view
-    for (size_t y = 0; y < view_on_ft_8bit.get_height(); y++) {
-        for (size_t x = 0; x < view_on_ft_8bit.get_width(); x++) {
+    for (size_t y = 0; y < view_on_ft_8bit.getHeight(); y++) {
+        for (size_t x = 0; x < view_on_ft_8bit.getWidth(); x++) {
             view_on_ft_8bit.setPixel<uint8_t>(Vec2<size_t>(x, y), 1 - view_on_ft_8bit.getPixel<uint8_t>(Vec2<size_t>(x, y)));
         }
     }
@@ -57,8 +57,8 @@ TEST(ImageTest, CreateAndWritePNG) {
     blank_16bit.setPixel<uint16_t>(Vec2<size_t>(4, 5), 42949);
 
     // get pixels and test
-    for (size_t y = 0; y < blank_16bit.get_height(); y++) {
-        for (size_t x = 0; x < blank_16bit.get_width(); x++) {
+    for (size_t y = 0; y < blank_16bit.getHeight(); y++) {
+        for (size_t x = 0; x < blank_16bit.getWidth(); x++) {
             if (x == 3 && y == 4) {
                 EXPECT_EQ(blank_16bit.getPixel<uint32_t>(Vec2<size_t>(x, y)), 26781);
             }
@@ -78,8 +78,8 @@ TEST(ImageTest, LoadPNGwithView) {
     // view on (10,10),(20,20)
     Image view_on_loaded_png(loaded_png.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20)));
     // invert view
-    for (size_t y = 0; y < view_on_loaded_png.get_height(); y++) {
-        for (size_t x = 0; x < view_on_loaded_png.get_width(); x++) {
+    for (size_t y = 0; y < view_on_loaded_png.getHeight(); y++) {
+        for (size_t x = 0; x < view_on_loaded_png.getWidth(); x++) {
             view_on_loaded_png.setPixel<uint16_t>(Vec2<size_t>(x, y), 0xFF - view_on_loaded_png.getPixel<uint16_t>(Vec2<size_t>(x, y)));
         }
     }
@@ -97,12 +97,12 @@ TEST(ImageTest, LoadPNGReducedBitDepth) {
 
 TEST(ImageTest, FloatExport) {
     Image float_image(256, 256, 32);
-    for (size_t y = 0; y < float_image.get_height(); y++) {
-        for (size_t x = 0; x < float_image.get_width(); x++) {
+    for (size_t y = 0; y < float_image.getHeight(); y++) {
+        for (size_t x = 0; x < float_image.getWidth(); x++) {
             float_image.setPixel<float>(Vec2<size_t>(x, y), float(x + y));
         }
     }
-    float_image.exportPng<float>(test_destination_path + "float.png", 0.0f, float(float_image.get_width() + float_image.get_height()));
+    float_image.exportPng<float>(test_destination_path + "float.png", 0.0f, float(float_image.getWidth() + float_image.getHeight()));
 }
 
 class DistanceTransformTest : public testing::Test {
@@ -110,7 +110,7 @@ class DistanceTransformTest : public testing::Test {
 };
 
 TEST_F(DistanceTransformTest, DeadReckoning) {
-    Image input(test_source_path + "Helvetica.png"), output(input.get_width(), input.get_height(), sizeof(DistanceTransform::OutputType)*8);
+    Image input(test_source_path + "Helvetica.png"), output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType)*8);
     input.exportPng<DistanceTransform::OutputType>(test_destination_path + "DeadReckoning.png", -20, 50);
 
     // std::unique_ptr<DistanceTransform> dt(new DeadReckoning(input, output));
@@ -120,7 +120,7 @@ TEST_F(DistanceTransformTest, DeadReckoning) {
 }
 
 TEST_F(DistanceTransformTest, ParabolaEnvelope) {
-    Image input(test_source_path + "Helvetica.png"), output(input.get_width(), input.get_height(), sizeof(DistanceTransform::OutputType)*8);
+    Image input(test_source_path + "Helvetica.png"), output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType)*8);
     std::unique_ptr<DistanceTransform> dt(new ParabolaEnvelope(input, output));
     dt->transform();
     output.exportPng<DistanceTransform::OutputType>(test_destination_path + "ParabolaEnvelope.png", -20, 50);

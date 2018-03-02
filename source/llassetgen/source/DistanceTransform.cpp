@@ -8,7 +8,7 @@ namespace llassetgen {
     template<typename PixelType, bool flipped, bool invalidBounds>
     PixelType DistanceTransform::getPixel(PositionType pos) {
         const Image& image = std::is_same<PixelType, InputType>::value ? input : output;
-        if(invalidBounds && !image.is_valid(pos))
+        if(invalidBounds && !image.isValid(pos))
             return 0;
         if(flipped)
             std::swap(pos.x, pos.y);
@@ -25,30 +25,30 @@ namespace llassetgen {
     }
 
     DistanceTransform::DistanceTransform(const Image& _input, const Image& _output) :input(_input), output(_output) {
-        assert(input.get_width() == output.get_width() && input.get_height() == output.get_height());
+        assert(input.getWidth() == output.getWidth() && input.getHeight() == output.getHeight());
     }
 
 
 
     DeadReckoning::PositionType& DeadReckoning::posAt(PositionType pos) {
-        assert(pos.x < input.get_width() && pos.y < input.get_height() && posBuffer.get());
-        return posBuffer[pos.y * input.get_width() + pos.x];
+        assert(pos.x < input.getWidth() && pos.y < input.getHeight() && posBuffer.get());
+        return posBuffer[pos.y * input.getWidth() + pos.x];
     }
 
     void DeadReckoning::transformAt(PositionType pos, PositionType target, OutputType distance) {
         target += pos;
-        if (output.is_valid(target) && getPixel<OutputType>(target) + distance < getPixel<OutputType>(pos)) {
+        if (output.isValid(target) && getPixel<OutputType>(target) + distance < getPixel<OutputType>(pos)) {
             posAt(pos) = target = posAt(target);
             setPixel<OutputType>(pos, std::sqrt(square(pos.x - target.x) + square(pos.y - target.y)));
         }
     }
 
     void DeadReckoning::transform() {
-        assert(input.get_width() > 0 && input.get_height() > 0);
-        posBuffer.reset(new PositionType[input.get_width() * input.get_height()]);
+        assert(input.getWidth() > 0 && input.getHeight() > 0);
+        posBuffer.reset(new PositionType[input.getWidth() * input.getHeight()]);
 
-        for (DimensionType y = 0; y < input.get_height(); ++y)
-            for (DimensionType x = 0; x < input.get_width(); ++x) {
+        for (DimensionType y = 0; y < input.getHeight(); ++y)
+            for (DimensionType x = 0; x < input.getWidth(); ++x) {
                 PositionType pos = {x, y};
                 bool center = getPixel<InputType, false>(pos);
                 posAt(pos) = pos;
@@ -68,18 +68,18 @@ namespace llassetgen {
             {static_cast<DimensionType>(-1), static_cast<DimensionType>( 0)}
         };
 
-        for (DimensionType y = 0; y < input.get_height(); ++y)
-            for (DimensionType x = 0; x < input.get_width(); ++x)
+        for (DimensionType y = 0; y < input.getHeight(); ++y)
+            for (DimensionType x = 0; x < input.getWidth(); ++x)
                 for (DimensionType i = 0; i < 4; ++i)
                     transformAt({x, y}, target[i], distance[i]);
 
-        for (DimensionType y = 0; y < input.get_height(); ++y)
-            for (DimensionType x = 0; x < input.get_width(); ++x)
+        for (DimensionType y = 0; y < input.getHeight(); ++y)
+            for (DimensionType x = 0; x < input.getWidth(); ++x)
                 for (DimensionType i = 0; i < 4; ++i)
-                    transformAt({input.get_width() - x - 1, input.get_height() - y - 1}, -(target[3 - i]), distance[3 - i]);
+                    transformAt({input.getWidth() - x - 1, input.getHeight() - y - 1}, -(target[3 - i]), distance[3 - i]);
 
-        for (DimensionType y = 0; y < input.get_height(); ++y)
-            for (DimensionType x = 0; x < input.get_width(); ++x) {
+        for (DimensionType y = 0; y < input.getHeight(); ++y)
+            for (DimensionType x = 0; x < input.getWidth(); ++x) {
                 Vec2<DimensionType> pos(x, y);
                 if (getPixel<InputType, false>(pos))
                     setPixel<OutputType>(pos, -getPixel<OutputType>(pos));
@@ -146,17 +146,17 @@ namespace llassetgen {
     }
 
     void ParabolaEnvelope::transform() {
-        assert(input.get_width() > 0 && input.get_height() > 0);
-        DimensionType length = std::max(input.get_width(), input.get_height());
+        assert(input.getWidth() > 0 && input.getHeight() > 0);
+        DimensionType length = std::max(input.getWidth(), input.getHeight());
         parabolas.reset(new Parabola[length + 1]);
         lineBuffer.reset(new OutputType[length]);
 
-        for(DimensionType y = 0; y < input.get_height(); ++y)
-            edgeDetection<false, true>(y, input.get_width());
+        for(DimensionType y = 0; y < input.getHeight(); ++y)
+            edgeDetection<false, true>(y, input.getWidth());
 
-        for(DimensionType x = 0; x < input.get_width(); ++x) {
-            edgeDetection<true, false>(x, input.get_height());
-            transformLine<true>(x, input.get_height());
+        for(DimensionType x = 0; x < input.getWidth(); ++x) {
+            edgeDetection<true, false>(x, input.getHeight());
+            transformLine<true>(x, input.getHeight());
         }
     }
 }
