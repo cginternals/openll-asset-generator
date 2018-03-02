@@ -6,10 +6,7 @@ find_package(glm REQUIRED)
 find_package(glbinding REQUIRED)
 find_package(globjects REQUIRED)
 
-find_package(Qt5Core 5.2 REQUIRED)
-find_package(Qt5Gui 5.2 REQUIRED)
-find_package(Qt5Widgets 5.2 REQUIRED)
-find_package(Qt5OpenGL 5.2 REQUIRED)
+find_package(Qt 5.2 REQUIRED Gui Widgets OpenGL)
 
 
 #
