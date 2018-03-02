@@ -84,7 +84,7 @@ namespace llassetgen {
         }
     }
 
-    Image::Image(const size_t width, const size_t height, const size_t _bit_depth) {
+    Image::Image(const size_t width, const size_t height, const uint8_t _bit_depth) {
         assert(_bit_depth == 1 || _bit_depth == 2 || _bit_depth == 4 || _bit_depth == 8 || _bit_depth == 16 || _bit_depth == 24 || _bit_depth == 32);
         min.x = 0;
         min.y = 0;
@@ -266,7 +266,7 @@ namespace llassetgen {
         ((std::ostream*)a)->flush();
     }
 
-    Image::Image(const std::string &filepath, int _bit_depth) {
+    Image::Image(const std::string &filepath, uint8_t _bit_depth) {
         std::ifstream in_file(filepath, std::ifstream::in | std::ifstream::binary);
 
         png_byte pngsig[8];
@@ -347,12 +347,7 @@ namespace llassetgen {
         png_destroy_read_struct(&png, &info, (png_infopp)0);
         in_file.close();
 
-        if (_bit_depth != -1) {
-            bit_depth = _bit_depth;
-        } else {
-            bit_depth = png_bit_depth;
-        }
-
+        bit_depth = (_bit_depth) ? _bit_depth : png_bit_depth;
         stride = size_t(ceil(float(get_width()) * (float(bit_depth) / 8.0f)));
 
         data = std::shared_ptr<uint8_t>(new uint8_t[get_height() * stride]);

@@ -21,8 +21,8 @@ namespace llassetgen {
         LLASSETGEN_NO_EXPORT static void write_data(png_struct_def* png, uint8_t* data, size_t length);
         LLASSETGEN_NO_EXPORT static void flush_data(png_struct_def* png);
        public:
-        Image(const std::string & filepath, uint8_t _bit_depth = -1);
-        Image(const size_t width, const size_t height, const size_t bit_depth);
+        Image(const std::string & filepath, uint8_t _bit_depth = 0);
+        Image(const size_t width, const size_t height, const uint8_t bit_depth);
         template<typename pixelType>
         void exportPng(const std::string & filepath, pixelType black = std::numeric_limits<pixelType>::min(), pixelType white = std::numeric_limits<pixelType>::max());
         template <typename pixelType>
