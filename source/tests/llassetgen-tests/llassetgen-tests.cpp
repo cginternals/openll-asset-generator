@@ -33,6 +33,8 @@ TEST_F(llassetgen_tests, ParabolaEnvelope) {
 std::string testfile_path = "./source/tests/llassetgen-tests/testfiles/";
 
 TEST(ImageTest, LoadTTF) {
+    init();
+
 	FT_Face face;
 	std::string font_file = testfile_path + "arial.ttf";
 	char letter = 'J';
