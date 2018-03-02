@@ -111,11 +111,10 @@ class DistanceTransformTest : public testing::Test {
 
 TEST_F(DistanceTransformTest, DeadReckoning) {
     Image input(test_source_path + "Helvetica.png"), output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType)*8);
-    input.exportPng<DistanceTransform::OutputType>(test_destination_path + "DeadReckoning.png", -20, 50);
-
-    // std::unique_ptr<DistanceTransform> dt(new DeadReckoning(input, output));
-    // dt->transform();
-    // output.exportPng<DistanceTransform::OutputType>(test_destination_path + "DeadReckoning.png", -20, 50);
+    //input.exportPng<DistanceTransform::OutputType>(test_destination_path + "DeadReckoning.png", -20, 50);
+    std::unique_ptr<DistanceTransform> dt(new DeadReckoning(input, output));
+    dt->transform();
+    output.exportPng<DistanceTransform::OutputType>(test_destination_path + "DeadReckoning.png", -20, 50);
     EXPECT_EQ(1, 1);
 }
 

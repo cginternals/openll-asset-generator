@@ -107,7 +107,7 @@ namespace llassetgen {
         return bitDepth;
     }
 
-    Image Image::view(const Vec2<size_t> _min, const Vec2<size_t> _max) {
+	Image Image::view(const Vec2<size_t> _min, const Vec2<size_t> _max) {
         return Image(_min, _max, stride, bitDepth, data);
     }
 
@@ -334,7 +334,7 @@ namespace llassetgen {
         uint8_t channels = png_get_channels(png, info);
 
         uint8_t png_bitDepth = png_get_bit_depth(png, info);
-        uint8_t png_stride = getWidth() * (png_bitDepth / 8);
+        size_t png_stride = size_t(ceil(float(getWidth()) * (float(png_bitDepth) / 8.0f)));
 
         std::unique_ptr<png_bytep> row_ptrs(new png_bytep[getHeight()]);
         std::unique_ptr<uint8_t> multi_channel_data(new uint8_t[getHeight() * png_stride * channels]);
