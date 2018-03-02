@@ -64,9 +64,9 @@ install:
 - cmd : set FREETYPE_INCLUDE_DIRS=C:\projects\llassetgen\freetype\build\native\include
 - if "%configuration%"=="Release" ( set FREETYPE_LIBRARY=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Release\freetype28.lib)
 - if "%configuration%"=="Debug" ( set FREETYPE_LIBRARY=C:\projects\llassetgen\freetype\build\native\lib\x64\v141\static\Debug\freetype28d.lib)
-- cmd : vcpkg install glm:x64-windows
-- cmd : vcpkg install glbinding:x64-windows
-- cmd : vcpkg install globjects:x64-windows
+#- cmd : vcpkg install glm:x64-windows
+#- cmd : vcpkg install glbinding:x64-windows
+#- cmd : vcpkg install globjects:x64-windows
 - cmd : set PATH=%QT5_DIR%;%ZLIB_ROOT%;%PNG_ROOT%;%FREETYPE_DIR%;%PATH%;
 
 - echo %PATH%
@@ -83,7 +83,8 @@ before_build:
     
     echo %QT5_DIR%
 
-    cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DPNG_LIBRARY_DEBUG=%PNG_LIBRARY_DEBUG% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS% -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
+    cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DPNG_LIBRARY_DEBUG=%PNG_LIBRARY_DEBUG% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS%
+    #cmake .. -G %generator% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DPNG_LIBRARY_DEBUG=%PNG_LIBRARY_DEBUG% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS% -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 build:
   project: c:\projects\llassetgen\build\llassetgen.sln
