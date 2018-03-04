@@ -34,12 +34,14 @@ set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(headers
     ${include_path}/llassetgen.h
-    ${include_path}/DistanceTransform.h
     ${include_path}/Vec2.h
+    ${include_path}/Image.h
+    ${include_path}/DistanceTransform.h
 )
 
 set(sources
     ${source_path}/llassetgen.cpp
+    ${source_path}/Image.cpp
     ${source_path}/DistanceTransform.cpp
 )
 
@@ -202,6 +204,13 @@ perform_health_checks(
     ${sources}
     ${headers}
 )
+
+
+#
+# Source Code Formatting
+#
+
+add_clang_format_target(${target} ${sources} ${headers})
 
 
 #
