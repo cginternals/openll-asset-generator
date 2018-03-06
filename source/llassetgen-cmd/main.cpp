@@ -6,6 +6,7 @@
 #include FT_FREETYPE_H
 
 #include <llassetgen/llassetgen.h>
+#include <codecvt>
 
 using namespace llassetgen;
 
@@ -32,6 +33,11 @@ void distField(std::string &algorithm, Image &input, std::string &out_path) {
     std::unique_ptr<DistanceTransform> dt = dtFactory[algorithm](input, output);
     dt->transform();
     output.exportPng<DistanceTransform::OutputType>(out_path, -20, 50);
+}
+
+std::u32string convertToUCS4(std::string& str) {
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> ucs4conv;
+    return ucs4conv.from_bytes(str);
 }
 
 int main(int argc, char** argv) {
@@ -69,11 +75,12 @@ int main(int argc, char** argv) {
         std::unique_ptr<Image> input;
         if (glyph_opt->count()) {
             // Example: llassetgen-cmd distfield -a parabola -g G --font="/Library/Fonts/Verdana.ttf" glyph.png
-            if (glyph.length() != 1) {  // TODO convert from std::string to FT_ULong to allow non-ASCII
+            std::u32string ucs4Glyph = convertToUCS4(glyph);
+            if (ucs4Glyph.length() != 1) {
                 std::cerr << "--glyph must be a single character" << std::endl;
                 return 2;
             }
-            input = loadGlyph(glyph[0], font_path);
+            input = loadGlyph(ucs4Glyph[0], font_path);
         } else if (img_opt->count()) {
             // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
             input = std::unique_ptr<Image>(new Image(img_path));  // TODO error handling
