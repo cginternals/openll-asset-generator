@@ -127,6 +127,14 @@ bool WindowQt::event(QEvent* event) {
 
 void WindowQt::paintGL() { updateGL(); }
 
+void WindowQt::mousePressEvent(QMouseEvent* /*event*/) {}
+
+void WindowQt::mouseMoveEvent(QMouseEvent* /*event*/) {}
+
+void WindowQt::mouseReleaseEvent(QMouseEvent* /*event*/) {}
+
+void WindowQt::wheelEvent(QWheelEvent* /*event*/) {}
+
 void WindowQt::initializeGL() {}
 
 void WindowQt::deinitializeGL() {}

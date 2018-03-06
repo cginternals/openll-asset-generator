@@ -180,6 +180,45 @@ class Window : public WindowQt {
         doneCurrent();
     }
 
+    virtual void mousePressEvent(QMouseEvent *event) override {
+        makeCurrent();
+
+        if (event->button() == Qt::LeftButton) {
+            isPanning = true;
+        } else if (event->button() == Qt::RightButton) {
+            isRotating = true;
+        }
+
+        doneCurrent();
+    }
+
+    virtual void mouseMoveEvent(QMouseEvent *event) override {
+        makeCurrent();
+
+        if ((event->buttons() & Qt::LeftButton) && isPanning) {
+            // TODO implement panning
+        }
+        if ((event->buttons() & Qt::RightButton) && isRotating) {
+            // TODO implement rotating
+        }
+
+        doneCurrent();
+    }
+
+    virtual void mouseReleaseEvent(QMouseEvent *event) override {
+        if (event->button() == Qt::LeftButton && isPanning) {
+            isPanning = false;
+        } else if (event->button() == Qt::RightButton && isRotating) {
+            isRotating = false;
+        }
+    }
+
+    virtual void wheelEvent(QWheelEvent *event) override {
+        // TODO implement zooming
+        // if delta is < 0, then zooming in (it's what I would expect)
+        std::cout << "zoom " << event->delta() << std::endl;
+    }
+
     void applyColorChange(float &color, QString value) {
         color = value.toInt() / 255.f;
         paint();
@@ -214,6 +253,10 @@ class Window : public WindowQt {
     glm::vec4 backgroundColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
     glm::vec4 fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     int samplerIndex = 0;
+
+    bool isPanning = false;
+    bool isRotating = false;
+    bool isZooming = false;
 };
 
 void prepareColorInput(QLineEdit *input, const QString placeholder) {
