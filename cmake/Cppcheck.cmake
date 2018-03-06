@@ -14,6 +14,7 @@ function(perform_cppcheck check_target target)
                 --std=c++11
                 --verbose
                 --suppress=missingIncludeSystem
+                --suppress=preprocessorErrorDirective
                 ${ARGN}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
