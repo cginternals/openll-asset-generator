@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 
 #include <CLI11.h>
 #include <ft2build.h> // NOLINT include order required by freetype
@@ -8,28 +9,29 @@
 
 using namespace llassetgen;
 
-DistanceTransform *instantiate(std::string algorithm) {
-    if(algorithm == "dreck") return new DeadReckoning();
-    if(algorithm == "parabola") return new ParabolaEnvelope();
-    assert(false);
-}
+std::map<std::string, std::function<std::unique_ptr<DistanceTransform>(Image&, Image&)>> dtFactory {
+    std::make_pair("deadrec", [](Image& input, Image& output){
+        return std::unique_ptr<DistanceTransform>(new DeadReckoning(input, output));
+    }),
+    std::make_pair("parabola", [](Image& input, Image& output){
+        return std::unique_ptr<DistanceTransform>(new ParabolaEnvelope(input, output));
+    }),
+};
 
-void dtFromGlyph(std::string algorithm, FT_ULong glyph, std::string font_path, std::string out_path) {
-    std::unique_ptr<DistanceTransform> dt(instantiate(algorithm));
+std::unique_ptr<Image> loadGlyph(FT_ULong glyph, std::string &font_path) {
     FT_Face face;
     assert(FT_New_Face(freetype, font_path.c_str(), 0, &face) == 0);
     assert(FT_Set_Pixel_Sizes(face, 0, 128) == 0);
     assert(FT_Load_Glyph(face, FT_Get_Char_Index(face, glyph), FT_LOAD_RENDER | FT_LOAD_TARGET_MONO) == 0);
-    dt->importFreeTypeBitmap(&face->glyph->bitmap, 20);
-    dt->transform();
-    dt->exportPng(out_path, -10, 20, 8);
+    auto bitmap = std::shared_ptr<FT_Bitmap_>(new FT_Bitmap_(face->glyph->bitmap));
+    return std::unique_ptr<Image>(new Image(*bitmap));
 }
 
-void dtFromPng(std::string algorithm, std::string png_path, std::string out_path) {
-    std::unique_ptr<DistanceTransform> dt(instantiate(algorithm));
-    dt->importPng(png_path);
+void distField(std::string &algorithm, Image &input, std::string &out_path) {
+    Image output = Image(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType)*8);
+    std::unique_ptr<DistanceTransform> dt = dtFactory[algorithm](input, output);
     dt->transform();
-    dt->exportPng(out_path, -20, 50, 8);
+    output.exportPng<DistanceTransform::OutputType>(out_path, -20, 50);
 }
 
 int main(int argc, char** argv) {
@@ -38,8 +40,12 @@ int main(int argc, char** argv) {
     CLI::App app{"OpenLL Font Asset Generator"};
     CLI::App *distfield = app.add_subcommand("distfield");
 
-    std::string algorithm = "dreck";  // default value
-    std::set<std::string> algo_options {"dreck", "parabola"};
+    // distfield params
+    std::string algorithm = "deadrec";  // default value
+    std::set<std::string> algo_options;
+    for(auto& algo : dtFactory) {
+        algo_options.insert(algo.first);
+    }
     distfield->add_set("-a,--algorithm", algorithm, algo_options);
 
     std::string glyph;
@@ -50,26 +56,31 @@ int main(int argc, char** argv) {
     font_opt->requires(glyph_opt);
     glyph_opt->requires(font_opt);
 
-    std::string png_path;
-    distfield->add_option("--image,-i", png_path)->excludes(glyph_opt);
+    std::string img_path;
+    CLI::Option *img_opt = distfield->add_option("--image,-i", img_path)->check(CLI::ExistingFile);
+    img_opt->excludes(glyph_opt);
 
     std::string out_path;
-    distfield->add_option("output", out_path)->required();
+    distfield->add_option("outfile", out_path)->required();
 
     CLI11_PARSE(app, argc, argv);
 
     if(app.got_subcommand(distfield)) {
-        if (distfield->count("-g")) {
+        std::unique_ptr<Image> input;
+        if (glyph_opt->count()) {
             // Example: llassetgen-cmd distfield -a parabola -g G --font="/Library/Fonts/Verdana.ttf" glyph.png
             if (glyph.length() != 1) {  // TODO convert from std::string to FT_ULong to allow non-ASCII
                 std::cerr << "--glyph must be a single character" << std::endl;
-                exit(2);
+                return 2;
             }
-            dtFromGlyph(algorithm, glyph[0], font_path, out_path);
-        } else if (distfield->count("-i")) {
-            // Example: llassetgen-cmd distfield -a dreck -i input.png output.png
-            dtFromPng(algorithm, png_path, out_path);
+            input = loadGlyph(glyph[0], font_path);
+        } else if (img_opt->count()) {
+            // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
+            input = std::unique_ptr<Image>(new Image(img_path));  // TODO error handling
         }
+
+        distField(algorithm, *input, out_path);
     }
+
     return 0;
 }
