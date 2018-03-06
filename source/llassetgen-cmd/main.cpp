@@ -87,6 +87,8 @@ int main(int argc, char** argv) {
         }
 
         distField(algorithm, *input, out_path);
+    } else {
+       return app.exit(CLI::CallForHelp());
     }
 
     return 0;
