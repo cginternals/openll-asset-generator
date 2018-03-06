@@ -92,6 +92,7 @@ namespace llassetgen {
             LLASSETGEN_NO_EXPORT bool packNextNoRotations(Vec2<PackingSizeType> rectSize);
             LLASSETGEN_NO_EXPORT bool packNextWithRotations(Vec2<PackingSizeType> rectSize);
             LLASSETGEN_NO_EXPORT void openNewShelf();
+            LLASSETGEN_NO_EXPORT bool storeMaybeGrow(Vec2<PackingSizeType> rectSize);
             LLASSETGEN_NO_EXPORT void store(Vec2<PackingSizeType> rectSize);
 
             Packing& packing;

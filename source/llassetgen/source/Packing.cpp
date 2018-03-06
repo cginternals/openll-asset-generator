@@ -25,18 +25,7 @@ namespace llassetgen {
                 }
             }
 
-            if (usedHeight + rectSize.y > packing.atlasSize.y) {
-                if (allowGrowth) {
-                    PackingSizeType finalHeight = usedHeight + rectSize.y;
-                    auto numDoublings = ceilLog2(ceilDiv(finalHeight, packing.atlasSize.y));
-                    packing.atlasSize.y <<= numDoublings;
-                } else {
-                    return false;
-                }
-            }
-
-            store(rectSize);
-            return true;
+            return storeMaybeGrow(rectSize);
         }
 
         bool ShelfNextFitPacker::packNextWithRotations(Vec2<PackingSizeType> rectSize) {
@@ -51,8 +40,8 @@ namespace llassetgen {
                 store({maxSide, minSide});
             } else {
                 openNewShelf();
-                return maxSide > packing.atlasSize.x ? packNextNoRotations({minSide, maxSide})
-                                                     : packNextNoRotations({maxSide, minSide});
+                return maxSide > packing.atlasSize.x ? storeMaybeGrow({minSide, maxSide})
+                                                     : storeMaybeGrow({maxSide, minSide});
             }
 
             return true;
@@ -61,6 +50,21 @@ namespace llassetgen {
         void ShelfNextFitPacker::openNewShelf() {
             usedHeight += currentShelfSize.y;
             currentShelfSize = {0, 0};
+        }
+
+        bool ShelfNextFitPacker::storeMaybeGrow(Vec2<PackingSizeType> rectSize) {
+            if (usedHeight + rectSize.y > packing.atlasSize.y) {
+                if (allowGrowth) {
+                    PackingSizeType finalHeight = usedHeight + rectSize.y;
+                    auto numDoublings = ceilLog2(ceilDiv(finalHeight, packing.atlasSize.y));
+                    packing.atlasSize.y <<= numDoublings;
+                } else {
+                    return false;
+                }
+            }
+
+            store(rectSize);
+            return true;
         }
 
         void ShelfNextFitPacker::store(Vec2<PackingSizeType> rectSize) {
