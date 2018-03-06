@@ -45,6 +45,7 @@ int main(int argc, char** argv) {
 
     CLI::App app{"OpenLL Font Asset Generator"};
     CLI::App *distfield = app.add_subcommand("distfield");
+    CLI::App *atlas = app.add_subcommand("atlas");
 
     // distfield params
     std::string algorithm = "deadrec";  // default value
@@ -69,6 +70,9 @@ int main(int argc, char** argv) {
     std::string out_path;
     distfield->add_option("outfile", out_path)->required();
 
+    // atlas params
+    // TODO
+
     CLI11_PARSE(app, argc, argv);
 
     if(app.got_subcommand(distfield)) {
@@ -87,6 +91,8 @@ int main(int argc, char** argv) {
         }
 
         distField(algorithm, *input, out_path);
+    } else if(app.got_subcommand(atlas)) {
+        // TODO
     } else {
        return app.exit(CLI::CallForHelp());
     }
