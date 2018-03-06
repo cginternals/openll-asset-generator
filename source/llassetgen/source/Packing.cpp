@@ -5,8 +5,8 @@
 
 using llassetgen::PackingSizeType;
 
-PackingSizeType ceilDiv(PackingSizeType divident, PackingSizeType divisor) {
-    return (divident + divisor - 1) / divisor;
+PackingSizeType ceilDiv(PackingSizeType dividend, PackingSizeType divisor) {
+    return (dividend + divisor - 1) / divisor;
 }
 
 namespace llassetgen {
