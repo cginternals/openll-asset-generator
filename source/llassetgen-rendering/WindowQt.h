@@ -51,6 +51,7 @@ class WindowQt : public QWindow {
     virtual void fontColorRChanged(QString value);
     virtual void fontColorGChanged(QString value);
     virtual void fontColorBChanged(QString value);
+    virtual void resetTransform3D();
 
    protected:
     QScopedPointer<QOpenGLContext> glcontext;

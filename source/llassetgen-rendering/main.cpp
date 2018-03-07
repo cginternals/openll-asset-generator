@@ -12,10 +12,13 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QPushButton>
 #include <QResizeEvent>
 #include <QValidator>
 
 #include <glm/glm.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <glbinding/ContextInfo.h>
 #include <glbinding/Version.h>
@@ -117,6 +120,7 @@ class Window : public WindowQt {
         vao->binding(0)->setFormat(2, GL_FLOAT);
         vao->enable(0);
 
+        program->setUniform("transform3D", transform3D);
         program->setUniform("glyphs", samplerIndex);
         program->setUniform("fontColor", fontColor);
     }
@@ -151,6 +155,7 @@ class Window : public WindowQt {
         }
 
         program->use();
+        program->setUniform("transform3D", transform3D);
         program->setUniform("fontColor", fontColor);
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         program->release();
@@ -217,6 +222,9 @@ class Window : public WindowQt {
         // TODO implement zooming
         // if delta is < 0, then zooming in (it's what I would expect)
         std::cout << "zoom " << event->delta() << std::endl;
+        auto d = event->delta() / 100.f;
+        //glm::tranzlate towards z ? scale?
+        //transform3D = glm::scale(transform3D, glm::vec3(d));
     }
 
     void applyColorChange(float &color, QString value) {
@@ -237,6 +245,12 @@ class Window : public WindowQt {
 
     virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
+    virtual void resetTransform3D() override {
+        //TODO
+        std::cout << "RESET" << std::endl;
+        transform3D = glm::mat4(); // set identity
+    }
+
    protected:
     std::unique_ptr<globjects::Buffer> cornerBuffer;
     std::unique_ptr<globjects::Program> program;
@@ -253,6 +267,7 @@ class Window : public WindowQt {
     glm::vec4 backgroundColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
     glm::vec4 fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     int samplerIndex = 0;
+    glm::mat4 transform3D = glm::mat4();
 
     bool isPanning = false;
     bool isRotating = false;
@@ -347,10 +362,24 @@ void setupGUI(QMainWindow *window) {
     QObject::connect(backgroundB, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorBChanged(QString)));
     backgroundColorLayout->addRow(labelB, backgroundB);
 
+    // MISCELLANEOUS GUI
+
+    auto miscGroupBox = new QGroupBox("Miscellaneous");
+    miscGroupBox->setMaximumHeight(150);
+    auto miscLayout = new QFormLayout();
+    miscGroupBox->setLayout(miscLayout);
+
+    // reset transform 3D to inital state
+    auto *resetButton = new QPushButton("Reset"); // TODO or reset camera? navigation?
+    resetButton->setMaximumWidth(90);
+    QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
+    miscLayout->addRow("Reset View", resetButton);
+
     // gather all parameters into one layout (separately from the gl window)
     auto *guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
     guiLayout->addWidget(backgroundColorGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(fontColorGroupBox, 0, Qt::AlignLeft);
+    guiLayout->addWidget(miscGroupBox, 0, Qt::AlignLeft);
 
     auto *mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
     mainLayout->addLayout(guiLayout, 0);
