@@ -9,7 +9,6 @@
 #include <QBoxLayout>
 #include <QFormLayout>
 #include <QGroupBox>
-#include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QResizeEvent>
@@ -251,27 +250,21 @@ void setupGUI(QMainWindow *window) {
 
     // font Color RED
     auto *fontR = new QLineEdit();
-    auto *labelFontR = new QLabel("R:");
-    labelFontR->setMaximumWidth(90);
     prepareColorInput(fontR, "0");
     QObject::connect(fontR, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorRChanged(QString)));
-    fontColorLayout->addRow(labelFontR, fontR);
+    fontColorLayout->addRow("R:", fontR);
 
     // font Color GREEN
     auto *fontG = new QLineEdit();
-    auto *labelFontG = new QLabel("G:");
-    labelFontG->setMaximumWidth(90);
     prepareColorInput(fontG, "0");
     QObject::connect(fontG, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorGChanged(QString)));
-    fontColorLayout->addRow(labelFontG, fontG);
+    fontColorLayout->addRow("G:", fontG);
 
     // font Color BLUE
     auto *fontB = new QLineEdit();
-    auto *labelFontB = new QLabel("B:");
-    labelFontB->setMaximumWidth(90);
     prepareColorInput(fontB, "0");
     QObject::connect(fontB, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorBChanged(QString)));
-    fontColorLayout->addRow(labelFontB, fontB);
+    fontColorLayout->addRow("B:", fontB);
 
     // BACKGROUND COLOR
 
@@ -282,27 +275,21 @@ void setupGUI(QMainWindow *window) {
 
     // Background Color RED
     auto *backgroundR = new QLineEdit();
-    auto *labelR = new QLabel("R");
-    labelR->setMaximumWidth(90);
     prepareColorInput(backgroundR, "255");
     QObject::connect(backgroundR, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorRChanged(QString)));
-    backgroundColorLayout->addRow(labelR, backgroundR);
+    backgroundColorLayout->addRow("R:", backgroundR);
 
     // Background Color GREEN
     auto *backgroundG = new QLineEdit();
-    auto *labelG = new QLabel("G");
-    labelG->setMaximumWidth(90);
     prepareColorInput(backgroundG, "255");
     QObject::connect(backgroundG, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorGChanged(QString)));
-    backgroundColorLayout->addRow(labelG, backgroundG);
+    backgroundColorLayout->addRow("G:", backgroundG);
 
     // Background Color BLUE
     auto *backgroundB = new QLineEdit();
-    auto *labelB = new QLabel("B");
-    labelB->setMaximumWidth(90);
     prepareColorInput(backgroundB, "255");
     QObject::connect(backgroundB, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorBChanged(QString)));
-    backgroundColorLayout->addRow(labelB, backgroundB);
+    backgroundColorLayout->addRow("B:", backgroundB);
 
     // gather all parameters into one layout (separately from the gl window)
     auto *guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
