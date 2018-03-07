@@ -5,3 +5,4 @@ ColumnLimit: 120
 NamespaceIndentation: All
 FixNamespaceComments: false
 Standard: Cpp11
+DerivePointerAlignment: false
