@@ -157,4 +157,4 @@ void WindowQt::fontColorGChanged(QString /*unused*/) {}
 
 void WindowQt::fontColorBChanged(QString /*unused*/) {}
 
-void WindowQt::resetTransform3D() {};
+void WindowQt::resetTransform3D() {}
