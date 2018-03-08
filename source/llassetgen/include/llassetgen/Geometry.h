@@ -28,6 +28,9 @@ namespace llassetgen {
         Vec2<T> size{0, 0};
 
         Rect(const Vec2<T>& _position, const Vec2<T>& _size);
+
+        bool operator==(const Rect& other) const;
+        bool operator!=(const Rect& other) const;
     };
 
     template <class T>
@@ -71,6 +74,16 @@ namespace llassetgen {
 
     template <class T>
     Rect<T>::Rect(const Vec2<T>& _position, const Vec2<T>& _size) : position{_position}, size{_size} {}
+
+    template <class T>
+    bool Rect<T>::operator==(const Rect& other) const {
+        return position == other.position && size == other.size;
+    }
+
+    template <class T>
+    bool Rect<T>::operator!=(const Rect& other) const {
+        return !(*this == other);
+    }
 
     template <class T>
     std::ostream& operator<<(std::ostream& out, const Vec2<T>& vec) {
