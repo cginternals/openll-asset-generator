@@ -1,6 +1,5 @@
-#include <llassetgen/Packing.h>
+#include <llassetgen/packing/internal/ShelfPacker.h>
 
-#include <algorithm>
 #include <tuple>
 
 using llassetgen::PackingSizeType;
@@ -10,8 +9,6 @@ PackingSizeType ceilDiv(PackingSizeType dividend, PackingSizeType divisor) {
 }
 
 namespace llassetgen {
-    Packing::Packing(Vec2<PackingSizeType> _atlasSize) : atlasSize{_atlasSize} {}
-
     namespace internal {
         bool ShelfNextFitPacker::packNext(Vec2<PackingSizeType> rectSize) {
             return allowRotations ? packNextWithRotations(rectSize) : packNextNoRotations(rectSize);
