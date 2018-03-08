@@ -119,7 +119,8 @@ class Window : public WindowQt {
         vao->binding(0)->setFormat(2, GL_FLOAT);
         vao->enable(0);
 
-        program->setUniform("transform3D", transform3D);
+        program->setUniform("projection", projection);
+        program->setUniform("modelView", transform3D);
         program->setUniform("glyphs", samplerIndex);
         program->setUniform("fontColor", fontColor);
     }
@@ -154,7 +155,7 @@ class Window : public WindowQt {
         }
 
         program->use();
-        program->setUniform("transform3D", transform3D);
+        program->setUniform("modelView", transform3D);
         program->setUniform("fontColor", fontColor);
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         program->release();
@@ -187,6 +188,9 @@ class Window : public WindowQt {
     virtual void mousePressEvent(QMouseEvent* event) override {
         makeCurrent();
 
+        lastMousePos.x = event->x();
+        lastMousePos.y = event->y();
+
         if (event->button() == Qt::LeftButton) {
             isPanning = true;
         } else if (event->button() == Qt::RightButton) {
@@ -197,13 +201,28 @@ class Window : public WindowQt {
     }
 
     virtual void mouseMoveEvent(QMouseEvent* event) override {
+        auto speed = 0.005f;  // magic.
+
         makeCurrent();
 
         if ((event->buttons() & Qt::LeftButton) && isPanning) {
-            // TODO implement panning
-        }
-        if ((event->buttons() & Qt::RightButton) && isRotating) {
-            // TODO implement rotating
+            auto deltaX = (event->x() - lastMousePos.x) * speed;
+            auto deltaY = (event->y() - lastMousePos.y) * speed * -1;  // minus one because of Qt widget positions.
+
+            transform3D = glm::translate(transform3D, glm::vec3(deltaX, deltaY, 0));
+
+            lastMousePos.x = event->x();
+            lastMousePos.y = event->y();
+
+            paint();
+        } else if ((event->buttons() & Qt::RightButton) && isRotating) {
+            // TODO calculate angle?
+            // transform3D = glm::rotate(transform3D,
+
+            lastMousePos.x = event->x();
+            lastMousePos.y = event->y();
+
+            paint();
         }
 
         doneCurrent();
@@ -218,12 +237,13 @@ class Window : public WindowQt {
     }
 
     virtual void wheelEvent(QWheelEvent* event) override {
-        // TODO implement zooming
-        // if delta is < 0, then zooming in (it's what I would expect)
-        std::cout << "zoom " << event->delta() << std::endl;
-        auto d = event->delta() / 100.f;
-        // glm::tranzlate towards z ? scale?
-        // transform3D = glm::scale(transform3D, glm::vec3(d));
+        auto speed = 0.001f;  // magic.
+
+        auto d = event->delta() * speed;
+
+        transform3D = glm::translate(transform3D, glm::vec3(0, 0, d));
+
+        paint();
     }
 
     void applyColorChange(float& color, QString value) {
@@ -245,9 +265,9 @@ class Window : public WindowQt {
     virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
     virtual void resetTransform3D() override {
-        // TODO
         std::cout << "RESET" << std::endl;
         transform3D = glm::mat4();  // set identity
+        paint();
     }
 
    protected:
@@ -267,10 +287,12 @@ class Window : public WindowQt {
     glm::vec4 fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     int samplerIndex = 0;
     glm::mat4 transform3D = glm::mat4();
+    glm::mat4 projection = glm::perspective(45.f, 1.f, 0.1f, 100.f);
 
     bool isPanning = false;
     bool isRotating = false;
     bool isZooming = false;
+    glm::vec2 lastMousePos = glm::vec2();
 };
 
 void prepareColorInput(QLineEdit* input, const QString placeholder) {
