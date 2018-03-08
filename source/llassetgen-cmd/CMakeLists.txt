@@ -2,7 +2,9 @@
 # External dependencies
 #
 
-# find_package(THIRDPARTY REQUIRED)
+if(UNIX)
+    find_package(fontconfig)
+endif()
 
 
 #
@@ -71,6 +73,13 @@ target_link_libraries(${target}
     ${DEFAULT_LIBRARIES}
     ${META_PROJECT_NAME}::llassetgen
 )
+
+if (UNIX)
+    target_link_libraries(${target}
+        PRIVATE
+        fontconfig
+    )
+endif ()
 
 
 #
