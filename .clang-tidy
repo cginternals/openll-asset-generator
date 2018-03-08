@@ -3,6 +3,13 @@
 # cppcoreguidelines-pro-bounds-constant-array-index: Causes false positives when using assert
 #
 # All others are code style differences
-Checks: '*,-android-*,-llvm-namespace-comment,-readability-implicit-bool-cast,-llvm-header-guard,-google-readability-namespace-comments,-cppcoreguidelines-pro-bounds-array-to-pointer-decay'
+Checks: "*,\
+         -android-*,\
+         -llvm-namespace-comment,\
+         -readability-implicit-bool-cast,\
+         -llvm-header-guard,\
+         -google-readability-namespace-comments,\
+         -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
+         -google-runtime-references"
 HeaderFilterRegex: '.*'
 ...
