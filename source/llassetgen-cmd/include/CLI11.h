@@ -256,6 +256,7 @@ enum class ExitCodes {
     ValidationError,
     RequiredError,
     RequiresError,
+    RequiresOneError,
     ExcludesError,
     ExtrasError,
     INIError,
@@ -443,6 +444,13 @@ class RequiresError : public ParseError {
     CLI11_ERROR_DEF(ParseError, RequiresError)
     RequiresError(std::string curname, std::string subname)
         : RequiresError(curname + " requires " + subname, ExitCodes::RequiresError) {}
+};
+
+/// Thrown when all requires one options are missing
+class RequiresOneError : public ParseError {
+    CLI11_ERROR_DEF(ParseError, RequiresOneError)
+    RequiresOneError(std::string curname, std::string subnames)
+        : RequiresOneError(curname + " requires one of " + subnames, ExitCodes::RequiresOneError) {}
 };
 
 /// Thrown when an excludes option is present
@@ -1036,6 +1044,9 @@ class Option : public OptionBase<Option> {
     /// A list of options that are required with this option
     std::set<Option *> requires_;
 
+    /// A list of lists of options. From each list, at least one option is required
+    std::set<std::set<Option *>> requires_one_;
+
     /// A list of options that are excluded with this option
     std::set<Option *> excludes_;
 
@@ -1127,6 +1138,13 @@ class Option : public OptionBase<Option> {
         auto tup = requires_.insert(opt);
         if(!tup.second)
             throw OptionAlreadyAdded::Requires(get_name(), opt->get_name());
+        return this;
+    }
+
+    /// Sets requires one options
+    Option *requires_one(std::initializer_list<Option *> opts) {
+        std::set<Option *> opts_set{opts};
+        requires_one_.insert(opts_set);
         return this;
     }
 
@@ -1291,6 +1309,16 @@ class Option : public OptionBase<Option> {
             for(const Option *opt : requires_)
                 out << " " << opt->get_name();
         }
+        if(!requires_one_.empty()) {
+            out << " Requires one of:";
+            for(const auto opts_set : requires_one_) {
+                out << " {";
+                for(const Option *opt : opts_set) {
+                    out << " " << opt->get_name();
+                }
+                out << " }";
+            }
+        }
         if(!excludes_.empty()) {
             out << " Excludes:";
             for(const Option *opt : excludes_)
@@ -1447,7 +1475,7 @@ class Option : public OptionBase<Option> {
     ///@{
     /// Can print positional name detailed option if true
     bool _has_help_positional() const {
-        return get_positional() && (has_description() || !requires_.empty() || !excludes_.empty());
+        return get_positional() && (has_description() || !requires_.empty() || ! requires_one_.empty() || !excludes_.empty());
     }
     ///@}
 };
@@ -2599,6 +2627,21 @@ class App {
             for(const Option *opt_req : opt->requires_)
                 if(opt->count() > 0 && opt_req->count() == 0)
                     throw RequiresError(opt->single_name(), opt_req->single_name());
+            // Requires one
+            for(const auto opts_set : opt->requires_one_) {
+                bool found = std::any_of(opts_set.begin(), opts_set.end(), [](Option *o){return o->count();});
+                if(opt->count() && !found) {
+                    std::string required_opts = std::accumulate(
+                        opts_set.begin(),
+                        opts_set.end(),
+                        std::string(),
+                        [](std::string current, Option *opt) {
+                            return current + opt->single_name()+ ", ";
+                        }
+                    );
+                    throw RequiresOneError(opt->single_name(), required_opts);
+                }
+            }
             // Excludes
             for(const Option *opt_ex : opt->excludes_)
                 if(opt->count() > 0 && opt_ex->count() != 0)
