@@ -90,6 +90,8 @@ int main(int argc, char** argv) {
         } else if (img_opt->count()) {
             // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
             input = std::unique_ptr<Image>(new Image(img_path));  // TODO error handling
+        } else {
+            return distfield->exit(CLI::CallForHelp());
         }
 
         distField(algorithm, *input, out_path);
