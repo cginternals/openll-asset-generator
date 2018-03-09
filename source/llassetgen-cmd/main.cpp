@@ -8,7 +8,8 @@
 #ifdef __unix__
 #include <fontconfig/fontconfig.h>
 #elif _WIN32
-// TODO
+#include <windows.h>
+#include <wingdi.h>
 #endif
 
 #include <llassetgen/llassetgen.h>
@@ -51,7 +52,7 @@ std::unique_ptr<Image> loadGlyphFromPath(const std::string& glyph, const std::st
     return renderGlyph(ucs4Glyph[0], face);
 }
 
-#ifdef __linux__
+#ifdef __unix__
 bool findFontPath(const std::string& fontName, std::string& fontPath) {
     FcConfig* config = FcInitLoadConfigAndFonts();
     FcPattern* pat = FcNameParse(reinterpret_cast<const FcChar8*>(fontName.c_str()));
@@ -83,18 +84,45 @@ std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::st
     return loadGlyphFromPath(glyph, fontPath);
 }
 #elif _WIN32
-std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::string& font_name) {
+bool getFontData(const std::string& fontName, std::vector<unsigned char>& fontData) {
+	bool result = false;
+
+	LOGFONTA lf;
+	memset(&lf, 0, sizeof lf);
+	strncpy_s(lf.lfFaceName, LF_FACESIZE, fontName.c_str(), fontName.size());
+	HFONT font = CreateFontIndirectA(&lf);
+
+	HDC deviceContext = CreateCompatibleDC(nullptr);
+	if (deviceContext) {
+		SelectObject(deviceContext, font);
+
+		const size_t size = GetFontData(deviceContext, 0, 0, nullptr, 0);
+		if (size > 0 && size != GDI_ERROR) {
+			auto buffer = new unsigned char[size];
+			if (GetFontData(deviceContext, 0, 0, buffer, size) == size) {
+				fontData.assign(buffer, buffer + size);
+				result = true;
+			}
+			delete[] buffer;
+		}
+		DeleteDC(deviceContext);
+	}
+	return result;
+}
+
+std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::string& fontName) {
     std::u32string ucs4Glyph = convertToUCS4(glyph);
     if (ucs4Glyph.length() != 1) {
         std::cerr << "--glyph must be a single character" << std::endl;
         return nullptr;
     }
 
-// TODO get font data
-    FT_Long dataLen;
-    FTByte fontData[dataLen];
+    std::vector<FT_Byte> fontData;
+    if (!getFontData(fontName, fontData))
+        return nullptr;
+
     FT_Face face;
-    FT_New_Memory_Face(freetype, fontData, dataLen, 0, &face);
+    FT_New_Memory_Face(freetype, &fontData[0], fontData.size(), 0, &face);
     return renderGlyph(ucs4Glyph[0], face);
 }
 #endif
