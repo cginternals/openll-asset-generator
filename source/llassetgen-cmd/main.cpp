@@ -135,7 +135,7 @@ void distField(std::string& algorithm, Image& input, std::string& outPath) {
     Image output = Image(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
     std::unique_ptr<DistanceTransform> dt = dtFactory[algorithm](input, output);
     dt->transform();
-    input.exportPng<DistanceTransform::OutputType>(outPath, -20, 50);
+    output.exportPng<DistanceTransform::OutputType>(outPath, -20, 50);
 }
 
 int main(int argc, char** argv) {
@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
                                          : loadGlyphFromName(glyph, fontName, fontSize);
         } else if (imgOpt->count()) {
             // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
-            input = std::unique_ptr<Image>(new Image(imgPath));  // TODO error handling
+            input = std::unique_ptr<Image>(new Image(imgPath));
         } else {
             return distfield->exit(CLI::CallForHelp());
         }
