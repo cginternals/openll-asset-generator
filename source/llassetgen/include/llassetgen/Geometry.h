@@ -99,10 +99,8 @@ namespace llassetgen {
 
     template <class T>
     bool Rect<T>::overlaps(const Rect<T>& other) const {
-        return position.x < other.position.x + other.size.x &&
-               position.x + size.x > other.position.x &&
-               position.y < other.position.y + other.size.y &&
-               position.y + size.y > other.position.y;
+        return position.x < other.position.x + other.size.x && position.x + size.x > other.position.x &&
+               position.y < other.position.y + other.size.y && position.y + size.y > other.position.y;
     }
 
     template <class T>
