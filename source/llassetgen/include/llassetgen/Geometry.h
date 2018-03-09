@@ -27,8 +27,10 @@ namespace llassetgen {
         Vec2<T> position{0, 0};
         Vec2<T> size{0, 0};
 
+        Rect() = default;
         Rect(const Vec2<T>& _position, const Vec2<T>& _size);
 
+        bool contains(const Rect& other) const;
         bool overlaps(const Rect& other) const;
 
         bool operator==(const Rect& other) const;
@@ -85,6 +87,14 @@ namespace llassetgen {
     template <class T>
     bool Rect<T>::operator!=(const Rect& other) const {
         return !(*this == other);
+    }
+
+    template <class T>
+    bool Rect<T>::contains(const Rect<T>& other) const {
+        auto thisMaxPoint = position + size;
+        auto otherMaxPoint = other.position + other.size;
+        return position.x <= other.position.x && position.y <= other.position.y && thisMaxPoint.x >= otherMaxPoint.x &&
+               thisMaxPoint.y >= otherMaxPoint.y;
     }
 
     template <class T>

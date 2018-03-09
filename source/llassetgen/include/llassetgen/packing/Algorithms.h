@@ -4,6 +4,7 @@
 
 #include <llassetgen/packing/Types.h>
 #include <llassetgen/packing/internal/Common.h>
+#include <llassetgen/packing/internal/MaxRectsPacker.h>
 #include <llassetgen/packing/internal/ShelfPacker.h>
 
 namespace llassetgen {
