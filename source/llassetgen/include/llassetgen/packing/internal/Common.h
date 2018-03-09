@@ -131,5 +131,18 @@ namespace llassetgen {
 
             return packing;
         }
+
+        class LLASSETGEN_API BasePacker {
+           public:
+            Vec2<PackingSizeType> atlasSize() const { return atlasSize_; }
+
+           protected:
+            BasePacker(const Vec2<PackingSizeType>& initialAtlasSize, bool _allowRotations, bool _allowGrowth)
+                : atlasSize_{initialAtlasSize}, allowRotations{_allowRotations}, allowGrowth{_allowGrowth} {}
+
+            Vec2<PackingSizeType> atlasSize_;
+            bool allowRotations;
+            bool allowGrowth;
+        };
     }
 }
