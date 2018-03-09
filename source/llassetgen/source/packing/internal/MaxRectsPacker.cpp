@@ -92,7 +92,7 @@ PackingSizeType bssfScore(const Rect<PackingSizeType>& free, const Rect<PackingS
 
 class BssfComparer {
    public:
-    explicit BssfComparer(const Rect<PackingSizeType>& toBePlaced) : toBePlaced(toBePlaced) {}
+    explicit BssfComparer(const Rect<PackingSizeType>& _toBePlaced) : toBePlaced(_toBePlaced) {}
 
     bool operator()(const Rect<PackingSizeType>& free1, const Rect<PackingSizeType>& free2) {
         return bssfScore(free1, toBePlaced) < bssfScore(free2, toBePlaced);
@@ -106,12 +106,17 @@ namespace llassetgen {
     namespace internal {
         bool MaxRectsPacker::pack(Rect<PackingSizeType>& rect) {
             // TODO: Implement sorting of rectangles (DESCSS)
-            // TODO: Implement growing
-            assert(!allowGrowth);
 
-            auto& freeRect = findFreeRect(rect);
-            if (!canContain(freeRect, rect)) {
-                return false;
+            Rect<PackingSizeType>& freeRect = findFreeRect(rect);
+            if (allowGrowth) {
+                while (!canContain(freeRect, rect)) {
+                    grow();
+                    freeRect = findFreeRect(rect);
+                }
+            } else {
+                if (!canContain(freeRect, rect)) {
+                    return false;
+                }
             }
 
             rect.position = freeRect.position;
@@ -119,6 +124,26 @@ namespace llassetgen {
             pruneFreeList();
 
             return true;
+        }
+
+        void MaxRectsPacker::grow() {
+            if (atlasSize_.x > atlasSize_.y) {
+                for (auto& freeRect : freeList) {
+                    if (freeRect.position.y + freeRect.size.y == atlasSize_.y) {
+                        freeRect.size.y += atlasSize_.y;
+                    }
+                }
+
+                atlasSize_.y *= 2;
+            } else {
+                for (auto& freeRect : freeList) {
+                    if (freeRect.position.x + freeRect.size.x == atlasSize_.x) {
+                        freeRect.size.x += atlasSize_.x;
+                    }
+                }
+
+                atlasSize_.x *= 2;
+            }
         }
 
         Rect<PackingSizeType>& MaxRectsPacker::findFreeRect(Rect<PackingSizeType>& rect) {
