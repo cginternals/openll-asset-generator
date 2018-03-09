@@ -68,23 +68,20 @@ install:
 - echo %PATH%
 
 before_build:
-- cmd: >-
+- cmd: |-
     SET
     
     mkdir build
-    
     cd build
-    
     cmake --version
     
     echo %QT5_DIR%
-
     cmake .. -G %generator% -DQT5_DIR=%QT%_DIR% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DPNG_PNG_INCLUDE_DIR=%PNG_PNG_INCLUDE_DIR% -DPNG_LIBRARY_RELEASE=%PNG_LIBRARY_RELEASE% -DPNG_LIBRARY_DEBUG=%PNG_LIBRARY_DEBUG% -DFREETYPE_LIBRARY=%FREETYPE_LIBRARY% -DFREETYPE_INCLUDE_DIRS=%FREETYPE_INCLUDE_DIRS% -DCMAKE_TOOLCHAIN_FILE=c:/tools/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 build:
   project: c:\projects\llassetgen\build\llassetgen.sln
   verbosity: minimal
-  parallel: true 
+  parallel: true
 only_commits:
   files:
     - CMakeLists.txt
