@@ -33,6 +33,7 @@ set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/${target}")
 set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(headers
+    ${include_path}/packing/internal/Common.h
     ${include_path}/packing/internal/ShelfPacker.h
     ${include_path}/packing/Algorithms.h
     ${include_path}/packing/Types.h
@@ -45,6 +46,7 @@ set(headers
 set(sources
     ${source_path}/llassetgen.cpp
     ${source_path}/DistanceTransform.cpp
+    ${source_path}/packing/internal/Common.cpp
     ${source_path}/packing/internal/ShelfPacker.cpp
 )
 

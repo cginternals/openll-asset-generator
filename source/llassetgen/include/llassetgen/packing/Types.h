@@ -18,7 +18,5 @@ namespace llassetgen {
         std::vector<Rect<PackingSizeType>> rects{};
 
         Packing() = default;
-
-        explicit Packing(Vec2<PackingSizeType> _atlasSize) : atlasSize{_atlasSize} {};
     };
 }
