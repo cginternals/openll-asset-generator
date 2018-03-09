@@ -7,6 +7,7 @@
 using llassetgen::Packing;
 
 using Vec = llassetgen::Vec2<llassetgen::PackingSizeType>;
+using Rect = llassetgen::Rect<llassetgen::PackingSizeType>;
 
 /**
  * Base class for all packing test fixtures.
@@ -19,6 +20,10 @@ class PackingTest : public testing::Test {
     virtual Packing run(const std::vector<Vec>& rectSizes, bool allowRotations) = 0;
 
     static bool rotatedSizesEquals(Vec size1, Vec size2) { return size1 == size2 || size1 == Vec{size2.y, size2.x}; }
+
+    static bool doNotOverlap(const Rect& rect1, const Rect& rect2) {
+        return !rect1.overlaps(rect2);
+    }
 
     /**
      * Expect a fixed size packing to succeed and validate the result.
@@ -38,7 +43,7 @@ class PackingTest : public testing::Test {
     void validatePacking(Packing packing, const std::vector<Vec>& rectSizes, bool allowRotations);
 
     void expectPackingFailure(const std::vector<Vec>& rectSizes, bool allowRotations, Vec atlasSize) {
-        std::vector<llassetgen::Rect<llassetgen::PackingSizeType>> emptyVec{};
+        std::vector<Rect> emptyVec{};
         EXPECT_EQ(emptyVec, run(rectSizes, allowRotations, atlasSize).rects);
     }
 
@@ -94,6 +99,10 @@ void PackingTest::validatePacking(Packing packing, const std::vector<Vec>& rectS
         EXPECT_LE(0, rect.position.y);
         EXPECT_GE(packing.atlasSize.x, rect.position.x + rect.size.x);
         EXPECT_GE(packing.atlasSize.y, rect.position.y + rect.size.y);
+
+        for (size_t j = i + 1; j < packing.rects.size(); j++) {
+            EXPECT_PRED2(doNotOverlap, rect, packing.rects[j]);
+        }
     }
 }
 
