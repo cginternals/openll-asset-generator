@@ -35,7 +35,6 @@ addons:
       - clang-tidy-3.8
       - libfreetype6-dev
       - libpng-dev
-      - qt5-default
 
 before_install:
   - |-
@@ -43,7 +42,7 @@ before_install:
       sudo apt-add-repository ppa:cginternals/ppa -y;
       sudo apt-add-repository ppa:cginternals/backports-ppa -y;
       sudo apt-get update -qq;
-      sudo apt-get install -qq libglm-dev libglbinding-dev libglobjects-dev;
+      sudo apt-get install -qq qt5-default libglm-dev libglbinding-dev libglobjects-dev;
     fi  # libpng is already installed by default
   - |-
     if [ $TRAVIS_OS_NAME == osx ]; then
