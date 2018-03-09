@@ -29,9 +29,14 @@ std::map<std::string, std::function<std::unique_ptr<DistanceTransform>(Image&, I
 };
 
 std::unique_ptr<Image> renderGlyph(FT_ULong glyph, const FT_Face& face) {
-    assert(FT_Set_Pixel_Sizes(face, 0, 128) == 0);
-    assert(FT_Load_Glyph(face, FT_Get_Char_Index(face, glyph), FT_LOAD_RENDER | FT_LOAD_TARGET_MONO) == 0);
-    auto bitmap = std::shared_ptr<FT_Bitmap_>(new FT_Bitmap_(face->glyph->bitmap));
+    FT_Error err;
+    err = FT_Set_Pixel_Sizes(face, 0, 128);
+    if (err) return nullptr;
+
+    err = FT_Load_Glyph(face, FT_Get_Char_Index(face, glyph), FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
+    if (err) return nullptr;
+
+    auto bitmap = std::shared_ptr<FT_Bitmap>(new FT_Bitmap(face->glyph->bitmap));
     return std::unique_ptr<Image>(new Image(*bitmap));
 }
 
@@ -48,8 +53,8 @@ std::unique_ptr<Image> loadGlyphFromPath(const std::string& glyph, const std::st
     }
 
     FT_Face face;
-    assert(FT_New_Face(freetype, font_path.c_str(), 0, &face) == 0);
-    return renderGlyph(ucs4Glyph[0], face);
+    FT_Error err = FT_New_Face(freetype, font_path.c_str(), 0, &face);
+    return err ? nullptr : renderGlyph(ucs4Glyph[0], face);
 }
 
 #ifdef __unix__
@@ -75,9 +80,9 @@ bool findFontPath(const std::string& fontName, std::string& fontPath) {
     return found;
 }
 
-std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::string& font_name) {
+std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::string& fontName) {
     std::string fontPath;
-    if (!findFontPath(font_name, fontPath)) {
+    if (!findFontPath(fontName, fontPath)) {
         std::cerr << "Font not found" << std::endl;
         return nullptr;
     }
@@ -122,8 +127,8 @@ std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::st
         return nullptr;
 
     FT_Face face;
-    FT_New_Memory_Face(freetype, &fontData[0], fontData.size(), 0, &face);
-    return renderGlyph(ucs4Glyph[0], face);
+    FT_Error err = FT_New_Memory_Face(freetype, &fontData[0], fontData.size(), 0, &face);
+    return err ? nullptr : renderGlyph(ucs4Glyph[0], face);
 }
 #endif
 
@@ -185,6 +190,10 @@ int main(int argc, char** argv) {
             input = std::unique_ptr<Image>(new Image(img_path));  // TODO error handling
         } else {
             return distfield->exit(CLI::CallForHelp());
+        }
+
+        if (!input) {
+            return 2;
         }
 
         distField(algorithm, *input, out_path);
