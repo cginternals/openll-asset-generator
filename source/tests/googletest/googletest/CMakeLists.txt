@@ -8,6 +8,7 @@
 # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
 # make it prominent in the GUI.
 option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
+set(BUILD_SHARED_LIBS OFF)
 
 # When other libraries are using a shared version of runtime libraries,
 # Google Test also has to use one.
@@ -94,12 +95,16 @@ endif()
 # Defines the gtest & gtest_main libraries.  User tests should link
 # with one of them.
 
+set(CMAKE_MACOSX_RPATH OFF)
+
 # Google Test libraries.  We build them using more strict warnings than what
 # are used for other targets, to ensure that gtest can be compiled by a user
 # aggressive about warnings.
 cxx_library(gtest "${cxx_strict}" src/gtest-all.cc)
 cxx_library(gtest_main "${cxx_strict}" src/gtest_main.cc)
 target_link_libraries(gtest_main gtest)
+set_target_properties(gtest_main PROPERTIES FOLDER "Tests")
+set_target_properties(gtest      PROPERTIES FOLDER "Tests")
 
 # If the CMake version supports it, attach header directory information
 # to the targets for when we are part of a parent build (ie being pulled
@@ -112,26 +117,26 @@ endif()
 ########################################################################
 #
 # Install rules
-if(INSTALL_GTEST)
-  install(TARGETS gtest gtest_main
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-  install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+# if(INSTALL_GTEST)
+#   install(TARGETS gtest gtest_main
+#     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+#     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+#   install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
+#     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-  # configure and install pkgconfig files
-  configure_file(
-    cmake/gtest.pc.in
-    "${CMAKE_BINARY_DIR}/gtest.pc"
-    @ONLY)
-  configure_file(
-    cmake/gtest_main.pc.in
-    "${CMAKE_BINARY_DIR}/gtest_main.pc"
-    @ONLY)
-  install(FILES "${CMAKE_BINARY_DIR}/gtest.pc" "${CMAKE_BINARY_DIR}/gtest_main.pc"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-endif()
+#   # configure and install pkgconfig files
+#   configure_file(
+#     cmake/gtest.pc.in
+#     "${CMAKE_BINARY_DIR}/gtest.pc"
+#     @ONLY)
+#   configure_file(
+#     cmake/gtest_main.pc.in
+#     "${CMAKE_BINARY_DIR}/gtest_main.pc"
+#     @ONLY)
+#   install(FILES "${CMAKE_BINARY_DIR}/gtest.pc" "${CMAKE_BINARY_DIR}/gtest_main.pc"
+#     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+# endif()
 
 ########################################################################
 #

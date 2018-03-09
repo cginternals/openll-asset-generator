@@ -8,6 +8,7 @@
 # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
 # make it prominent in the GUI.
 option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
+set(BUILD_SHARED_LIBS OFF)
 
 option(gmock_build_tests "Build all of Google Mock's own tests." OFF)
 
@@ -85,6 +86,8 @@ endif()
 # Defines the gmock & gmock_main libraries.  User tests should link
 # with one of them.
 
+set(CMAKE_MACOSX_RPATH OFF)
+
 # Google Mock libraries.  We build them using more strict warnings than what
 # are used for other targets, to ensure that Google Mock can be compiled by
 # a user aggressive about warnings.
@@ -99,6 +102,9 @@ cxx_library(gmock_main
             src/gmock-all.cc
             src/gmock_main.cc)
 
+set_target_properties(gmock_main PROPERTIES FOLDER "Tests")
+set_target_properties(gmock      PROPERTIES FOLDER "Tests")
+
 # If the CMake version supports it, attach header directory information
 # to the targets for when we are part of a parent build (ie being pulled
 # in via add_subdirectory() rather than being a standalone build).
@@ -110,26 +116,26 @@ endif()
 ########################################################################
 #
 # Install rules
-if(INSTALL_GMOCK)
-  install(TARGETS gmock gmock_main
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-  install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+# if(INSTALL_GMOCK)
+#   install(TARGETS gmock gmock_main
+#     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+#     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+#   install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
+#     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-  # configure and install pkgconfig files
-  configure_file(
-    cmake/gmock.pc.in
-    "${CMAKE_BINARY_DIR}/gmock.pc"
-    @ONLY)
-  configure_file(
-    cmake/gmock_main.pc.in
-    "${CMAKE_BINARY_DIR}/gmock_main.pc"
-    @ONLY)
-  install(FILES "${CMAKE_BINARY_DIR}/gmock.pc" "${CMAKE_BINARY_DIR}/gmock_main.pc"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-endif()
+#   # configure and install pkgconfig files
+#   configure_file(
+#     cmake/gmock.pc.in
+#     "${CMAKE_BINARY_DIR}/gmock.pc"
+#     @ONLY)
+#   configure_file(
+#     cmake/gmock_main.pc.in
+#     "${CMAKE_BINARY_DIR}/gmock_main.pc"
+#     @ONLY)
+#   install(FILES "${CMAKE_BINARY_DIR}/gmock.pc" "${CMAKE_BINARY_DIR}/gmock_main.pc"
+#     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+# endif()
 
 ########################################################################
 #
