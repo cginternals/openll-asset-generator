@@ -201,6 +201,9 @@ class Window : public WindowQt {
     }
 
     virtual void mouseMoveEvent(QMouseEvent* event) override {
+        // early return
+        if (!isPanning && !isRotating) return;
+
         auto speed = 0.005f;  // magic.
 
         makeCurrent();
@@ -211,19 +214,19 @@ class Window : public WindowQt {
 
             transform3D = glm::translate(transform3D, glm::vec3(deltaX, deltaY, 0));
 
-            lastMousePos.x = event->x();
-            lastMousePos.y = event->y();
-
-            paint();
         } else if ((event->buttons() & Qt::RightButton) && isRotating) {
-            // TODO calculate angle?
-            // transform3D = glm::rotate(transform3D,
+            auto deltaX = (event->x() - lastMousePos.x) * speed;
+            auto deltaY = (event->y() - lastMousePos.y) * speed;
 
-            lastMousePos.x = event->x();
-            lastMousePos.y = event->y();
-
-            paint();
+            transform3D = glm::rotate(transform3D, deltaX, glm::vec3(0, 1, 0));
+            transform3D = glm::rotate(transform3D, deltaY, glm::vec3(1, 0, 0));
+            // What's for rotation around z? maybe some GUI Elements?
         }
+
+        lastMousePos.x = event->x();
+        lastMousePos.y = event->y();
+
+        paint();
 
         doneCurrent();
     }
