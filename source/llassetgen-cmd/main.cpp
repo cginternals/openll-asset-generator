@@ -36,7 +36,7 @@ std::unique_ptr<Image> renderGlyph(FT_ULong glyph, const FT_Face& face) {
     err = FT_Load_Glyph(face, FT_Get_Char_Index(face, glyph), FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
     if (err) return nullptr;
 
-    auto bitmap = std::shared_ptr<FT_Bitmap>(new FT_Bitmap(face->glyph->bitmap));
+    auto bitmap = std::make_shared<FT_Bitmap>(face->glyph->bitmap);
     return std::unique_ptr<Image>(new Image(*bitmap));
 }
 
@@ -90,29 +90,29 @@ std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::st
 }
 #elif _WIN32
 bool getFontData(const std::string& fontName, std::vector<unsigned char>& fontData) {
-	bool result = false;
+    bool result = false;
 
-	LOGFONTA lf;
-	memset(&lf, 0, sizeof lf);
-	strncpy_s(lf.lfFaceName, LF_FACESIZE, fontName.c_str(), fontName.size());
-	HFONT font = CreateFontIndirectA(&lf);
+    LOGFONTA lf;
+    memset(&lf, 0, sizeof lf);
+    strncpy_s(lf.lfFaceName, LF_FACESIZE, fontName.c_str(), fontName.size());
+    HFONT font = CreateFontIndirectA(&lf);
 
-	HDC deviceContext = CreateCompatibleDC(nullptr);
-	if (deviceContext) {
-		SelectObject(deviceContext, font);
+    HDC deviceContext = CreateCompatibleDC(nullptr);
+    if (deviceContext) {
+        SelectObject(deviceContext, font);
 
-		const size_t size = GetFontData(deviceContext, 0, 0, nullptr, 0);
-		if (size > 0 && size != GDI_ERROR) {
-			auto buffer = new unsigned char[size];
-			if (GetFontData(deviceContext, 0, 0, buffer, size) == size) {
-				fontData.assign(buffer, buffer + size);
-				result = true;
-			}
-			delete[] buffer;
-		}
-		DeleteDC(deviceContext);
-	}
-	return result;
+        const size_t size = GetFontData(deviceContext, 0, 0, nullptr, 0);
+        if (size > 0 && size != GDI_ERROR) {
+            auto buffer = new unsigned char[size];
+            if (GetFontData(deviceContext, 0, 0, buffer, size) == size) {
+                fontData.assign(buffer, buffer + size);
+                result = true;
+            }
+            delete[] buffer;
+        }
+        DeleteDC(deviceContext);
+    }
+    return result;
 }
 
 std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::string& fontName) {
@@ -123,8 +123,7 @@ std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::st
     }
 
     std::vector<FT_Byte> fontData;
-    if (!getFontData(fontName, fontData))
-        return nullptr;
+    if (!getFontData(fontName, fontData)) return nullptr;
 
     FT_Face face;
     FT_Error err = FT_New_Memory_Face(freetype, &fontData[0], fontData.size(), 0, &face);
@@ -192,9 +191,7 @@ int main(int argc, char** argv) {
             return distfield->exit(CLI::CallForHelp());
         }
 
-        if (!input) {
-            return 2;
-        }
+        if (!input) return 2;
 
         distField(algorithm, *input, outPath);
     } else if (app.got_subcommand(atlas)) {
