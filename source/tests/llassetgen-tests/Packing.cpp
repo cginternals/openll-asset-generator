@@ -123,6 +123,24 @@ TEST_F(ShelfNextFitPackingTest, TestAcceptAtlasSized) { testAcceptAtlasSized(); 
 TEST_F(ShelfNextFitPackingTest, TestAcceptMultipleTiny) { testAcceptMultipleTiny(); }
 TEST_F(ShelfNextFitPackingTest, TestVariableSizePacking) { testVariableSizePacking(); }
 
+class MaxRectsPackingTest : public PackingTest {
+protected:
+    Packing run(const std::vector<Vec>& rectSizes, bool allowRotations, Vec atlasSize) override {
+        return llassetgen::maxRectsPackAtlas(rectSizes.begin(), rectSizes.end(), atlasSize, allowRotations);
+    }
+
+    Packing run(const std::vector<Vec>& rectSizes, bool allowRotations) override {
+        return llassetgen::maxRectsPackAtlas(rectSizes.begin(), rectSizes.end(), allowRotations);
+    }
+};
+
+TEST_F(MaxRectsPackingTest, TestRejectTooWide) { testRejectTooWide(); }
+TEST_F(MaxRectsPackingTest, TestRejectTooHigh) { testRejectTooHigh(); }
+TEST_F(MaxRectsPackingTest, TestRotateOnly) { testRotateOnly(); }
+TEST_F(MaxRectsPackingTest, TestAcceptAtlasSized) { testAcceptAtlasSized(); }
+TEST_F(MaxRectsPackingTest, TestAcceptMultipleTiny) { testAcceptMultipleTiny(); }
+TEST_F(MaxRectsPackingTest, TestVariableSizePacking) { testVariableSizePacking(); }
+
 TEST(TestPackingInternals, TestCeilLog2) {
     for (int i = 0; i < 64; i++) {
         std::uint64_t twoToTheI = static_cast<std::uint64_t>(1) << i;
