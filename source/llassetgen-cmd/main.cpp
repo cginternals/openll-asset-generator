@@ -39,7 +39,10 @@ std::unique_ptr<Image> renderGlyph(FT_ULong glyph, const FT_Face& face, FT_UInt 
     if (err) return nullptr;
 
     err = FT_Load_Glyph(face, FT_Get_Char_Index(face, glyph), FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
-    if (err) return nullptr;
+    if (err || face->glyph->bitmap.buffer == nullptr) {
+        std::cerr << "Error: glyph could not be rendered" << std::endl;
+        return nullptr;
+    }
 
     auto bitmap = std::make_shared<FT_Bitmap>(face->glyph->bitmap);
     return std::unique_ptr<Image>(new Image(*bitmap));
