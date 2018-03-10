@@ -36,7 +36,10 @@ std::u32string UTF8toUCS4(const std::string& str) {
 std::unique_ptr<Image> renderGlyph(FT_ULong glyph, const FT_Face& face, FT_UInt size) {
     FT_Error err;
     err = FT_Set_Pixel_Sizes(face, 0, size);
-    if (err) return nullptr;
+    if (err) {
+        std::cerr << "Error: could not set font size" << std::endl;
+        return nullptr;
+    }
 
     err = FT_Load_Glyph(face, FT_Get_Char_Index(face, glyph), FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
     if (err || face->glyph->bitmap.buffer == nullptr) {
@@ -59,7 +62,11 @@ std::unique_ptr<Image> loadGlyph(const std::string& glyphs, const FT_Face& fontF
 
 bool fontFaceFromPath(const std::string& fontPath, FT_Face& fontFace) {
     FT_Error err = FT_New_Face(freetype, fontPath.c_str(), 0, &fontFace);
-    return err == 0;
+    if (err) {
+        std::cout << "Error: font could not be loaded" << std::endl;
+        return false;
+    }
+    return true;
 }
 
 #ifdef __unix__
@@ -118,16 +125,23 @@ bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace) {
 #if __unix__
     std::string fontPath;
     if (!findFontPath(fontName, fontPath)) {
-        std::cerr << "Font not found" << std::endl;
+        std::cerr << "Error: font not found" << std::endl;
         return false;
     }
     return fontFaceFromPath(fontPath, fontFace);
 #elif _WIN32
     std::vector<FT_Byte> fontData;
-    if (!getFontData(fontName, fontData)) return false;
+    if (!getFontData(fontName, fontData)) {
+        std::cerr << "Error: font not found" << std::endl;
+        return false;
+    }
 
     FT_Error err = FT_New_Memory_Face(freetype, &fontData[0], fontData.size(), 0, &fontFace);
-    return err == 0;
+    if (err) {
+        std::cout << "Error: font could not be loaded" << std::endl;
+        return false;
+    }
+    return true;
 #endif
 }
 
