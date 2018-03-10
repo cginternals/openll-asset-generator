@@ -28,6 +28,11 @@ std::map<std::string, std::function<std::unique_ptr<DistanceTransform>(Image&, I
                    }),
 };
 
+std::u32string UTF8toUCS4(const std::string& str) {
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> ucs4conv;
+    return ucs4conv.from_bytes(str);
+}
+
 std::unique_ptr<Image> renderGlyph(FT_ULong glyph, const FT_Face& face, FT_UInt size) {
     FT_Error err;
     err = FT_Set_Pixel_Sizes(face, 0, size);
@@ -40,21 +45,18 @@ std::unique_ptr<Image> renderGlyph(FT_ULong glyph, const FT_Face& face, FT_UInt 
     return std::unique_ptr<Image>(new Image(*bitmap));
 }
 
-std::u32string convertToUCS4(const std::string& str) {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> ucs4conv;
-    return ucs4conv.from_bytes(str);
-}
-
-std::unique_ptr<Image> loadGlyphFromPath(const std::string& glyph, const std::string& fontPath, int size) {
-    std::u32string ucs4Glyph = convertToUCS4(glyph);
+std::unique_ptr<Image> loadGlyph(const std::string& glyphs, const FT_Face& fontFace, int size) {
+    std::u32string ucs4Glyph = UTF8toUCS4(glyphs);
     if (ucs4Glyph.length() != 1) {
         std::cerr << "--glyph must be a single character" << std::endl;
         return nullptr;
     }
+    return renderGlyph(ucs4Glyph[0], fontFace, static_cast<FT_UInt>(size));
+}
 
-    FT_Face face;
-    FT_Error err = FT_New_Face(freetype, fontPath.c_str(), 0, &face);
-    return err ? nullptr : renderGlyph(ucs4Glyph[0], face, static_cast<FT_UInt>(size));
+bool fontFaceFromPath(const std::string& fontPath, FT_Face& fontFace) {
+    FT_Error err = FT_New_Face(freetype, fontPath.c_str(), 0, &fontFace);
+    return err == 0;
 }
 
 #ifdef __unix__
@@ -79,16 +81,9 @@ bool findFontPath(const std::string& fontName, std::string& fontPath) {
     FcPatternDestroy(pat);
     return found;
 }
+#endif
 
-std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::string& fontName, int size) {
-    std::string fontPath;
-    if (!findFontPath(fontName, fontPath)) {
-        std::cerr << "Font not found" << std::endl;
-        return nullptr;
-    }
-    return loadGlyphFromPath(glyph, fontPath, size);
-}
-#elif _WIN32
+#if _WIN32
 bool getFontData(const std::string& fontName, std::vector<unsigned char>& fontData) {
     bool result = false;
 
@@ -114,22 +109,24 @@ bool getFontData(const std::string& fontName, std::vector<unsigned char>& fontDa
     }
     return result;
 }
-
-std::unique_ptr<Image> loadGlyphFromName(const std::string& glyph, const std::string& fontName, int size) {
-    std::u32string ucs4Glyph = convertToUCS4(glyph);
-    if (ucs4Glyph.length() != 1) {
-        std::cerr << "--glyph must be a single character" << std::endl;
-        return nullptr;
-    }
-
-    std::vector<FT_Byte> fontData;
-    if (!getFontData(fontName, fontData)) return nullptr;
-
-    FT_Face face;
-    FT_Error err = FT_New_Memory_Face(freetype, &fontData[0], fontData.size(), 0, &face);
-    return err ? nullptr : renderGlyph(ucs4Glyph[0], face, size);
-}
 #endif
+
+bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace) {
+#if __unix__
+    std::string fontPath;
+    if (!findFontPath(fontName, fontPath)) {
+        std::cerr << "Font not found" << std::endl;
+        return false;
+    }
+    return fontFaceFromPath(fontPath, fontFace);
+#elif _WIN32
+    std::vector<FT_Byte> fontData;
+    if (!getFontData(fontName, fontData)) return false;
+
+    FT_Error err = FT_New_Memory_Face(freetype, &fontData[0], fontData.size(), 0, &fontFace);
+    return err == 0;
+#endif
+}
 
 void distField(std::string& algorithm, Image& input, std::string& outPath) {
     Image output = Image(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
@@ -148,30 +145,30 @@ int main(int argc, char** argv) {
     // distfield params
     std::string algorithm = "deadrec";  // default value
     std::set<std::string> algoOptions;
-    for (auto& algo : dtFactory) {
+    for (const auto& algo : dtFactory) {
         algoOptions.insert(algo.first);
     }
     distfield->add_set("-a,--algorithm", algorithm, algoOptions);
 
-    std::string glyph;
-    CLI::Option* glyphOpt = distfield->add_option("-g,--glyph", glyph);
+    std::string glyphs;
+    CLI::Option* glyphsOpt = distfield->add_option("-g,--glyph", glyphs);
 
     std::string fontPath;
     CLI::Option* fontPathOpt = distfield->add_option("--fontpath", fontPath)->check(CLI::ExistingFile);
-    fontPathOpt->requires(glyphOpt);
+    fontPathOpt->requires(glyphsOpt);
 
     std::string fontName;
     CLI::Option* fontNameOpt = distfield->add_option("--fontname,-f", fontName);
-    fontNameOpt->requires(glyphOpt);
+    fontNameOpt->requires(glyphsOpt);
 
-    glyphOpt->requires_one({fontPathOpt, fontNameOpt});
+    glyphsOpt->requires_one({fontPathOpt, fontNameOpt});
 
     int fontSize = 128;
-    distfield->add_option("-s,--fontsize", fontSize)->requires(glyphOpt);
+    distfield->add_option("-s,--fontsize", fontSize)->requires(glyphsOpt);
 
     std::string imgPath;
     CLI::Option* imgOpt = distfield->add_option("--image,-i", imgPath)->check(CLI::ExistingFile);
-    imgOpt->excludes(glyphOpt);
+    imgOpt->excludes(glyphsOpt);
 
     std::string outPath;
     distfield->add_option("outfile", outPath)->required();
@@ -183,10 +180,14 @@ int main(int argc, char** argv) {
 
     if (app.got_subcommand(distfield)) {
         std::unique_ptr<Image> input;
-        if (glyphOpt->count()) {
+        if (glyphsOpt->count()) {
             // Example: llassetgen-cmd distfield -a parabola -g G -f Verdana -s 64 glyph.png
-            input = fontPathOpt->count() ? loadGlyphFromPath(glyph, fontPath, fontSize)
-                                         : loadGlyphFromName(glyph, fontName, fontSize);
+            FT_Face fontFace;
+            bool faceLoaded = fontPathOpt->count() ? fontFaceFromPath(fontPath, fontFace)
+                                                   : fontFaceFromName(fontName, fontFace);
+            if (!faceLoaded) return 2;
+
+            input = loadGlyph(glyphs, fontFace, fontSize);
         } else if (imgOpt->count()) {
             // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
             input = std::unique_ptr<Image>(new Image(imgPath));
