@@ -10,6 +10,9 @@ namespace llassetgen {
            public:
             ShelfPacker(const Vec2<PackingSizeType>& initialAtlasSize, bool _allowRotations, bool _allowGrowth)
                 : BasePacker{initialAtlasSize, _allowRotations, _allowGrowth} {}
+
+            static bool inputSortingComparator(const Rect<PackingSizeType>& rect1, const Rect<PackingSizeType>& rect2);
+
             bool pack(Rect<PackingSizeType>& rect);
 
            private:

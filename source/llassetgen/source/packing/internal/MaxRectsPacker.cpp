@@ -1,6 +1,5 @@
 #include <llassetgen/packing/internal/MaxRectsPacker.h>
 
-#include <algorithm>
 #include <iterator>
 #include <limits>
 
@@ -104,9 +103,13 @@ class BssfComparer {
 
 namespace llassetgen {
     namespace internal {
-        bool MaxRectsPacker::pack(Rect<PackingSizeType>& rect) {
-            // TODO: Implement sorting of rectangles (DESCSS)
+        bool MaxRectsPacker::inputSortingComparator(const Rect<PackingSizeType>& rect1,
+                                                    const Rect<PackingSizeType>& rect2) {
+            // Sort descending by shortest side fit (DESCSS)
+            return std::minmax(rect1.size.x, rect1.size.y) > std::minmax(rect2.size.x, rect2.size.y);
+        }
 
+        bool MaxRectsPacker::pack(Rect<PackingSizeType>& rect) {
             Rect<PackingSizeType>& freeRect = findFreeRect(rect);
             if (allowGrowth) {
                 while (!canContain(freeRect, rect)) {

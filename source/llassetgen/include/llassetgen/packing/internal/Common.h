@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iterator>
+#include <numeric>
 #include <type_traits>
 
 #include <llassetgen/llassetgen_api.h>
@@ -79,8 +80,13 @@ namespace llassetgen {
 
         template <class Packer>
         bool packAll(Packing& packing, Packer& packer) {
-            return std::all_of(packing.rects.begin(), packing.rects.end(),
-                               [&](Rect<PackingSizeType>& rect) { return packer.pack(rect); });
+            std::vector<size_t> indices(packing.rects.size());
+            std::iota(indices.begin(), indices.end(), 0);
+            std::sort(indices.begin(), indices.end(), [&packing](size_t i1, size_t i2) {
+                return Packer::inputSortingComparator(packing.rects[i1], packing.rects[i2]);
+            });
+            return std::all_of(std::begin(indices), std::end(indices),
+                               [&](size_t i) { return packer.pack(packing.rects[i]); });
         }
 
         /**
@@ -89,6 +95,10 @@ namespace llassetgen {
          * @tparam Packer
          *   Packer class. Must provide the following methods:
          *    - `Packer(const Vec2<PackingSizeType>& initialAtlasSize, bool allowRotations, bool allowGrowth)`
+         *    - `static bool inputSortingComparator(const Rect<PackingSizeType>& rect1,
+         *                                          const Rect<PackingSizeType>& * rect2)`:
+         *      Used to sort the input rectangles before packing. The input
+         *      rectangles will be passed to `pack` ordered by this comparator.
          *    - `bool pack(Rect<PackingSizeType>& rect)`: Packs the rectangle at
          *      a position, the size is pre-filled. Returns false if the space
          *      is insufficient.

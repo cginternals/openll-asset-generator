@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <vector>
 
 #include <llassetgen/llassetgen_api.h>
@@ -12,6 +13,8 @@ namespace llassetgen {
            public:
             MaxRectsPacker(const Vec2<PackingSizeType>& initialAtlasSize, bool _allowRotations, bool _allowGrowth)
                 : BasePacker{initialAtlasSize, _allowRotations, _allowGrowth}, freeList{{{0, 0}, initialAtlasSize}} {}
+
+            static bool inputSortingComparator(const Rect<PackingSizeType>& rect1, const Rect<PackingSizeType>& rect2);
 
             bool pack(Rect<PackingSizeType>& rect);
 

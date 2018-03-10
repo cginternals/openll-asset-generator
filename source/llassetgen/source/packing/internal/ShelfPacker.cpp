@@ -1,6 +1,7 @@
 #include <llassetgen/packing/internal/ShelfPacker.h>
 
 #include <tuple>
+#include <utility>
 
 #include <llassetgen/packing/internal/Common.h>
 
@@ -10,8 +11,19 @@ PackingSizeType ceilDiv(PackingSizeType dividend, PackingSizeType divisor) {
     return (dividend + divisor - 1) / divisor;
 }
 
+template <class T>
+std::pair<T, T> flip(std::pair<T, T> pair) {
+    return {pair.second, pair.first};
+};
+
 namespace llassetgen {
     namespace internal {
+        bool ShelfPacker::inputSortingComparator(const Rect<PackingSizeType>& rect1,
+                                                 const Rect<PackingSizeType>& rect2) {
+            // Sort by longest side descending (DESCLS)
+            return flip(std::minmax(rect1.size.x, rect1.size.y)) > flip(std::minmax(rect2.size.x, rect2.size.y));
+        }
+
         bool ShelfPacker::pack(Rect<PackingSizeType>& rect) {
             return allowRotations ? packWithRotations(rect) : packNoRotations(rect);
         }
