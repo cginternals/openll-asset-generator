@@ -8,8 +8,9 @@
 
 using namespace llassetgen;
 
-std::string test_source_path = "../source/tests/llassetgen-tests/testfiles/";
-std::string test_destination_path = "../build/";
+//std::string test_source_path = "../source/tests/llassetgen-tests/testfiles/";
+std::string test_source_path = "./llassetgen-tests/testfiles/";
+std::string test_destination_path = "../../build/";
 
 TEST(ImageTest, LoadTTF) {
     init();
