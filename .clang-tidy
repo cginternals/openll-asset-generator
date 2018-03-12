@@ -10,6 +10,8 @@ Checks: "*,\
          -llvm-header-guard,\
          -google-readability-namespace-comments,\
          -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
-         -google-runtime-references"
+         -google-runtime-references,\
+         -fuchsia-overloaded-operator,\
+         -fuchsia-default-arguments"
 HeaderFilterRegex: '.*'
 ...
