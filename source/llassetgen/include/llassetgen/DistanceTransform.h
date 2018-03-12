@@ -1,6 +1,8 @@
 #pragma once
 
 #include <llassetgen/Image.h>
+#include <llassetgen/Geometry.h>
+#include <llassetgen/llassetgen_api.h>
 
 namespace llassetgen {
     class LLASSETGEN_API DistanceTransform {
