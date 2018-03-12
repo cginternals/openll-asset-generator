@@ -89,9 +89,9 @@ PackingSizeType bssfScore(const Rect<PackingSizeType>& free, const Rect<PackingS
     return std::min(remainder.x, remainder.y);
 }
 
-class BssfComparer {
+class BssfComparator {
    public:
-    explicit BssfComparer(const Rect<PackingSizeType>& _toBePlaced) : toBePlaced(_toBePlaced) {}
+    explicit BssfComparator(const Rect<PackingSizeType>& _toBePlaced) : toBePlaced(_toBePlaced) {}
 
     bool operator()(const Rect<PackingSizeType>& free1, const Rect<PackingSizeType>& free2) {
         return bssfScore(free1, toBePlaced) < bssfScore(free2, toBePlaced);
@@ -150,10 +150,10 @@ namespace llassetgen {
         }
 
         Rect<PackingSizeType>& MaxRectsPacker::findFreeRect(Rect<PackingSizeType>& rect) {
-            auto& freeRect = *std::min_element(freeList.begin(), freeList.end(), BssfComparer{rect});
+            auto& freeRect = *std::min_element(freeList.begin(), freeList.end(), BssfComparator{rect});
             if (allowRotations) {
                 Rect<PackingSizeType> rectRotated{rect.position, {rect.size.y, rect.size.x}};
-                auto& freeRectRotated = *std::min_element(freeList.begin(), freeList.end(), BssfComparer{rectRotated});
+                auto& freeRectRotated = *std::min_element(freeList.begin(), freeList.end(), BssfComparator{rectRotated});
                 if (bssfScore(freeRectRotated, rectRotated) < bssfScore(freeRect, rect)) {
                     rect.size = rectRotated.size;
                     return freeRectRotated;
