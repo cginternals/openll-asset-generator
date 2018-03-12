@@ -290,7 +290,7 @@ class Window : public WindowQt {
     glm::vec4 fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     int samplerIndex = 0;
     glm::mat4 transform3D = glm::mat4();
-    glm::mat4 projection = glm::perspective(45.f, 1.f, 0.1f, 100.f);
+    glm::mat4 projection = glm::perspective(45.f, 1.f, 0.0001f, 100.f);
 
     bool isPanning = false;
     bool isRotating = false;
