@@ -22,10 +22,16 @@ message(STATUS "Application ${target}")
 # Sources
 #
 
-set(sources
-    main.cpp
-)
+set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
+set(headers
+    ${include_path}/CLI11.h
+    ${include_path}/FontRenderer.h)
+
+set(sources
+    ${source_path}/main.cpp
+    ${source_path}/FontRenderer.cpp)
 
 #
 # Create executable
@@ -34,6 +40,7 @@ set(sources
 # Build executable
 add_executable(${target}
     MACOSX_BUNDLE
+    ${headers}
     ${sources}
 )
 
@@ -119,6 +126,7 @@ target_link_libraries(${target}
 perform_health_checks(
     ${target}
     ${sources}
+    ${headers}
 )
 
 
