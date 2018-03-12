@@ -21,9 +21,7 @@ class PackingTest : public testing::Test {
 
     static bool rotatedSizesEquals(Vec size1, Vec size2) { return size1 == size2 || size1 == Vec{size2.y, size2.x}; }
 
-    static bool doNotOverlap(const Rect& rect1, const Rect& rect2) {
-        return !rect1.overlaps(rect2);
-    }
+    static bool doNotOverlap(const Rect& rect1, const Rect& rect2) { return !rect1.overlaps(rect2); }
 
     /**
      * Expect a fixed size packing to succeed and validate the result.
@@ -124,7 +122,7 @@ TEST_F(ShelfNextFitPackingTest, TestAcceptMultipleTiny) { testAcceptMultipleTiny
 TEST_F(ShelfNextFitPackingTest, TestVariableSizePacking) { testVariableSizePacking(); }
 
 class MaxRectsPackingTest : public PackingTest {
-protected:
+   protected:
     Packing run(const std::vector<Vec>& rectSizes, bool allowRotations, Vec atlasSize) override {
         return llassetgen::maxRectsPackAtlas(rectSizes.begin(), rectSizes.end(), atlasSize, allowRotations);
     }
