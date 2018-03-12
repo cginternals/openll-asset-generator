@@ -121,8 +121,8 @@ bool getFontData(const std::string& fontName, std::vector<unsigned char>& fontDa
 }
 #endif
 
-bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace) {
 #if __unix__
+bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace) {
     std::string fontPath;
     if (!findFontPath(fontName, fontPath)) {
         std::cerr << "Error: font not found" << std::endl;
@@ -130,7 +130,7 @@ bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace) {
     }
     return fontFaceFromPath(fontPath, fontFace);
 #elif _WIN32
-    std::vector<FT_Byte> fontData;
+    bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace, std::vector<FT_Byte> fontData) {
     if (!getFontData(fontName, fontData)) {
         std::cerr << "Error: font not found" << std::endl;
         return false;
@@ -200,8 +200,18 @@ int main(int argc, char** argv) {
         if (glyphsOpt->count()) {
             // Example: llassetgen-cmd distfield -a parabola -g G -f Verdana -s 64 glyph.png
             FT_Face fontFace;
-            bool faceLoaded = fontPathOpt->count() ? fontFaceFromPath(fontPath, fontFace)
-                                                   : fontFaceFromName(fontName, fontFace);
+            bool faceLoaded;
+            if (fontPathOpt->count()) {
+                faceLoaded = fontFaceFromPath(fontPath, fontFace);
+            } else {
+#ifdef _WIN32
+                std::vector<FT_Byte> fontData;
+                faceLoaded = fontFaceFromName(fontName, fontFace, fontData);
+#else
+                faceLoaded = fontFaceFromName(fontName, fontFace);
+#endif
+            }
+
             if (!faceLoaded) return 2;
 
             input = loadGlyph(glyphs, fontFace, fontSize);
