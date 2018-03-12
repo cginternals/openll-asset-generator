@@ -92,9 +92,16 @@ bool findFontPath(const std::string& fontName, std::string& fontPath) {
     FcPatternDestroy(pat);
     return found;
 }
-#endif
 
-#if _WIN32
+bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace) {
+    std::string fontPath;
+    if (!findFontPath(fontName, fontPath)) {
+        std::cerr << "Error: font not found" << std::endl;
+        return false;
+    }
+    return fontFaceFromPath(fontPath, fontFace);
+}
+#elif _WIN32
 bool getFontData(const std::string& fontName, std::vector<unsigned char>& fontData) {
     bool result = false;
 
@@ -120,18 +127,8 @@ bool getFontData(const std::string& fontName, std::vector<unsigned char>& fontDa
     }
     return result;
 }
-#endif
 
-#if __unix__
-bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace) {
-    std::string fontPath;
-    if (!findFontPath(fontName, fontPath)) {
-        std::cerr << "Error: font not found" << std::endl;
-        return false;
-    }
-    return fontFaceFromPath(fontPath, fontFace);
-#elif _WIN32
-    bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace, std::vector<FT_Byte> fontData) {
+bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace, std::vector<FT_Byte> fontData) {
     if (!getFontData(fontName, fontData)) {
         std::cerr << "Error: font not found" << std::endl;
         return false;
@@ -143,8 +140,8 @@ bool fontFaceFromName(const std::string& fontName, FT_Face& fontFace) {
         return false;
     }
     return true;
-#endif
 }
+#endif
 
 void distField(std::string& algorithm, Image& input, std::string& outPath) {
     Image output = Image(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
