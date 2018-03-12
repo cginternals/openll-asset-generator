@@ -105,7 +105,7 @@ namespace llassetgen {
     namespace internal {
         bool MaxRectsPacker::inputSortingComparator(const Rect<PackingSizeType>& rect1,
                                                     const Rect<PackingSizeType>& rect2) {
-            // Sort descending by shortest side fit (DESCSS)
+            // Sort by shortest side fit descending (DESCSS)
             return std::minmax(rect1.size.x, rect1.size.y) > std::minmax(rect2.size.x, rect2.size.y);
         }
 
