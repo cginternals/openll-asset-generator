@@ -20,8 +20,14 @@ std::map<std::string, std::function<std::unique_ptr<DistanceTransform>(Image&, I
 };
 
 std::u32string UTF8toUCS4(const std::string& str) {
+#if _MSC_VER >= 1900  // handle Visual Studio bug
+    std::wstring_convert<std::codecvt_utf8<uint32_t>, uint32_t> ucs4conv;
+    auto convStr = ucs4conv.from_bytes(str);
+    return std::u32string(reinterpret_cast<char32_t*>(convStr.data()), convStr.size());
+#else
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> ucs4conv;
     return ucs4conv.from_bytes(str);
+#endif
 }
 
 void distField(std::string& algorithm, Image& input, std::string& outPath) {

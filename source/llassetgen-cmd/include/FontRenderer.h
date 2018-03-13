@@ -5,6 +5,9 @@
 #include <llassetgen/llassetgen.h>
 
 #include <string>
+#ifdef _WIN32
+#include <vector>
+#endif
 
 using namespace llassetgen;
 
