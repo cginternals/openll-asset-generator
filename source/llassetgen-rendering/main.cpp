@@ -116,9 +116,9 @@ class Window : public WindowQt {
         float quadW = 1.f;
         float quadH = quadW * imageH / imageW;
 
-        cornerBuffer->setData(
-            std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(quadW, 0), glm::vec2(0, quadH), glm::vec2(quadW, quadH)}},
-            GL_STATIC_DRAW);
+        cornerBuffer->setData(std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(quadW, 0), glm::vec2(0, quadH),
+                                                        glm::vec2(quadW, quadH)}},
+                              GL_STATIC_DRAW);
 
         vao->binding(0)->setAttribute(0);
         vao->binding(0)->setBuffer(cornerBuffer.get(), 0, sizeof(glm::vec2));
