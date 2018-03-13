@@ -8,8 +8,9 @@
 
 using namespace llassetgen;
 
-std::string test_source_path = "../source/tests/llassetgen-tests/testfiles/";
-std::string test_destination_path = "../build/";
+// current working directory: openll-asset-generator/build/source/tests
+std::string test_source_path = "../../../source/tests/llassetgen-tests/testfiles/";
+std::string test_destination_path = "../../";
 
 TEST(ImageTest, LoadTTF) {
     init();

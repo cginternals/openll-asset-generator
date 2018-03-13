@@ -1,6 +1,4 @@
 language: cpp
-
-sudo: required
 dist: trusty
 
 os:
@@ -23,15 +21,23 @@ matrix:
   - os: osx
     compiler: gcc
 
+addons:
+  apt:
+    packages:
+      - cmake3
+      - cppcheck
+      - clang-tidy-3.8
+      - libfreetype6-dev
+      - libpng-dev
+
 before_install:
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get install -qq cmake3 cppcheck clang-tidy-3.8 libfreetype6-dev libpng-dev; fi
   # libpng is already installed by default
   - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype; fi
+  - chmod +x ./configure
 
 before_script:
   - ./configure
-  - if [ $CMAKE_CONFIGURATION == release ]; then ./configure; fi
-  - if [ $CMAKE_CONFIGURATION == debug ]; then ./configure debug; fi
+  - ./configure $CMAKE_CONFIGURATION
 
 script:
   - cmake --build $BUILD_DIR
