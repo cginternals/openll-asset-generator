@@ -12,12 +12,7 @@ namespace llassetgen {
             return 0;
         if(flipped)
             std::swap(pos.x, pos.y);
-        PixelType value = image.getPixel<PixelType>(pos);
-        if (std::is_same<PixelType, InputType>::value) {
-            return (value >= 1 << image.getBitDepth() - 1);  // (value > 0.5 * maxValue) ? 1 : 0
-        } else {
-            return value;
-        }
+        return image.getPixel<PixelType>(pos);
     }
 
     template<typename PixelType, bool flipped>
@@ -29,7 +24,7 @@ namespace llassetgen {
     }
 
     DistanceTransform::DistanceTransform(const Image& _input, const Image& _output) :input(_input), output(_output) {
-        assert(input.getWidth() == output.getWidth() && input.getHeight() == output.getHeight());
+        assert(input.getWidth() == output.getWidth() && input.getHeight() == output.getHeight() && input.getBitDepth() == 1);
     }
 
 
