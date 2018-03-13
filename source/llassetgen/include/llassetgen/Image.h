@@ -1,6 +1,7 @@
 #pragma once
 
-#include <llassetgen/Vec2.h>
+#include <llassetgen/llassetgen_api.h>
+#include <llassetgen/Geometry.h>
 
 #include <limits>
 #include <string>

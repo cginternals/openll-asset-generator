@@ -19,7 +19,8 @@ message(STATUS "Test ${target}")
 
 set(sources
     main.cpp
-    llassetgen-tests.cpp
+    Packing.cpp
+    Image.cpp
 )
 
 
@@ -98,3 +99,10 @@ target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LINKER_OPTIONS}
 )
+
+
+#
+# Source Code Formatting
+#
+
+add_clang_format_target(${target} ${sources} ${headers})
