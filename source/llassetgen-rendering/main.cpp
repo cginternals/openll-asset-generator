@@ -80,7 +80,7 @@ class Window : public WindowQt {
         // TODO load using own png loader instead of Qt (blocked: wait for this feature to be merged into master, then
         // pull). TODO: Make sure this file structure is the same on other OS
         auto path = QApplication::applicationDirPath();
-        auto* image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_rgb.png");
+        auto* image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_DT.png");
 
         // mirrored: Qt flips images after
         // loading; meant as convenience, but
@@ -89,11 +89,14 @@ class Window : public WindowQt {
         auto imageData = imageFormatted.bits();
 
         texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
-        texture->image2D(0, GL_RGBA8, image->width(), image->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
+        float imageW = image->width();
+        float imageH = image->height();
+        texture->image2D(0, GL_RGBA8, imageW, imageH, 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
         // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
         // ignore this, since we use black&white image data here?
 
         cornerBuffer = globjects::Buffer::create();
+        textureBuffer = globjects::Buffer::create();
         program = globjects::Program::create();
         vao = globjects::VertexArray::create();
 
@@ -110,14 +113,26 @@ class Window : public WindowQt {
 
         program->attach(vertexShader.get(), fragmentShader.get());
 
+        float quadW = 1.f;
+        float quadH = quadW * imageH / imageW;
+
         cornerBuffer->setData(
-            std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0, 1), glm::vec2(1, 1)}},
+            std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(quadW, 0), glm::vec2(0, quadH), glm::vec2(quadW, quadH)}},
             GL_STATIC_DRAW);
 
         vao->binding(0)->setAttribute(0);
         vao->binding(0)->setBuffer(cornerBuffer.get(), 0, sizeof(glm::vec2));
         vao->binding(0)->setFormat(2, GL_FLOAT);
         vao->enable(0);
+
+        textureBuffer->setData(
+            std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0, 1), glm::vec2(1, 1)}},
+            GL_STATIC_DRAW);
+
+        vao->binding(1)->setAttribute(1);
+        vao->binding(1)->setBuffer(textureBuffer.get(), 0, sizeof(glm::vec2));
+        vao->binding(1)->setFormat(2, GL_FLOAT);
+        vao->enable(1);
 
         program->setUniform("projection", projection);
         program->setUniform("modelView", transform3D);
@@ -129,6 +144,7 @@ class Window : public WindowQt {
         texture.reset(nullptr);
 
         cornerBuffer.reset(nullptr);
+        textureBuffer.reset(nullptr);
         program.reset(nullptr);
         vertexShaderSource.reset(nullptr);
         vertexShaderTemplate.reset(nullptr);
@@ -140,7 +156,10 @@ class Window : public WindowQt {
     }
 
     virtual void resizeGL(QResizeEvent* event) override {
-        glViewport(0, 0, event->size().width(), event->size().height());
+        float w = event->size().width();
+        float h = event->size().height();
+        glViewport(0, 0, w, h);
+        projection = glm::perspective(45.f, w / h, 0.0001f, 100.f);
     }
 
     virtual void paintGL() override {
@@ -155,6 +174,7 @@ class Window : public WindowQt {
         }
 
         program->use();
+        program->setUniform("projection", projection);
         program->setUniform("modelView", transform3D);
         program->setUniform("fontColor", fontColor);
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -240,6 +260,8 @@ class Window : public WindowQt {
     }
 
     virtual void wheelEvent(QWheelEvent* event) override {
+        // zooming
+
         auto speed = 0.001f;  // magic.
 
         auto d = event->delta() * speed;
@@ -268,13 +290,13 @@ class Window : public WindowQt {
     virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
     virtual void resetTransform3D() override {
-        std::cout << "RESET" << std::endl;
         transform3D = glm::mat4();  // set identity
         paint();
     }
 
    protected:
     std::unique_ptr<globjects::Buffer> cornerBuffer;
+    std::unique_ptr<globjects::Buffer> textureBuffer;
     std::unique_ptr<globjects::Program> program;
     std::unique_ptr<globjects::File> vertexShaderSource;
     std::unique_ptr<globjects::AbstractStringSource> vertexShaderTemplate;
@@ -294,7 +316,6 @@ class Window : public WindowQt {
 
     bool isPanning = false;
     bool isRotating = false;
-    bool isZooming = false;
     glm::vec2 lastMousePos = glm::vec2();
 };
 
