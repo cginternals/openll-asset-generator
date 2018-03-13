@@ -25,13 +25,14 @@ TEST(ImageTest, LoadTTF) {
     FT_Error pixel_size_set = FT_Set_Pixel_Sizes(face, 64, 64);
     EXPECT_EQ(pixel_size_set, 0);
 
-    FT_Error glyph_loaded = FT_Load_Glyph(face, FT_Get_Char_Index(face, letter), FT_LOAD_RENDER | FT_LOAD_MONOCHROME); // load default 8-bit //| FT_LOAD_MONOCHROME for 1-bit
+    FT_Error glyph_loaded = FT_Load_Glyph(face, FT_Get_Char_Index(face, letter), FT_LOAD_RENDER | FT_LOAD_MONOCHROME);
     EXPECT_EQ(glyph_loaded, 0);
 
-    Image ft_8bit(face->glyph->bitmap);
+    Image ft_8bit(face->glyph->bitmap.width, face->glyph->bitmap.rows, 1);
+    ft_8bit.load(face->glyph->bitmap);
 
     // view on (10,10),(20,20)
-    Image view_on_ft_8bit(ft_8bit.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20)));
+    Image view_on_ft_8bit = ft_8bit.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20));
     // invert view
     for (size_t y = 0; y < view_on_ft_8bit.getHeight(); y++) {
         for (size_t x = 0; x < view_on_ft_8bit.getWidth(); x++) {
@@ -54,6 +55,11 @@ TEST(ImageTest, CreateAndWritePNG) {
     // create blank image with 40x30 pixels and 16 bit
     Image blank_16bit(8, 8, 16);
     // set pixels
+    for (size_t y = 0; y < blank_16bit.getHeight(); y++) {
+        for (size_t x = 0; x < blank_16bit.getWidth(); x++) {
+            blank_16bit.setPixel<uint16_t>(Vec2<size_t>(x, y), 0);
+        }
+    }
     blank_16bit.setPixel<uint16_t>(Vec2<size_t>(3, 4), 26781);
     blank_16bit.setPixel<uint16_t>(Vec2<size_t>(4, 5), 42949);
 
@@ -77,7 +83,7 @@ TEST(ImageTest, CreateAndWritePNG) {
 TEST(ImageTest, LoadPNGwithView) {
     Image loaded_png(test_source_path + "A_glyph.png");
     // view on (10,10),(20,20)
-    Image view_on_loaded_png(loaded_png.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20)));
+    Image view_on_loaded_png = loaded_png.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20));
     // invert view
     for (size_t y = 0; y < view_on_loaded_png.getHeight(); y++) {
         for (size_t x = 0; x < view_on_loaded_png.getWidth(); x++) {
