@@ -73,14 +73,14 @@ namespace llassetgen {
         assert(ft_bitDepth == bitDepth);
 
         stride = size_t(std::ceil(float(getWidth() * bitDepth) / 8));
-        size_t paddingBytes = padding / 8;
+        size_t paddingBytes = (padding * bitDepth) / 8;
 
         /* because there are (padding % 8) padding bits, each byte from the original bitmap is
            split into (8 - padding % 8) left bits and (padding % 8) right bits. Thus every byte
            in the Image bitmap consists of the right bits of one original byte and the left bits
            of the byte that comes after it.
         */
-        char rightBits = padding % 8;
+        char rightBits = (padding * bitDepth) % 8;
         char leftBits = 8 - rightBits;
 
         data = std::shared_ptr<uint8_t>(new uint8_t[getHeight() * stride]);
