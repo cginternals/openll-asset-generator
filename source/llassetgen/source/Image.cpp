@@ -25,11 +25,11 @@
 
 namespace llassetgen {
 
-    Image::Image(const FT_Bitmap &ft_bitmap) {
+    Image::Image(const FT_Bitmap &ft_bitmap, size_t padding) {
         min.x = 0;
         min.y = 0;
-        max.x = ft_bitmap.width;
-        max.y = ft_bitmap.rows;
+        max.x = ft_bitmap.width + 2 * padding;
+        max.y = ft_bitmap.rows + 2 * padding;
 
         switch (ft_bitmap.pixel_mode) {
         case FT_PIXEL_MODE_MONO:
@@ -47,11 +47,12 @@ namespace llassetgen {
             bitDepth = 8;
         }
 
-        load(ft_bitmap);
+        load(ft_bitmap, padding);
     }
 
-    void Image::load(const FT_Bitmap &ft_bitmap) {
-        assert(getWidth() == ft_bitmap.width && getHeight() == ft_bitmap.rows);
+    void Image::load(const FT_Bitmap &ft_bitmap, size_t padding) {
+        assert(getWidth() == ft_bitmap.width + 2 * padding &&
+               getHeight() == ft_bitmap.rows + 2 * padding);
 
         uint8_t ft_bitDepth;
         switch (ft_bitmap.pixel_mode) {
@@ -72,15 +73,44 @@ namespace llassetgen {
         assert(ft_bitDepth == bitDepth);
 
         stride = size_t(std::ceil(float(getWidth() * bitDepth) / 8));
+        size_t paddingBytes = (padding * bitDepth) / 8;
+
+        /* because there are (padding % 8) padding bits, each byte from the original bitmap is
+           split into (8 - padding % 8) left bits and (padding % 8) right bits. Thus every byte
+           in the Image bitmap consists of the right bits of one original byte and the left bits
+           of the byte that comes after it.
+        */
+        char rightBits = (padding * bitDepth) % 8;
+        char leftBits = 8 - rightBits;
 
         data = std::shared_ptr<uint8_t>(new uint8_t[getHeight() * stride]);
-        for (size_t y = 0; y < getHeight(); y++) {
+
+        // y padding
+        for (size_t y = 0; y < padding; y++) {
             for (size_t x = 0; x < stride; x++) {
-                data.get()[y * stride + x] = 0xFF - ft_bitmap.buffer[y * ft_bitmap.pitch + x];
+                data.get()[y * stride + x] = 0xFF;
+                data.get()[(getHeight() - y - 1) * stride + x] = 0xFF;
             }
-            size_t padding_bits = size_t((float(getWidth() * bitDepth) / 8 - std::floor(float(getWidth() * bitDepth) / 8)) * 8);
-            uint8_t mask = ~(0xFF >> padding_bits);
-            data.get()[y * stride + stride - 1] &= mask;
+        }
+
+        for (size_t y = 0; y < ft_bitmap.rows; y++) {
+            size_t padded_y = y + padding;
+
+            // x padding
+            for (size_t x = 0; x < paddingBytes; x++) {
+                data.get()[padded_y * stride + x] = 0xFF;
+                data.get()[(padded_y + 1) * stride - x - 1] = 0xFF;
+            }
+
+            uint8_t left = (0xFF >> leftBits) << leftBits;
+            for (size_t x = 0; x < (stride - 2 * paddingBytes) - 1; x++) {
+                size_t padded_x = x + paddingBytes;
+                uint8_t val = ~(ft_bitmap.buffer[y * ft_bitmap.pitch + x]);
+                data.get()[padded_y * stride + padded_x] = left | (val >> rightBits);
+                left = val << leftBits;
+            }
+            size_t lastX = (stride - 2 * paddingBytes) - 1 + paddingBytes;
+            data.get()[padded_y * stride + lastX] = left | (0xFF >> leftBits);
         }
     }
 

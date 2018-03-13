@@ -30,9 +30,9 @@ namespace llassetgen {
         pixelType getPixel(const Vec2<size_t> pos) const;
         template <typename pixelType>
         void setPixel(const Vec2<size_t> pos, const pixelType data) const;
-        Image(const FT_Bitmap_ & ft_bitmap);
+        Image(const FT_Bitmap_ & ft_bitmap, size_t padding = 0);
         bool isValid(const Vec2<size_t> pos) const;
-        void load(const FT_Bitmap_ & ft_bitmap);
+        void load(const FT_Bitmap_ & ft_bitmap, size_t padding);
         size_t getWidth() const;
         size_t getHeight() const;
         size_t getBitDepth() const;
