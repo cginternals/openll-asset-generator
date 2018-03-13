@@ -13,7 +13,11 @@ namespace llassetgen {
         if(flipped)
             std::swap(pos.x, pos.y);
         PixelType value = image.getPixel<PixelType>(pos);
-        return std::is_same<PixelType, InputType>::value ? (value >= std::numeric_limits<InputType>::max()/2) : value; // TODO
+        if (std::is_same<PixelType, InputType>::value) {
+            return (value >= 1 << image.getBitDepth() - 1);  // (value > 0.5 * maxValue) ? 1 : 0
+        } else {
+            return value;
+        }
     }
 
     template<typename PixelType, bool flipped>
