@@ -140,6 +140,7 @@ class Window : public WindowQt {
 
         program->setUniform("fontColor", fontColor);
         program->setUniform("glyphs", samplerIndex);
+        program->setUniform("showDistanceField", showDistanceField);
         program->setUniform("superSampling", superSampling);
     }
 
@@ -184,7 +185,7 @@ class Window : public WindowQt {
         program->setUniform("fontColor", fontColor);
         // uncomment if you need to change the index for that texture
         // program->setUniform("glyphs", samplerIndex);
-
+        program->setUniform("showDistanceField", showDistanceField);
         program->setUniform("superSampling", superSampling);
 
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -309,6 +310,11 @@ class Window : public WindowQt {
         paint();
     }
 
+    virtual void toggleDistanceField(bool activated) override {
+        showDistanceField = activated;
+        paint();
+    }
+
    protected:
     std::unique_ptr<globjects::Buffer> cornerBuffer;
     std::unique_ptr<globjects::Buffer> textureBuffer;
@@ -329,6 +335,7 @@ class Window : public WindowQt {
     glm::mat4 transform3D = glm::mat4();
     glm::mat4 projection = glm::perspective(45.f, 1.f, 0.0001f, 100.f);
     uint superSampling = 0;
+    bool showDistanceField = false;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -419,10 +426,17 @@ void setupGUI(QMainWindow* window) {
     miscGroupBox->setLayout(miscLayout);
 
     // reset transform 3D to inital state
-    auto* resetButton = new QPushButton("Reset");  // TODO or reset camera? navigation?
+    auto* resetButton = new QPushButton("Reset");
     resetButton->setMaximumWidth(90);
     QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
     miscLayout->addRow("Reset View", resetButton);
+
+    // switch between viewing the rendered glyphs and the underlying distance field
+    auto* switchRenderingButton = new QPushButton("Distance Field");
+    switchRenderingButton->setCheckable(true);
+    switchRenderingButton->setMaximumWidth(90);
+    QObject::connect(switchRenderingButton, SIGNAL(toggled(bool)), glwindow, SLOT(toggleDistanceField(bool)));
+    miscLayout->addRow("Switch Rendering", switchRenderingButton);
 
     // Supersampling
     auto* ssComboBox = new QComboBox();

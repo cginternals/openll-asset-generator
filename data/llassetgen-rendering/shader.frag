@@ -12,6 +12,7 @@ const uint SuperSampling4x4      = 7u;
 
 uniform vec4 fontColor;
 uniform sampler2D glyphs;
+uniform bool showDistanceField;
 uniform uint superSampling;
 
 in vec4 color;
@@ -172,28 +173,39 @@ float aastep4x4(float t, vec2 uv)
 
 
 void main()
-{    
-    // requires blend: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+{   
+    fragColor = vec4(1.0,0.0,0.0,1.0); //debugging color
     
     float s = texture(glyphs, v_uv).r;
-    if(s < 0.3)
-        discard;
-
-    //vec4 fc = color; // if we want vertex-based color
-    vec4 fc = fontColor; // if we want uniform font color
-
-    float a;
-    switch (superSampling)
+    
+    if (showDistanceField)
     {
-    case SuperSamplingNone:     a =            tex(0.5, v_uv); break;
-    case SuperSampling1x3:      a =      aastep1x3(0.5, v_uv); break;
-    case SuperSampling2x4:      a =      aastep2x4(0.5, v_uv); break;
-    case SuperSampling2x2RGSS:  a =  aastep2x2RGSS(0.5, v_uv); break;
-    case SuperSamplingQuincunx: a = aastepQuincunx(0.5, v_uv); break;
-    case SuperSampling8Rooks:   a =   aastep8Rooks(0.5, v_uv); break;
-    case SuperSampling3x3:      a =      aastep3x3(0.5, v_uv); break;
-    case SuperSampling4x4:      a =      aastep4x4(0.5, v_uv); break;
+        fragColor = vec4(s, s, s, 1.0);
+        
     }
+    else
+    {
+        // requires blend: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    fragColor = vec4(fc.rgb, fc.a * a);
+        if(s < 0.3)
+            discard;
+
+        //vec4 fc = color;  // if we want vertex-based color
+        vec4 fc = fontColor;  // if we want uniform font color
+
+        float a;
+        switch (superSampling)
+        {
+        case SuperSamplingNone:     a =            tex(0.5, v_uv); break;
+        case SuperSampling1x3:      a =      aastep1x3(0.5, v_uv); break;
+        case SuperSampling2x4:      a =      aastep2x4(0.5, v_uv); break;
+        case SuperSampling2x2RGSS:  a =  aastep2x2RGSS(0.5, v_uv); break;
+        case SuperSamplingQuincunx: a = aastepQuincunx(0.5, v_uv); break;
+        case SuperSampling8Rooks:   a =   aastep8Rooks(0.5, v_uv); break;
+        case SuperSampling3x3:      a =      aastep3x3(0.5, v_uv); break;
+        case SuperSampling4x4:      a =      aastep4x4(0.5, v_uv); break;
+        }
+
+        fragColor = vec4(fc.rgb, fc.a * a);
+    }
 }
