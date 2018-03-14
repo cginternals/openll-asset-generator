@@ -178,15 +178,14 @@ class Window : public WindowQt {
 
         program->use();
 
-
         program->setUniform("modelView", transform3D);
         program->setUniform("projection", projection);
-        
-        program->setUniform("fontColor", fontColor);
-        //uncomment if you need to change the index for that texture
-        //program->setUniform("glyphs", samplerIndex);
 
-        program->setUniform("superSampling", superSampling);        
+        program->setUniform("fontColor", fontColor);
+        // uncomment if you need to change the index for that texture
+        // program->setUniform("glyphs", samplerIndex);
+
+        program->setUniform("superSampling", superSampling);
 
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         program->release();
@@ -425,9 +424,8 @@ void setupGUI(QMainWindow* window) {
     QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
     miscLayout->addRow("Reset View", resetButton);
 
-
     // Supersampling
-    auto* ssComboBox= new QComboBox();
+    auto* ssComboBox = new QComboBox();
     // item order is important, their index is used in fragment shader
     ssComboBox->addItem("None");
     ssComboBox->addItem("1x3");
@@ -437,7 +435,7 @@ void setupGUI(QMainWindow* window) {
     ssComboBox->addItem("8 Rooks");
     ssComboBox->addItem("3x3");
     ssComboBox->addItem("4x4");
-    
+
     QObject::connect(ssComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(superSamplingChanged(int)));
     miscLayout->addRow("Super Sampling", ssComboBox);
 
