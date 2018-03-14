@@ -25,7 +25,9 @@ float tex(float t, vec2 uv)
 
 void main()
 {	
-    float s = texture(glyphs, v_uv).r;
+	// requires blend: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+	float s = texture(glyphs, v_uv).r;
     if(s < 0.3)
         discard;
 
