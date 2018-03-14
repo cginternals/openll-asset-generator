@@ -38,12 +38,16 @@ namespace llassetgen {
 
     Image Image::view(Vec2<size_t> outerMin, Vec2<size_t> outerMax, size_t padding) {
         assert(outerMax.x <= getWidth() && outerMax.y <= getHeight());
-        Vec2<size_t> vec(padding, padding), innerMin = min + outerMin + vec, innerMax = min + outerMax - vec;
+        outerMin += min;
+        outerMax += min;
+        Vec2<size_t> paddingVec(padding, padding),
+                     innerMin = outerMin + paddingVec,
+                     innerMax = outerMax - paddingVec;
         if(padding > 0) {
-            fillRect(outerMin, Vec2<size_t>(innerMax.x, innerMin.y));
-            fillRect(Vec2<size_t>(innerMax.x, outerMin.y), Vec2<size_t>(outerMax.x, innerMax.y));
-            fillRect(Vec2<size_t>(innerMin.x, innerMax.y), outerMax);
-            fillRect(Vec2<size_t>(outerMin.x, innerMin.y), Vec2<size_t>(innerMin.x, outerMax.y));
+            fillRect(outerMin, {innerMax.x, innerMin.y});
+            fillRect({innerMax.x, outerMin.y}, {outerMax.x, innerMax.y});
+            fillRect({innerMin.x, innerMax.y}, outerMax);
+            fillRect({outerMin.x, innerMin.y}, {innerMin.x, outerMax.y});
         }
         return Image(innerMin, innerMax, stride, bitDepth, data);
     }
@@ -125,7 +129,7 @@ namespace llassetgen {
     void Image::fillRect(Vec2<size_t> _min, Vec2<size_t> _max, pixelType in) const {
         for(size_t y = _min.y; y < _max.y; y++) {
             for(size_t x = _min.x; x < _max.x; x++) {
-                setPixel<uint16_t>({x, y}, in);
+                setPixel<pixelType>({x, y}, in);
             }
         }
     }
