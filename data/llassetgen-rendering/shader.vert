@@ -14,5 +14,5 @@ void main()
 {
     gl_Position = projection * modelView * vec4(corner * 2.0 - 1.0, -2.0, 1.0);
     color = vec4(corner, 0.0, 1.0);
-	v_uv = texUV;
+    v_uv = texUV;
 }
