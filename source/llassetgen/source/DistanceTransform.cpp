@@ -7,22 +7,25 @@ namespace llassetgen {
     template <typename PixelType, bool flipped, bool invalidBounds>
     PixelType DistanceTransform::getPixel(PositionType pos) {
         const Image& image = std::is_same<PixelType, InputType>::value ? input : output;
-        if (invalidBounds && !image.isValid(pos)) return 0;
-        if (flipped) std::swap(pos.x, pos.y);
+        if (invalidBounds && !image.isValid(pos))
+            return 0;
+        if (flipped)
+            std::swap(pos.x, pos.y);
         return image.getPixel<PixelType>(pos);
     }
 
     template <typename PixelType, bool flipped>
     void DistanceTransform::setPixel(PositionType pos, PixelType value) {
         const Image& image = std::is_same<PixelType, InputType>::value ? input : output;
-        if (flipped) std::swap(pos.x, pos.y);
+        if (flipped)
+            std::swap(pos.x, pos.y);
         image.setPixel<PixelType>(pos, value);
     }
 
     DistanceTransform::DistanceTransform(const Image& _input, const Image& _output) : input(_input), output(_output) {
-        assert(input.getWidth() == output.getWidth()
-               && input.getHeight() == output.getHeight()
-               && input.getBitDepth() == 1);
+        assert(input.getWidth() == output.getWidth() &&
+               input.getHeight() == output.getHeight() &&
+               input.getBitDepth() == 1);
     }
 
     DeadReckoning::PositionType& DeadReckoning::posAt(PositionType pos) {
@@ -87,16 +90,18 @@ namespace llassetgen {
         DimensionType begin = 0;
         for (DimensionType j = 0; j < length; ++j) {
             InputType next = getPixel<InputType, flipped>({j, offset});
-            if (next == prev) continue;
+            if (next == prev)
+                continue;
             DimensionType end = (next) ? j : j - 1;
             if (fill)
                 for (DimensionType i = begin; i < end; ++i)
                     setPixel<OutputType, flipped>(
                         {i, offset},
                         square(begin == 0
-                                   ? (end - i)                                            // Falling slope
-                                   : ((i < (end + begin) / 2) ? i - begin + 1 : end - i)  // Rising and falling slope
-                               ));
+                            ? (end - i)                                            // Falling slope
+                            : ((i < (end + begin) / 2) ? i - begin + 1 : end - i)  // Rising and falling slope
+                        )
+                    );
             prev = next;
             begin = end + 1;
             setPixel<OutputType, flipped>({end, offset}, 0);  // Mark edge
@@ -104,12 +109,14 @@ namespace llassetgen {
         if (fill)
             for (DimensionType i = begin; i < length; ++i)
                 setPixel<OutputType, flipped>(
-                    {i, offset}, (begin == 0) ? std::numeric_limits<OutputType>::max()  // Empty
-                                              : square(prev ? ((i < (length - 1 + begin) / 2)
-                                                                   ? i - begin + 1
-                                                                   : length - 1 - i)  // Rising and falling slope
-                                                            : (i - begin + 1)         // Rising slope
-                                                       ));
+                    {i, offset},
+                    (begin == 0)
+                        ? std::numeric_limits<OutputType>::max()  // Empty
+                        : square(prev
+                            ? ((i < (length - 1 + begin) / 2) ? i - begin + 1 : length - 1 - i)  // Rising and falling slope
+                            : (i - begin + 1)         // Rising slope
+                        )
+                );
         if (prev) setPixel<OutputType, flipped>({length - 1, offset}, 0);  // Mark edge
     }
 
