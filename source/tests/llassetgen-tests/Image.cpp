@@ -16,7 +16,7 @@ TEST(ImageTest, LoadTTF) {
     init();
 
     FT_Face face;
-    std::string font_file = test_source_path + "arial.ttf";
+    std::string font_file = test_source_path + "SourceSansPro-Regular.ttf";
     char letter = 'J';
 
     FT_Error face_created = FT_New_Face(freetype, font_file.c_str(), 0, &face);
