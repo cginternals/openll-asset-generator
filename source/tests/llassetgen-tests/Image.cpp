@@ -28,27 +28,26 @@ TEST(ImageTest, LoadTTF) {
     FT_Error glyph_loaded = FT_Load_Glyph(face, FT_Get_Char_Index(face, letter), FT_LOAD_RENDER | FT_LOAD_MONOCHROME);
     EXPECT_EQ(glyph_loaded, 0);
 
-    Image ft_8bit(face->glyph->bitmap.width, face->glyph->bitmap.rows, 1);
-    ft_8bit.load(face->glyph->bitmap);
+    size_t padding = 5;
+    Image canvas(face->glyph->bitmap.width + padding * 2, face->glyph->bitmap.rows + padding * 2, 1);
+    Image glyph_view = canvas.view(Vec2<size_t>(0, 0), Vec2<size_t>(face->glyph->bitmap.width + padding * 2, face->glyph->bitmap.rows + padding * 2), padding);
+    glyph_view.load(face->glyph->bitmap);
 
-    // view on (10,10),(20,20)
-    Image view_on_ft_8bit = ft_8bit.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20));
-    // invert view
-    for (size_t y = 0; y < view_on_ft_8bit.getHeight(); y++) {
-        for (size_t x = 0; x < view_on_ft_8bit.getWidth(); x++) {
-            view_on_ft_8bit.setPixel<uint8_t>(Vec2<size_t>(x, y), 1 - view_on_ft_8bit.getPixel<uint8_t>(Vec2<size_t>(x, y)));
+    Image invert_view = glyph_view.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20));
+    for (size_t y = 0; y < invert_view.getHeight(); y++) {
+        for (size_t x = 0; x < invert_view.getWidth(); x++) {
+            invert_view.setPixel<uint8_t>(Vec2<size_t>(x, y), 1 - invert_view.getPixel<uint8_t>(Vec2<size_t>(x, y)));
         }
     }
 
-    // save whole image.
-    ft_8bit.exportPng<uint8_t>(test_destination_path + "glyph1_out.png");
+    canvas.exportPng<uint8_t>(test_destination_path + "glyph1_out.png", 0, 1);
 }
 
 TEST(ImageTest, CreateAndWriteOneBitPNG) {
     Image blank_1bit(2, 2, 1);
     blank_1bit.setPixel<uint8_t>(Vec2<size_t>(0, 0), 1);
     blank_1bit.setPixel<uint8_t>(Vec2<size_t>(1, 1), 1);
-    blank_1bit.exportPng<uint8_t>(test_destination_path + "blank_one_bit.png");
+    blank_1bit.exportPng<uint8_t>(test_destination_path + "blank_one_bit.png", 0, 1);
 }
 
 TEST(ImageTest, CreateAndWritePNG) {
@@ -95,11 +94,11 @@ TEST(ImageTest, LoadPNGwithView) {
 
 TEST(ImageTest, LoadPNGReducedBitDepth) {
     Image loaded_png4(test_source_path + "A_glyph.png", 4);
-    loaded_png4.exportPng<uint16_t>(test_destination_path + "A_glyph2_out_4bit.png");
+    loaded_png4.exportPng<uint16_t>(test_destination_path + "A_glyph2_out_4bit.png", 0, 15);
     Image loaded_png2(test_source_path + "A_glyph.png", 2);
-    loaded_png2.exportPng<uint16_t>(test_destination_path + "A_glyph2_out_2bit.png");
+    loaded_png2.exportPng<uint16_t>(test_destination_path + "A_glyph2_out_2bit.png", 0, 3);
     Image loaded_png1(test_source_path + "A_glyph.png", 1);
-    loaded_png1.exportPng<uint16_t>(test_destination_path + "A_glyph2_out_1bit.png");
+    loaded_png1.exportPng<uint16_t>(test_destination_path + "A_glyph2_out_1bit.png", 0, 1);
 }
 
 TEST(ImageTest, FloatExport) {

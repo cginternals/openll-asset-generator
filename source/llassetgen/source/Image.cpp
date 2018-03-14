@@ -36,8 +36,16 @@ namespace llassetgen {
         :min(Vec2<size_t>(0, 0)), max(Vec2<size_t>(width, height)), stride((width  * _bitDepth + 7) / 8),
         bitDepth(_bitDepth), data(new uint8_t[stride * height]), isOwnerOfData(true) { }
 
-    Image Image::view(Vec2<size_t> _min, Vec2<size_t> _max) {
-        return Image(_min, _max, stride, bitDepth, data);
+    Image Image::view(Vec2<size_t> outerMin, Vec2<size_t> outerMax, size_t padding) {
+        assert(outerMax.x <= getWidth() && outerMax.y <= getHeight());
+        Vec2<size_t> vec(padding, padding), innerMin = min + outerMin + vec, innerMax = min + outerMax - vec;
+        if(padding > 0) {
+            fillRect(outerMin, Vec2<size_t>(innerMax.x, innerMin.y));
+            fillRect(Vec2<size_t>(innerMax.x, outerMin.y), Vec2<size_t>(outerMax.x, innerMax.y));
+            fillRect(Vec2<size_t>(innerMin.x, innerMax.y), outerMax);
+            fillRect(Vec2<size_t>(outerMin.x, innerMin.y), Vec2<size_t>(innerMin.x, outerMax.y));
+        }
+        return Image(innerMin, innerMax, stride, bitDepth, data);
     }
 
     size_t Image::getWidth() const {
@@ -71,14 +79,14 @@ namespace llassetgen {
             byte <<= bit_pos * bitDepth;
             byte >>= 8 - bitDepth;
             uint32_t casted = static_cast<uint32_t>(byte);
-            return *reinterpret_cast<pixelType*>(&casted);
+            return reinterpret_cast<pixelType&>(casted);
         } else {
             uint32_t return_data = 0;
             for (size_t byte_pos = 0; byte_pos < bitDepth / 8; ++byte_pos) {
                 return_data <<= 8;
                 return_data |= data[offset.y * stride + offset.x * bitDepth / 8 + byte_pos];
             }
-            return *reinterpret_cast<pixelType*>(&return_data);
+            return reinterpret_cast<pixelType&>(return_data);
         }
     }
 
@@ -92,7 +100,7 @@ namespace llassetgen {
         Vec2<size_t> offset = min + pos;
         if (bitDepth <= 8) {
             uint8_t mask = 0xFF;
-            uint8_t in_byte = static_cast<uint8_t>(*reinterpret_cast<uint32_t*>(&in));
+            uint8_t in_byte = static_cast<uint8_t>(reinterpret_cast<uint32_t&>(in));
             mask <<= 8 - bitDepth;
             mask >>= 8 - bitDepth;
 
@@ -101,7 +109,7 @@ namespace llassetgen {
             mask <<= 8 - bit_pos * bitDepth - bitDepth;
             data[offset.y * stride + offset.x * bitDepth / 8] = (data[offset.y * stride + offset.x * bitDepth / 8] & ~mask) | in_byte;
         } else {
-            uint32_t in_int = *reinterpret_cast<uint32_t*>(&in);
+            uint32_t in_int = reinterpret_cast<uint32_t&>(in);
             for (int byte_pos = bitDepth / 8 - 1; byte_pos >= 0; byte_pos--) {
                 data[offset.y * stride + offset.x * bitDepth / 8 + byte_pos] = static_cast<uint8_t>(in_int);
                 in_int >>= 8;
@@ -109,9 +117,35 @@ namespace llassetgen {
         }
     }
 
+    template LLASSETGEN_API void Image::fillRect<float>(Vec2<size_t> _min, Vec2<size_t> _max, float in) const;
+    template LLASSETGEN_API void Image::fillRect<uint32_t>(Vec2<size_t> _min, Vec2<size_t> _max, uint32_t in) const;
+    template LLASSETGEN_API void Image::fillRect<uint16_t>(Vec2<size_t> _min, Vec2<size_t> _max, uint16_t in) const;
+    template LLASSETGEN_API void Image::fillRect<uint8_t>(Vec2<size_t> _min, Vec2<size_t> _max, uint8_t in) const;
+    template<typename pixelType>
+    void Image::fillRect(Vec2<size_t> _min, Vec2<size_t> _max, pixelType in) const {
+        for(size_t y = _min.y; y < _max.y; y++) {
+            for(size_t x = _min.x; x < _max.x; x++) {
+                setPixel<uint16_t>({x, y}, in);
+            }
+        }
+    }
+
     void Image::load(const FT_Bitmap& ft_bitmap) {
-        assert(getWidth() == ft_bitmap.width && getHeight() == ft_bitmap.rows && stride == static_cast<size_t>(ft_bitmap.pitch));
-        memcpy(data, ft_bitmap.buffer, stride * getHeight());
+        assert(getWidth() == ft_bitmap.width && getHeight() == ft_bitmap.rows && bitDepth == getFtBitdepth(ft_bitmap));
+        if(min.x == 0 && min.y == 0) {
+            assert(stride == static_cast<size_t>(ft_bitmap.pitch));
+            memcpy(data, ft_bitmap.buffer, ft_bitmap.pitch * ft_bitmap.rows);
+        } else if(min.x % 8 == 0) {
+            assert(bitDepth == 1);
+            for(size_t y = 0; y < ft_bitmap.rows; y++)
+                memcpy(&data[(min.y + y) * stride + min.x / 8], &ft_bitmap.buffer[y * ft_bitmap.pitch], ft_bitmap.pitch);
+        } else {
+            for(size_t y = 0; y < ft_bitmap.rows; y++) {
+                for(size_t x = 0; x < ft_bitmap.width; x++) {
+                    setPixel<uint8_t>({x, y}, (ft_bitmap.buffer[y * ft_bitmap.pitch + x / 8] >> (7 - (x % 8))) & 1);
+                }
+            }
+        }
     }
 
     size_t Image::getFtBitdepth(const FT_Bitmap& ft_bitmap) {
