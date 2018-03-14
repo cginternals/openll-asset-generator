@@ -37,12 +37,14 @@ set(headers
     ${include_path}/Vec2.h
     ${include_path}/Image.h
     ${include_path}/DistanceTransform.h
+	${include_path}/FntWriter.h
 )
 
 set(sources
     ${source_path}/llassetgen.cpp
     ${source_path}/Image.cpp
     ${source_path}/DistanceTransform.cpp
+	${source_path}/FntWriter.cpp
 )
 
 # Group source files

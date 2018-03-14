@@ -8,9 +8,48 @@
 
 using namespace llassetgen;
 
-//std::string test_source_path = "../source/tests/llassetgen-tests/testfiles/";
-std::string test_source_path = "./llassetgen-tests/testfiles/";
-std::string test_destination_path = "../../build/";
+std::string test_source_path = "../source/tests/llassetgen-tests/testfiles/";
+//std::string test_source_path = "./llassetgen-tests/testfiles/";
+std::string test_destination_path = "../build/";
+//std::string test_destination_path = "../../build/";
+
+TEST(FntWriterTest, getKerning) {
+init();
+
+FT_Face face;
+std::string face_name = "arial.ttf";
+std::string font_file = test_source_path + face_name;
+
+FT_Error face_created = FT_New_Face(freetype, font_file.c_str(), 0, &face);
+EXPECT_EQ(face_created, 0);
+
+bool has_kerning = FT_HAS_KERNING(face);
+EXPECT_EQ(has_kerning, true);
+
+FntWriter writer = FntWriter(face, face_name);
+writer.readFont();
+
+FT_ULong charcode;
+FT_UInt gindex;
+Vec2<float> position = { 0.0f, 0.0f };
+Vec2<float> size = { 1.0f, 1.0f };
+Vec2<float> offset = { 0.0f, 0.0f };
+
+charcode = FT_Get_First_Char(face, &gindex);
+while (gindex != 0) {
+	charcode = FT_Get_Next_Char(face, charcode, &gindex);
+	writer.setCharInfo(gindex, position, size, offset);
+	position += {1.0f, 1.0f};
+	size += {1.0f, 1.0f};
+	offset += {1.0f, 1.0f};
+}
+
+Image test_image = Image(100, 200, 8);
+writer.setAtlasProperties(test_image);
+
+writer.SaveFnt(test_destination_path + "fnt.fnt");
+}
+
 
 TEST(ImageTest, LoadTTF) {
     init();
