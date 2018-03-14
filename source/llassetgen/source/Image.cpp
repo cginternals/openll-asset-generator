@@ -1,9 +1,9 @@
-#include <vector>
-#include <iostream>
-#include <fstream>
 #include <cassert>
 #include <cmath>
+#include <fstream>
+#include <iostream>
 #include <memory>
+#include <vector>
 
 /*
  * If we sort png.h below the freetype includes, an compile error will be
@@ -30,11 +30,15 @@ namespace llassetgen {
     }
 
     Image::Image(Vec2<size_t> _min, Vec2<size_t> _max, size_t _stride, uint8_t _bitDepth, uint8_t* _data)
-        :min(_min), max(_max), stride(_stride), bitDepth(_bitDepth), data(_data), isOwnerOfData(false) { }
+        : min(_min), max(_max), stride(_stride), bitDepth(_bitDepth), data(_data), isOwnerOfData(false) {}
 
     Image::Image(size_t width, size_t height, size_t _bitDepth)
-        :min(Vec2<size_t>(0, 0)), max(Vec2<size_t>(width, height)), stride((width  * _bitDepth + 7) / 8),
-        bitDepth(_bitDepth), data(new uint8_t[stride * height]), isOwnerOfData(true) { }
+        : min(Vec2<size_t>(0, 0)),
+          max(Vec2<size_t>(width, height)),
+          stride((width * _bitDepth + 7) / 8),
+          bitDepth(_bitDepth),
+          data(new uint8_t[stride * height]),
+          isOwnerOfData(true) {}
 
     Image Image::view(Vec2<size_t> outerMin, Vec2<size_t> outerMax, size_t padding) {
         assert(outerMax.x <= getWidth() && outerMax.y <= getHeight());
@@ -43,7 +47,7 @@ namespace llassetgen {
         Vec2<size_t> paddingVec(padding, padding),
                      innerMin = outerMin + paddingVec,
                      innerMax = outerMax - paddingVec;
-        if(padding > 0) {
+        if (padding > 0) {
             fillRect(outerMin, {innerMax.x, innerMin.y});
             fillRect({innerMax.x, outerMin.y}, {outerMax.x, innerMax.y});
             fillRect({innerMin.x, innerMax.y}, outerMax);
@@ -52,17 +56,11 @@ namespace llassetgen {
         return Image(innerMin, innerMax, stride, bitDepth, data);
     }
 
-    size_t Image::getWidth() const {
-        return max.x - min.x;
-    }
+    size_t Image::getWidth() const { return max.x - min.x; }
 
-    size_t Image::getHeight() const {
-        return max.y - min.y;
-    }
+    size_t Image::getHeight() const { return max.y - min.y; }
 
-    size_t Image::getBitDepth() const {
-        return bitDepth;
-    }
+    size_t Image::getBitDepth() const { return bitDepth; }
 
     bool Image::isValid(Vec2<size_t> pos) const {
         Vec2<size_t> offset = min + pos;
@@ -73,7 +71,7 @@ namespace llassetgen {
     template LLASSETGEN_API uint32_t Image::getPixel<uint32_t>(Vec2<size_t> pos) const;
     template LLASSETGEN_API uint16_t Image::getPixel<uint16_t>(Vec2<size_t> pos) const;
     template LLASSETGEN_API uint8_t Image::getPixel<uint8_t>(Vec2<size_t> pos) const;
-    template<typename pixelType>
+    template <typename pixelType>
     pixelType Image::getPixel(Vec2<size_t> pos) const {
         assert(isValid(pos));
         Vec2<size_t> offset = min + pos;
@@ -98,7 +96,7 @@ namespace llassetgen {
     template LLASSETGEN_API void Image::setPixel<uint32_t>(Vec2<size_t> pos, uint32_t in) const;
     template LLASSETGEN_API void Image::setPixel<uint16_t>(Vec2<size_t> pos, uint16_t in) const;
     template LLASSETGEN_API void Image::setPixel<uint8_t>(Vec2<size_t> pos, uint8_t in) const;
-    template<typename pixelType>
+    template <typename pixelType>
     void Image::setPixel(Vec2<size_t> pos, pixelType in) const {
         assert(isValid(pos));
         Vec2<size_t> offset = min + pos;
@@ -111,7 +109,8 @@ namespace llassetgen {
             size_t bit_pos = offset.x % (8 / bitDepth);
             in_byte <<= 8 - bit_pos * bitDepth - bitDepth;
             mask <<= 8 - bit_pos * bitDepth - bitDepth;
-            data[offset.y * stride + offset.x * bitDepth / 8] = (data[offset.y * stride + offset.x * bitDepth / 8] & ~mask) | in_byte;
+            data[offset.y * stride + offset.x * bitDepth / 8] =
+                (data[offset.y * stride + offset.x * bitDepth / 8] & ~mask) | in_byte;
         } else {
             uint32_t in_int = reinterpret_cast<uint32_t&>(in);
             for (int byte_pos = bitDepth / 8 - 1; byte_pos >= 0; byte_pos--) {
@@ -125,10 +124,10 @@ namespace llassetgen {
     template LLASSETGEN_API void Image::fillRect<uint32_t>(Vec2<size_t> _min, Vec2<size_t> _max, uint32_t in) const;
     template LLASSETGEN_API void Image::fillRect<uint16_t>(Vec2<size_t> _min, Vec2<size_t> _max, uint16_t in) const;
     template LLASSETGEN_API void Image::fillRect<uint8_t>(Vec2<size_t> _min, Vec2<size_t> _max, uint8_t in) const;
-    template<typename pixelType>
+    template <typename pixelType>
     void Image::fillRect(Vec2<size_t> _min, Vec2<size_t> _max, pixelType in) const {
-        for(size_t y = _min.y; y < _max.y; y++) {
-            for(size_t x = _min.x; x < _max.x; x++) {
+        for (size_t y = _min.y; y < _max.y; y++) {
+            for (size_t x = _min.x; x < _max.x; x++) {
                 setPixel<pixelType>({x, y}, in);
             }
         }
@@ -136,16 +135,18 @@ namespace llassetgen {
 
     void Image::load(const FT_Bitmap& ft_bitmap) {
         assert(getWidth() == ft_bitmap.width && getHeight() == ft_bitmap.rows && bitDepth == getFtBitdepth(ft_bitmap));
-        if(min.x == 0 && min.y == 0) {
+        if (min.x == 0 && min.y == 0) {
             assert(stride == static_cast<size_t>(ft_bitmap.pitch));
             memcpy(data, ft_bitmap.buffer, ft_bitmap.pitch * ft_bitmap.rows);
-        } else if(min.x % 8 == 0) {
+        } else if (min.x % 8 == 0) {
             assert(bitDepth == 1);
-            for(size_t y = 0; y < ft_bitmap.rows; y++)
-                memcpy(&data[(min.y + y) * stride + min.x / 8], &ft_bitmap.buffer[y * ft_bitmap.pitch], ft_bitmap.pitch);
+            for (size_t y = 0; y < ft_bitmap.rows; y++)
+                memcpy(&data[(min.y + y) * stride + min.x / 8],
+                       &ft_bitmap.buffer[y * ft_bitmap.pitch],
+                       ft_bitmap.pitch);
         } else {
-            for(size_t y = 0; y < ft_bitmap.rows; y++) {
-                for(size_t x = 0; x < ft_bitmap.width; x++) {
+            for (size_t y = 0; y < ft_bitmap.rows; y++) {
+                for (size_t x = 0; x < ft_bitmap.width; x++) {
                     setPixel<uint8_t>({x, y}, (ft_bitmap.buffer[y * ft_bitmap.pitch + x / 8] >> (7 - (x % 8))) & 1);
                 }
             }
@@ -153,7 +154,7 @@ namespace llassetgen {
     }
 
     size_t Image::getFtBitdepth(const FT_Bitmap& ft_bitmap) {
-        switch(ft_bitmap.pixel_mode) {
+        switch (ft_bitmap.pixel_mode) {
             case FT_PIXEL_MODE_MONO:
                 return 1;
             case FT_PIXEL_MODE_GRAY2:
@@ -237,7 +238,8 @@ namespace llassetgen {
         } else {
             if (png_get_valid(png, info, PNG_INFO_tRNS)) {
                 png_set_tRNS_to_alpha(png);
-            } if (color_type == PNG_COLOR_TYPE_PALETTE) {
+            }
+            if (color_type == PNG_COLOR_TYPE_PALETTE) {
                 png_set_palette_to_rgb(png);
             } else if (color_type == PNG_COLOR_TYPE_RGB ||
                 color_type == PNG_COLOR_TYPE_RGBA ||
@@ -274,7 +276,9 @@ namespace llassetgen {
 
         for (size_t y = 0; y < getHeight(); y++) {
             for (size_t x = 0; x < getWidth(); x++) {
-                setPixel<uint16_t>({x, y}, reduceBitDepth(multi_channel_data.get()[y * png_stride * channels + x * png_bitDepth / 8 * channels], png_bitDepth, bitDepth));
+                auto pixel = multi_channel_data.get()[y * png_stride * channels + x * png_bitDepth / 8 * channels];
+                auto reducedPixel = reduceBitDepth(pixel, png_bitDepth, bitDepth);
+                setPixel<uint16_t>({x, y}, reducedPixel);
             }
         }
     }
@@ -336,7 +340,9 @@ namespace llassetgen {
 
             for (size_t y = 0; y < getHeight(); y++) {
                 for (size_t x = 0; x < getWidth(); x++) {
-                    row[x] = clamp(static_cast<float>(getPixel<pixelType>({x, y}) - black) / static_cast<float>(white - black), 0.0F, 1.0F) * std::numeric_limits<uint16_t>::max();
+                    auto value =
+                        static_cast<float>(getPixel<pixelType>({x, y}) - black) / static_cast<float>(white - black);
+                    row[x] = clamp(value, 0.0F, 1.0F) * std::numeric_limits<uint16_t>::max();
                 }
                 png_write_row(png, reinterpret_cast<png_bytep>(row.get()));
             }

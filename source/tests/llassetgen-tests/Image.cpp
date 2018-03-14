@@ -1,4 +1,4 @@
-#include <ft2build.h> // NOLINT include order required by freetype
+#include <ft2build.h>  // NOLINT include order required by freetype
 #include FT_FREETYPE_H
 
 #include <gmock/gmock.h>
@@ -30,13 +30,15 @@ TEST(ImageTest, LoadTTF) {
 
     size_t padding = 5;
     Image canvas(face->glyph->bitmap.width + padding * 2, face->glyph->bitmap.rows + padding * 2, 1);
-    Image glyph_view = canvas.view(Vec2<size_t>(0, 0), Vec2<size_t>(face->glyph->bitmap.width + padding * 2, face->glyph->bitmap.rows + padding * 2), padding);
+    auto x = face->glyph->bitmap.width + padding * 2;
+    auto y = face->glyph->bitmap.rows + padding * 2;
+    Image glyph_view = canvas.view({0, 0}, {x, y}, padding);
     glyph_view.load(face->glyph->bitmap);
 
     Image invert_view = glyph_view.view(Vec2<size_t>(10, 10), Vec2<size_t>(20, 20));
     for (size_t y = 0; y < invert_view.getHeight(); y++) {
         for (size_t x = 0; x < invert_view.getWidth(); x++) {
-            invert_view.setPixel<uint8_t>(Vec2<size_t>(x, y), 1 - invert_view.getPixel<uint8_t>(Vec2<size_t>(x, y)));
+            invert_view.setPixel<uint8_t>({x, y}, 1 - invert_view.getPixel<uint8_t>({x, y}));
         }
     }
 
@@ -67,11 +69,9 @@ TEST(ImageTest, CreateAndWritePNG) {
         for (size_t x = 0; x < blank_16bit.getWidth(); x++) {
             if (x == 3 && y == 4) {
                 EXPECT_EQ(blank_16bit.getPixel<uint32_t>(Vec2<size_t>(x, y)), 26781);
-            }
-            else if (x == 4 && y == 5) {
+            } else if (x == 4 && y == 5) {
                 EXPECT_EQ(blank_16bit.getPixel<uint32_t>(Vec2<size_t>(x, y)), 42949);
-            }
-            else {
+            } else {
                 EXPECT_EQ(blank_16bit.getPixel<uint32_t>(Vec2<size_t>(x, y)), 0);
             }
         }
@@ -86,7 +86,7 @@ TEST(ImageTest, LoadPNGwithView) {
     // invert view
     for (size_t y = 0; y < view_on_loaded_png.getHeight(); y++) {
         for (size_t x = 0; x < view_on_loaded_png.getWidth(); x++) {
-            view_on_loaded_png.setPixel<uint16_t>(Vec2<size_t>(x, y), 0xFF - view_on_loaded_png.getPixel<uint16_t>(Vec2<size_t>(x, y)));
+            view_on_loaded_png.setPixel<uint16_t>({x, y}, 0xFF - view_on_loaded_png.getPixel<uint16_t>({x, y}));
         }
     }
     loaded_png.exportPng<uint16_t>(test_destination_path + "A_glyph2_out.png");
@@ -108,15 +108,15 @@ TEST(ImageTest, FloatExport) {
             float_image.setPixel<float>(Vec2<size_t>(x, y), float(x + y));
         }
     }
-    float_image.exportPng<float>(test_destination_path + "float.png", 0.0f, float(float_image.getWidth() + float_image.getHeight()));
+    float_image.exportPng<float>(test_destination_path + "float.png", 0.0f,
+                                 float(float_image.getWidth() + float_image.getHeight()));
 }
 
-class DistanceTransformTest : public testing::Test {
-
-};
+class DistanceTransformTest : public testing::Test {};
 
 TEST_F(DistanceTransformTest, DeadReckoning) {
-    Image input(test_source_path + "Helvetica.png", 1), output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType)*8);
+    Image input(test_source_path + "Helvetica.png", 1),
+          output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
     std::unique_ptr<DistanceTransform> dt(new DeadReckoning(input, output));
     dt->transform();
     output.exportPng<DistanceTransform::OutputType>(test_destination_path + "DeadReckoning.png", -20, 50);
@@ -124,7 +124,8 @@ TEST_F(DistanceTransformTest, DeadReckoning) {
 }
 
 TEST_F(DistanceTransformTest, ParabolaEnvelope) {
-    Image input(test_source_path + "Helvetica.png", 1), output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType)*8);
+    Image input(test_source_path + "Helvetica.png", 1),
+          output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
     std::unique_ptr<DistanceTransform> dt(new ParabolaEnvelope(input, output));
     dt->transform();
     output.exportPng<DistanceTransform::OutputType>(test_destination_path + "ParabolaEnvelope.png", -20, 50);
