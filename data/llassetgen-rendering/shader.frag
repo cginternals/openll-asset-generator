@@ -24,15 +24,15 @@ float tex(float t, vec2 uv)
 
 
 void main()
-{	
-	// requires blend: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+{
+    // requires blend: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-	float s = texture(glyphs, v_uv).r;
+    float s = texture(glyphs, v_uv).r;
     if(s < 0.3)
         discard;
 
     //vec4 fc = color; //TODO if we want vertex-based color
-	vec4 fc = fontColor; //if we want uniform font color
+    vec4 fc = fontColor; //if we want uniform font color
 
     float a = tex(0.5, v_uv);
 
