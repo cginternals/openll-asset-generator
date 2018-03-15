@@ -172,15 +172,15 @@ float aastep4x4(float t, vec2 uv)
 
 
 void main()
-{    
+{
     // requires blend: glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
+
     float s = texture(glyphs, v_uv).r;
     if(s < 0.3)
         discard;
 
-    //vec4 fc = color; // if we want vertex-based color
-    vec4 fc = fontColor; // if we want uniform font color
+    //vec4 fc = color;  // if we want vertex-based color
+    vec4 fc = fontColor;  // if we want uniform font color
 
     float a;
     switch (superSampling)
