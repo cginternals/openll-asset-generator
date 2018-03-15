@@ -82,6 +82,11 @@ class Window : public WindowQt {
         auto path = QApplication::applicationDirPath();
         auto* image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_DT.png");
 
+        // TODO see above TODO. Will have an appropiate error handling here.
+        if (image->isNull()) {
+            std::cout << "Image NOT loaded successfully." << std::endl;
+        }
+
         // mirrored: Qt flips images after
         // loading; meant as convenience, but
         // we need it to flip back here.
