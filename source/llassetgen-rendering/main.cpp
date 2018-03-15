@@ -83,6 +83,11 @@ class Window : public WindowQt {
         auto path = QApplication::applicationDirPath();
         auto* image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_DT.png");
 
+        // TODO see above TODO. Will have an appropiate error handling here.
+        if (image->isNull()) {
+            std::cout << "Image NOT loaded successfully." << std::endl;
+        }
+
         // mirrored: Qt flips images after
         // loading; meant as convenience, but
         // we need it to flip back here.
@@ -117,8 +122,7 @@ class Window : public WindowQt {
         float quadW = 1.f;
         float quadH = quadW * imageH / imageW;
 
-        cornerBuffer->setData(std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(quadW, 0), glm::vec2(0, quadH),
-                                                        glm::vec2(quadW, quadH)}},
+        cornerBuffer->setData(std::array<glm::vec2, 4>{{{0, 0}, {quadW, 0}, {0, quadH}, {quadW, quadH}}},
                               GL_STATIC_DRAW);
 
         vao->binding(0)->setAttribute(0);
@@ -126,9 +130,7 @@ class Window : public WindowQt {
         vao->binding(0)->setFormat(2, GL_FLOAT);
         vao->enable(0);
 
-        textureBuffer->setData(
-            std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0, 1), glm::vec2(1, 1)}},
-            GL_STATIC_DRAW);
+        textureBuffer->setData(std::array<glm::vec2, 4>{{{0, 0}, {1, 0}, {0, 1}, {1, 1}}}, GL_STATIC_DRAW);
 
         vao->binding(1)->setAttribute(1);
         vao->binding(1)->setBuffer(textureBuffer.get(), 0, sizeof(glm::vec2));
@@ -217,8 +219,6 @@ class Window : public WindowQt {
     }
 
     virtual void mousePressEvent(QMouseEvent* event) override {
-        makeCurrent();
-
         lastMousePos.x = event->x();
         lastMousePos.y = event->y();
 
@@ -227,8 +227,6 @@ class Window : public WindowQt {
         } else if (event->button() == Qt::RightButton) {
             isRotating = true;
         }
-
-        doneCurrent();
     }
 
     virtual void mouseMoveEvent(QMouseEvent* event) override {
@@ -236,8 +234,6 @@ class Window : public WindowQt {
         if (!isPanning && !isRotating) return;
 
         auto speed = 0.005f;  // magic.
-
-        makeCurrent();
 
         if ((event->buttons() & Qt::LeftButton) && isPanning) {
             auto deltaX = (event->x() - lastMousePos.x) * speed;
@@ -258,8 +254,6 @@ class Window : public WindowQt {
         lastMousePos.y = event->y();
 
         paint();
-
-        doneCurrent();
     }
 
     virtual void mouseReleaseEvent(QMouseEvent* event) override {

@@ -173,9 +173,9 @@ float aastep4x4(float t, vec2 uv)
 
 
 void main()
-{   
+{
     fragColor = vec4(1.0,0.0,0.0,1.0); //debugging color
-    
+
     float s = texture(glyphs, v_uv).r;
     
     if (showDistanceField)
