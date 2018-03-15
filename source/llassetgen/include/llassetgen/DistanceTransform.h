@@ -1,7 +1,7 @@
 #pragma once
 
-#include <llassetgen/Image.h>
 #include <llassetgen/Geometry.h>
+#include <llassetgen/Image.h>
 #include <llassetgen/llassetgen_api.h>
 
 namespace llassetgen {
@@ -13,9 +13,9 @@ namespace llassetgen {
         using PositionType = Vec2<DimensionType>;
 
        protected:
-        template<typename PixelType, bool flipped = false, bool invalidBounds = false>
+        template <typename PixelType, bool flipped = false, bool invalidBounds = false>
         LLASSETGEN_NO_EXPORT PixelType getPixel(PositionType pos);
-        template<typename PixelType, bool flipped = false>
+        template <typename PixelType, bool flipped = false>
         LLASSETGEN_NO_EXPORT void setPixel(PositionType pos, PixelType value);
 
        public:
@@ -32,7 +32,7 @@ namespace llassetgen {
         LLASSETGEN_NO_EXPORT void transformAt(PositionType pos, PositionType target, OutputType distance);
 
        public:
-        DeadReckoning(const Image& _input, const Image& _output) :DistanceTransform(_input, _output) {}
+        DeadReckoning(const Image& _input, const Image& _output) : DistanceTransform(_input, _output) {}
         void transform();
     };
 
@@ -45,13 +45,13 @@ namespace llassetgen {
         std::unique_ptr<Parabola[]> parabolas;
         std::unique_ptr<OutputType[]> lineBuffer;
 
-        template<bool flipped, bool fill>
+        template <bool flipped, bool fill>
         LLASSETGEN_NO_EXPORT void edgeDetection(DimensionType offset, DimensionType length);
-        template<bool flipped>
+        template <bool flipped>
         LLASSETGEN_NO_EXPORT void transformLine(DimensionType offset, DimensionType length);
 
        public:
-        ParabolaEnvelope(const Image& _input, const Image& _output) :DistanceTransform(_input, _output) {}
+        ParabolaEnvelope(const Image& _input, const Image& _output) : DistanceTransform(_input, _output) {}
         void transform();
     };
 }

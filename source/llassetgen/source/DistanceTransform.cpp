@@ -1,38 +1,32 @@
-#include <iostream>
 #include <cassert>
 #include <cmath>
 
 #include <llassetgen/DistanceTransform.h>
 
 namespace llassetgen {
-    template<typename PixelType, bool flipped, bool invalidBounds>
+    template <typename PixelType, bool flipped, bool invalidBounds>
     PixelType DistanceTransform::getPixel(PositionType pos) {
         const Image& image = std::is_same<PixelType, InputType>::value ? input : output;
-        if(invalidBounds && !image.isValid(pos))
+        if (invalidBounds && !image.isValid(pos))
             return 0;
-        if(flipped)
+        if (flipped)
             std::swap(pos.x, pos.y);
-        PixelType value = image.getPixel<PixelType>(pos);
-        if (std::is_same<PixelType, InputType>::value) {
-            return (value >= 1 << image.getBitDepth() - 1);  // (value > 0.5 * maxValue) ? 1 : 0
-        } else {
-            return value;
-        }
+        return image.getPixel<PixelType>(pos);
     }
 
-    template<typename PixelType, bool flipped>
+    template <typename PixelType, bool flipped>
     void DistanceTransform::setPixel(PositionType pos, PixelType value) {
         const Image& image = std::is_same<PixelType, InputType>::value ? input : output;
-        if(flipped)
+        if (flipped)
             std::swap(pos.x, pos.y);
         image.setPixel<PixelType>(pos, value);
     }
 
-    DistanceTransform::DistanceTransform(const Image& _input, const Image& _output) :input(_input), output(_output) {
-        assert(input.getWidth() == output.getWidth() && input.getHeight() == output.getHeight());
+    DistanceTransform::DistanceTransform(const Image& _input, const Image& _output) : input(_input), output(_output) {
+        assert(input.getWidth() == output.getWidth() &&
+               input.getHeight() == output.getHeight() &&
+               input.getBitDepth() == 1);
     }
-
-
 
     DeadReckoning::PositionType& DeadReckoning::posAt(PositionType pos) {
         assert(pos.x < input.getWidth() && pos.y < input.getHeight() && posBuffer.get());
@@ -90,41 +84,43 @@ namespace llassetgen {
             }
     }
 
-
-
-    template<bool flipped, bool fill>
+    template <bool flipped, bool fill>
     void ParabolaEnvelope::edgeDetection(DimensionType offset, DimensionType length) {
         InputType prev = 0;
         DimensionType begin = 0;
-        for(DimensionType j = 0; j < length; ++j) {
+        for (DimensionType j = 0; j < length; ++j) {
             InputType next = getPixel<InputType, flipped>({j, offset});
-            if(next == prev)
+            if (next == prev)
                 continue;
-            DimensionType end = (next) ? j : j-1;
-            if(fill)
-                for(DimensionType i = begin; i < end; ++i)
-                    setPixel<OutputType, flipped>({i, offset}, square(begin == 0
-                        ? (end-i) // Falling slope
-                        : ((i < (end+begin)/2) ? i-begin+1 : end-i) // Rising and falling slope
-                    ));
+            DimensionType end = (next) ? j : j - 1;
+            if (fill)
+                for (DimensionType i = begin; i < end; ++i)
+                    setPixel<OutputType, flipped>(
+                        {i, offset},
+                        square(begin == 0
+                            ? (end - i)                                            // Falling slope
+                            : ((i < (end + begin) / 2) ? i - begin + 1 : end - i)  // Rising and falling slope
+                        )
+                    );
             prev = next;
-            begin = end+1;
-            setPixel<OutputType, flipped>({end, offset}, 0); // Mark edge
+            begin = end + 1;
+            setPixel<OutputType, flipped>({end, offset}, 0);  // Mark edge
         }
-        if(fill)
-            for(DimensionType i = begin; i < length; ++i)
-                setPixel<OutputType, flipped>({i, offset}, (begin == 0)
-                    ? std::numeric_limits<OutputType>::max() // Empty
-                    : square(prev
-                        ? ((i < (length-1+begin)/2) ? i-begin+1 : length-1-i) // Rising and falling slope
-                        : (i-begin+1) // Rising slope
-                    )
+        if (fill)
+            for (DimensionType i = begin; i < length; ++i)
+                setPixel<OutputType, flipped>(
+                    {i, offset},
+                    (begin == 0)
+                        ? std::numeric_limits<OutputType>::max()  // Empty
+                        : square(prev
+                            ? ((i < (length - 1 + begin) / 2) ? i - begin + 1 : length - 1 - i)  // Rising and falling slope
+                            : (i - begin + 1)         // Rising slope
+                        )
                 );
-        if(prev)
-            setPixel<OutputType, flipped>({length-1, offset}, 0); // Mark edge
+        if (prev) setPixel<OutputType, flipped>({length - 1, offset}, 0);  // Mark edge
     }
 
-    template<bool flipped>
+    template <bool flipped>
     void ParabolaEnvelope::transformLine(DimensionType offset, DimensionType length) {
         parabolas[0].apex = 0;
         parabolas[0].begin = -std::numeric_limits<OutputType>::infinity();
@@ -134,7 +130,8 @@ namespace llassetgen {
             OutputType begin;
             do {
                 DimensionType apex = parabolas[parabola].apex;
-                begin = (getPixel<OutputType, flipped>({i, offset}) + square(i) - (parabolas[parabola].value + square(apex))) / (2 * (i - apex));
+                auto pixel = getPixel<OutputType, flipped>({i, offset});
+                begin = (pixel + square(i) - (parabolas[parabola].value + square(apex))) / (2 * (i - apex));
             } while (begin <= parabolas[parabola--].begin);
             parabola += 2;
             parabolas[parabola].apex = i;
@@ -143,9 +140,12 @@ namespace llassetgen {
             parabolas[parabola + 1].begin = std::numeric_limits<OutputType>::infinity();
         }
         for (DimensionType parabola = 0, i = 0; i < length; ++i) {
-            while (parabolas[++parabola].begin < i);
+            while (parabolas[++parabola].begin < i)
+                ;
             --parabola;
-            setPixel<OutputType, flipped>({i, offset}, std::sqrt(parabolas[parabola].value+square(i-parabolas[parabola].apex)) * (getPixel<InputType, flipped>({i, offset}) ? -1 : 1));
+            auto pixel = getPixel<InputType, flipped>({i, offset}) ? -1 : 1;
+            auto value = std::sqrt(parabolas[parabola].value + square(i - parabolas[parabola].apex)) * pixel;
+            setPixel<OutputType, flipped>({i, offset}, value);
         }
     }
 
@@ -158,7 +158,7 @@ namespace llassetgen {
         for(DimensionType y = 0; y < input.getHeight(); ++y)
             edgeDetection<false, true>(y, input.getWidth());
 
-        for(DimensionType x = 0; x < input.getWidth(); ++x) {
+        for (DimensionType x = 0; x < input.getWidth(); ++x) {
             edgeDetection<true, false>(x, input.getHeight());
             transformLine<true>(x, input.getHeight());
         }

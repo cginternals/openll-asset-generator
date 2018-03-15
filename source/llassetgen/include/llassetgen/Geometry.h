@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <ostream>
 
 template <typename T>
