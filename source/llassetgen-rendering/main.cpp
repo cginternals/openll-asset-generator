@@ -300,7 +300,7 @@ class Window : public WindowQt {
     }
 
     virtual void superSamplingChanged(int index) override {
-        superSampling = (uint)index;
+        superSampling = static_cast<unsigned int>(index);
         paint();
     }
 
@@ -328,7 +328,7 @@ class Window : public WindowQt {
     int samplerIndex = 0;
     glm::mat4 transform3D = glm::mat4();
     glm::mat4 projection = glm::perspective(45.f, 1.f, 0.0001f, 100.f);
-    uint superSampling = 0;
+    unsigned int superSampling = 0;
     bool showDistanceField = false;
 
     bool isPanning = false;
