@@ -105,6 +105,8 @@ std::unique_ptr<Image> FontRenderer::renderGlyph(unsigned long glyph, unsigned i
         throw std::runtime_error("glyph could not be rendered");
     }
 
-    auto bitmap = std::make_shared<FT_Bitmap>(fontFace->glyph->bitmap);
-    return std::unique_ptr<Image>(new Image(*bitmap));
+    FT_Bitmap& bitmap = fontFace->glyph->bitmap;
+    auto img = std::unique_ptr<Image>(new Image(bitmap.width, bitmap.rows, 1));
+    img->load(bitmap);
+    return img;
 }

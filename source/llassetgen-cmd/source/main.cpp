@@ -34,7 +34,7 @@ void distField(std::string& algorithm, Image& input, std::string& outPath) {
     Image output = Image(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
     std::unique_ptr<DistanceTransform> dt = dtFactory[algorithm](input, output);
     dt->transform();
-    output.exportPng<DistanceTransform::OutputType>(outPath, -20, 50);
+    output.exportPng<DistanceTransform::OutputType>(outPath, 20, -30);
 }
 
 int main(int argc, char** argv) {
