@@ -14,9 +14,7 @@ compiler:
 env:
   global:
     - CMAKE_OPTIONS="-DOPTION_BUILD_EXAMPLES=On"
-    - PATH="/usr/local/opt/qt/bin:$PATH"
-    - PATH="/usr/local/opt/glbinding:$PATH"
-    - PATH="/usr/local/opt/globjects:$PATH"
+    - PATH="/usr/local/opt/qt/bin:/usr/local/opt/glbinding:/usr/local/opt/globjects:$PATH"
     
   matrix:
     - CMAKE_CONFIGURATION=release BUILD_DIR=build
