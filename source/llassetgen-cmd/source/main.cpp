@@ -1,9 +1,8 @@
+#include <CLI11.h>
+#include <codecvt>
 #include <map>
 #include <ostream>
 
-#include <CLI11.h>
-
-#include <codecvt>
 #include "FontRenderer.h"
 
 using namespace llassetgen;

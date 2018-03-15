@@ -1,11 +1,12 @@
-#include "FontRenderer.h"
 #ifdef __unix__
-#include <fontconfig/fontconfig.h>
+    #include <fontconfig/fontconfig.h>
 #elif _WIN32
-#define NOMINMAX
-#include <windows.h>
-#include <wingdi.h>
+    #define NOMINMAX
+    #include <windows.h>
+    #include <wingdi.h>
 #endif
+
+#include "FontRenderer.h"
 
 using namespace llassetgen;
 
