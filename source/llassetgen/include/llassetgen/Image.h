@@ -40,6 +40,7 @@ namespace llassetgen {
         void setPixel(Vec2<size_t> pos, pixelType data) const;
         template <typename pixelType = uint8_t>
         void fillRect(Vec2<size_t> _min, Vec2<size_t> _max, pixelType in = 0) const;
+        void clear() const;
 
         void load(const FT_Bitmap_& ft_bitmap);
         Image(const std::string& filepath, uint8_t _bitDepth = 0);

@@ -44,16 +44,8 @@ namespace llassetgen {
         assert(outerMax.x <= getWidth() && outerMax.y <= getHeight());
         outerMin += min;
         outerMax += min;
-        Vec2<size_t> paddingVec(padding, padding),
-                     innerMin = outerMin + paddingVec,
-                     innerMax = outerMax - paddingVec;
-        if (padding > 0) {
-            fillRect(outerMin, {innerMax.x, innerMin.y});
-            fillRect({innerMax.x, outerMin.y}, {outerMax.x, innerMax.y});
-            fillRect({innerMin.x, innerMax.y}, outerMax);
-            fillRect({outerMin.x, innerMin.y}, {innerMin.x, outerMax.y});
-        }
-        return Image(innerMin, innerMax, stride, bitDepth, data);
+        Vec2<size_t> paddingVec(padding, padding);
+        return Image(outerMin + paddingVec, outerMax - paddingVec, stride, bitDepth, data);
     }
 
     size_t Image::getWidth() const { return max.x - min.x; }
@@ -130,6 +122,14 @@ namespace llassetgen {
             for (size_t x = _min.x; x < _max.x; x++) {
                 setPixel<pixelType>({x, y}, in);
             }
+        }
+    }
+
+    void Image::clear() const {
+        if(isOwnerOfData) {
+            memset(data, 0, stride * getHeight());
+        } else {
+            fillRect(min, max, 0);
         }
     }
 

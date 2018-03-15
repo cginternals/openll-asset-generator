@@ -56,11 +56,7 @@ TEST(ImageTest, CreateAndWritePNG) {
     // create blank image with 40x30 pixels and 16 bit
     Image blank_16bit(8, 8, 16);
     // set pixels
-    for (size_t y = 0; y < blank_16bit.getHeight(); y++) {
-        for (size_t x = 0; x < blank_16bit.getWidth(); x++) {
-            blank_16bit.setPixel<uint16_t>(Vec2<size_t>(x, y), 0);
-        }
-    }
+    blank_16bit.clear();
     blank_16bit.setPixel<uint16_t>(Vec2<size_t>(3, 4), 26781);
     blank_16bit.setPixel<uint16_t>(Vec2<size_t>(4, 5), 42949);
 
