@@ -1,11 +1,11 @@
 #version 140
 #extension GL_ARB_explicit_attrib_location : require
 
-layout (location = 0) in vec2 corner;
-layout (location = 1) in vec2 texUV;
-
 uniform mat4 modelView;
 uniform mat4 projection;
+
+layout (location = 0) in vec2 corner;
+layout (location = 1) in vec2 texUV;
 
 out vec4 color;
 out vec2 v_uv;
