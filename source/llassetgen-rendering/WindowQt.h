@@ -25,6 +25,11 @@ class WindowQt : public QWindow {
     virtual void enterEvent(QEvent* event);
     virtual void leaveEvent(QEvent* event);
 
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseMoveEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
+    virtual void wheelEvent(QWheelEvent* event) override;
+
     /*
      * Make OpenGL Context current context.
      */
@@ -46,6 +51,7 @@ class WindowQt : public QWindow {
     virtual void fontColorRChanged(QString value);
     virtual void fontColorGChanged(QString value);
     virtual void fontColorBChanged(QString value);
+    virtual void resetTransform3D();
 
    protected:
     QScopedPointer<QOpenGLContext> glcontext;

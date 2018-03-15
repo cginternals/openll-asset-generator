@@ -11,10 +11,13 @@
 #include <QGroupBox>
 #include <QLineEdit>
 #include <QMainWindow>
+#include <QPushButton>
 #include <QResizeEvent>
 #include <QValidator>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/mat4x4.hpp>
 
 #include <glbinding/ContextInfo.h>
 #include <glbinding/Version.h>
@@ -50,7 +53,7 @@ using namespace gl;
  */
 class Window : public WindowQt {
    public:
-    explicit Window(const QSurfaceFormat &format) : WindowQt(format) {}
+    explicit Window(const QSurfaceFormat& format) : WindowQt(format) {}
 
     virtual ~Window() {}
 
@@ -77,7 +80,12 @@ class Window : public WindowQt {
         // TODO load using own png loader instead of Qt (blocked: wait for this feature to be merged into master, then
         // pull). TODO: Make sure this file structure is the same on other OS
         auto path = QApplication::applicationDirPath();
-        auto *image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_rgb.png");
+        auto* image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_DT.png");
+
+        // TODO see above TODO. Will have an appropiate error handling here.
+        if (image->isNull()) {
+            std::cout << "Image NOT loaded successfully." << std::endl;
+        }
 
         // mirrored: Qt flips images after
         // loading; meant as convenience, but
@@ -86,11 +94,14 @@ class Window : public WindowQt {
         auto imageData = imageFormatted.bits();
 
         texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
-        texture->image2D(0, GL_RGBA8, image->width(), image->height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
+        float imageW = image->width();
+        float imageH = image->height();
+        texture->image2D(0, GL_RGBA8, imageW, imageH, 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
         // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
         // ignore this, since we use black&white image data here?
 
         cornerBuffer = globjects::Buffer::create();
+        textureBuffer = globjects::Buffer::create();
         program = globjects::Program::create();
         vao = globjects::VertexArray::create();
 
@@ -107,15 +118,26 @@ class Window : public WindowQt {
 
         program->attach(vertexShader.get(), fragmentShader.get());
 
-        cornerBuffer->setData(
-            std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0, 1), glm::vec2(1, 1)}},
-            GL_STATIC_DRAW);
+        float quadW = 1.f;
+        float quadH = quadW * imageH / imageW;
+
+        cornerBuffer->setData(std::array<glm::vec2, 4>{{{0, 0}, {quadW, 0}, {0, quadH}, {quadW, quadH}}},
+                              GL_STATIC_DRAW);
 
         vao->binding(0)->setAttribute(0);
         vao->binding(0)->setBuffer(cornerBuffer.get(), 0, sizeof(glm::vec2));
         vao->binding(0)->setFormat(2, GL_FLOAT);
         vao->enable(0);
 
+        textureBuffer->setData(std::array<glm::vec2, 4>{{{0, 0}, {1, 0}, {0, 1}, {1, 1}}}, GL_STATIC_DRAW);
+
+        vao->binding(1)->setAttribute(1);
+        vao->binding(1)->setBuffer(textureBuffer.get(), 0, sizeof(glm::vec2));
+        vao->binding(1)->setFormat(2, GL_FLOAT);
+        vao->enable(1);
+
+        program->setUniform("projection", projection);
+        program->setUniform("modelView", transform3D);
         program->setUniform("glyphs", samplerIndex);
         program->setUniform("fontColor", fontColor);
     }
@@ -124,6 +146,7 @@ class Window : public WindowQt {
         texture.reset(nullptr);
 
         cornerBuffer.reset(nullptr);
+        textureBuffer.reset(nullptr);
         program.reset(nullptr);
         vertexShaderSource.reset(nullptr);
         vertexShaderTemplate.reset(nullptr);
@@ -134,8 +157,11 @@ class Window : public WindowQt {
         vao.reset(nullptr);
     }
 
-    virtual void resizeGL(QResizeEvent *event) override {
-        glViewport(0, 0, event->size().width(), event->size().height());
+    virtual void resizeGL(QResizeEvent* event) override {
+        float w = event->size().width();
+        float h = event->size().height();
+        glViewport(0, 0, w, h);
+        projection = glm::perspective(45.f, w / h, 0.0001f, 100.f);
     }
 
     virtual void paintGL() override {
@@ -150,6 +176,8 @@ class Window : public WindowQt {
         }
 
         program->use();
+        program->setUniform("projection", projection);
+        program->setUniform("modelView", transform3D);
         program->setUniform("fontColor", fontColor);
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         program->release();
@@ -161,7 +189,7 @@ class Window : public WindowQt {
         glDisable(GL_BLEND);
     }
 
-    virtual void keyPressEvent(QKeyEvent *event) override {
+    virtual void keyPressEvent(QKeyEvent* event) override {
         makeCurrent();
 
         switch (event->key()) {
@@ -179,7 +207,65 @@ class Window : public WindowQt {
         doneCurrent();
     }
 
-    void applyColorChange(float &color, QString value) {
+    virtual void mousePressEvent(QMouseEvent* event) override {
+        lastMousePos.x = event->x();
+        lastMousePos.y = event->y();
+
+        if (event->button() == Qt::LeftButton) {
+            isPanning = true;
+        } else if (event->button() == Qt::RightButton) {
+            isRotating = true;
+        }
+    }
+
+    virtual void mouseMoveEvent(QMouseEvent* event) override {
+        // early return
+        if (!isPanning && !isRotating) return;
+
+        auto speed = 0.005f;  // magic.
+
+        if ((event->buttons() & Qt::LeftButton) && isPanning) {
+            auto deltaX = (event->x() - lastMousePos.x) * speed;
+            auto deltaY = (event->y() - lastMousePos.y) * speed * -1;  // minus one because of Qt widget positions.
+
+            transform3D = glm::translate(transform3D, glm::vec3(deltaX, deltaY, 0));
+
+        } else if ((event->buttons() & Qt::RightButton) && isRotating) {
+            auto deltaX = (event->x() - lastMousePos.x) * speed;
+            auto deltaY = (event->y() - lastMousePos.y) * speed;
+
+            transform3D = glm::rotate(transform3D, deltaX, glm::vec3(0, 1, 0));
+            transform3D = glm::rotate(transform3D, deltaY, glm::vec3(1, 0, 0));
+            // What's for rotation around z? maybe some GUI Elements?
+        }
+
+        lastMousePos.x = event->x();
+        lastMousePos.y = event->y();
+
+        paint();
+    }
+
+    virtual void mouseReleaseEvent(QMouseEvent* event) override {
+        if (event->button() == Qt::LeftButton && isPanning) {
+            isPanning = false;
+        } else if (event->button() == Qt::RightButton && isRotating) {
+            isRotating = false;
+        }
+    }
+
+    virtual void wheelEvent(QWheelEvent* event) override {
+        // zooming
+
+        auto speed = 0.001f;  // magic.
+
+        auto d = event->delta() * speed;
+
+        transform3D = glm::translate(transform3D, glm::vec3(0, 0, d));
+
+        paint();
+    }
+
+    void applyColorChange(float& color, QString value) {
         color = value.toInt() / 255.f;
         paint();
     }
@@ -197,8 +283,14 @@ class Window : public WindowQt {
 
     virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
+    virtual void resetTransform3D() override {
+        transform3D = glm::mat4();  // set identity
+        paint();
+    }
+
    protected:
     std::unique_ptr<globjects::Buffer> cornerBuffer;
+    std::unique_ptr<globjects::Buffer> textureBuffer;
     std::unique_ptr<globjects::Program> program;
     std::unique_ptr<globjects::File> vertexShaderSource;
     std::unique_ptr<globjects::AbstractStringSource> vertexShaderTemplate;
@@ -213,9 +305,15 @@ class Window : public WindowQt {
     glm::vec4 backgroundColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
     glm::vec4 fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     int samplerIndex = 0;
+    glm::mat4 transform3D = glm::mat4();
+    glm::mat4 projection = glm::perspective(45.f, 1.f, 0.0001f, 100.f);
+
+    bool isPanning = false;
+    bool isRotating = false;
+    glm::vec2 lastMousePos = glm::vec2();
 };
 
-void prepareColorInput(QLineEdit *input, const QString placeholder) {
+void prepareColorInput(QLineEdit* input, const QString placeholder) {
     auto colorValidator = new QIntValidator(0, 255);
     input->setValidator(colorValidator);
     input->setPlaceholderText(placeholder);
@@ -225,7 +323,7 @@ void prepareColorInput(QLineEdit *input, const QString placeholder) {
 /* This function creates GUI elements and connects them to their correspondent functions using Qt signal-slot.
  * A QApplication offers a window, that must not be destroyed to make QApplication work properly.
  */
-void setupGUI(QMainWindow *window) {
+void setupGUI(QMainWindow* window) {
     // from globjects
     QSurfaceFormat format;
 #ifdef __APPLE__
@@ -236,7 +334,7 @@ void setupGUI(QMainWindow *window) {
 #endif
     format.setDepthBufferSize(16);
 
-    Window *glwindow = new Window(format);
+    Window* glwindow = new Window(format);
 
     window->setMinimumSize(640, 480);
     window->setWindowTitle("Open Font Asset Generator");
@@ -249,19 +347,19 @@ void setupGUI(QMainWindow *window) {
     fontColorGroupBox->setLayout(fontColorLayout);
 
     // font Color RED
-    auto *fontR = new QLineEdit();
+    auto* fontR = new QLineEdit();
     prepareColorInput(fontR, "0");
     QObject::connect(fontR, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorRChanged(QString)));
     fontColorLayout->addRow("R:", fontR);
 
     // font Color GREEN
-    auto *fontG = new QLineEdit();
+    auto* fontG = new QLineEdit();
     prepareColorInput(fontG, "0");
     QObject::connect(fontG, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorGChanged(QString)));
     fontColorLayout->addRow("G:", fontG);
 
     // font Color BLUE
-    auto *fontB = new QLineEdit();
+    auto* fontB = new QLineEdit();
     prepareColorInput(fontB, "0");
     QObject::connect(fontB, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorBChanged(QString)));
     fontColorLayout->addRow("B:", fontB);
@@ -274,29 +372,43 @@ void setupGUI(QMainWindow *window) {
     backgroundColorGroupBox->setLayout(backgroundColorLayout);
 
     // Background Color RED
-    auto *backgroundR = new QLineEdit();
+    auto* backgroundR = new QLineEdit();
     prepareColorInput(backgroundR, "255");
     QObject::connect(backgroundR, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorRChanged(QString)));
     backgroundColorLayout->addRow("R:", backgroundR);
 
     // Background Color GREEN
-    auto *backgroundG = new QLineEdit();
+    auto* backgroundG = new QLineEdit();
     prepareColorInput(backgroundG, "255");
     QObject::connect(backgroundG, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorGChanged(QString)));
     backgroundColorLayout->addRow("G:", backgroundG);
 
     // Background Color BLUE
-    auto *backgroundB = new QLineEdit();
+    auto* backgroundB = new QLineEdit();
     prepareColorInput(backgroundB, "255");
     QObject::connect(backgroundB, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorBChanged(QString)));
     backgroundColorLayout->addRow("B:", backgroundB);
 
+    // MISCELLANEOUS GUI
+
+    auto miscGroupBox = new QGroupBox("Miscellaneous");
+    miscGroupBox->setMaximumHeight(150);
+    auto miscLayout = new QFormLayout();
+    miscGroupBox->setLayout(miscLayout);
+
+    // reset transform 3D to inital state
+    auto* resetButton = new QPushButton("Reset");  // TODO or reset camera? navigation?
+    resetButton->setMaximumWidth(90);
+    QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
+    miscLayout->addRow("Reset View", resetButton);
+
     // gather all parameters into one layout (separately from the gl window)
-    auto *guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+    auto* guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
     guiLayout->addWidget(backgroundColorGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(fontColorGroupBox, 0, Qt::AlignLeft);
+    guiLayout->addWidget(miscGroupBox, 0, Qt::AlignLeft);
 
-    auto *mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+    auto* mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
     mainLayout->addLayout(guiLayout, 0);
     mainLayout->addWidget(QWidget::createWindowContainer(glwindow));
 
@@ -308,7 +420,7 @@ void setupGUI(QMainWindow *window) {
     window->setCentralWidget(central);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     llassetgen::init();
 
     std::unique_ptr<llassetgen::DistanceTransform> dt(new llassetgen::DeadReckoning());
@@ -322,7 +434,7 @@ int main(int argc, char **argv) {
     // TODO: don't export, but use as texture directly
     // TODO: exported png is corrupted, wait for update/fix
 
-    QMainWindow *window = new QMainWindow();
+    QMainWindow* window = new QMainWindow();
     setupGUI(window);
     window->show();
 
