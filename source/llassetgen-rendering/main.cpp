@@ -423,15 +423,17 @@ void setupGUI(QMainWindow* window) {
 int main(int argc, char** argv) {
     llassetgen::init();
 
-    std::unique_ptr<llassetgen::DistanceTransform> dt(new llassetgen::DeadReckoning());
-
     QApplication app(argc, argv);
 
     auto path = app.applicationDirPath();
+    /*
+    std::unique_ptr<llassetgen::DistanceTransform> dt(new llassetgen::DeadReckoning());
+
     dt->importPng(path.toStdString() + "/../../data/llassetgen-rendering/testfontatlas.png");
     dt->transform();
     dt->exportPng(path.toStdString() + "/../../data/llassetgen-rendering/testfontatlasDT.png", -20, 50, 8);
-    // TODO: don't export, but use as texture directly
+    **/
+    // TODO: don't export, but use as texture directly?
     // TODO: exported png is corrupted, wait for update/fix
 
     QMainWindow* window = new QMainWindow();
