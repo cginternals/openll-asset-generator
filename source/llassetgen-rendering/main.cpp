@@ -116,8 +116,7 @@ class Window : public WindowQt {
         float quadW = 1.f;
         float quadH = quadW * imageH / imageW;
 
-        cornerBuffer->setData(std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(quadW, 0), glm::vec2(0, quadH),
-                                                        glm::vec2(quadW, quadH)}},
+        cornerBuffer->setData(std::array<glm::vec2, 4>{{{0, 0}, {quadW, 0}, {0, quadH}, {quadW, quadH}}},
                               GL_STATIC_DRAW);
 
         vao->binding(0)->setAttribute(0);
@@ -125,9 +124,7 @@ class Window : public WindowQt {
         vao->binding(0)->setFormat(2, GL_FLOAT);
         vao->enable(0);
 
-        textureBuffer->setData(
-            std::array<glm::vec2, 4>{{glm::vec2(0, 0), glm::vec2(1, 0), glm::vec2(0, 1), glm::vec2(1, 1)}},
-            GL_STATIC_DRAW);
+        textureBuffer->setData(std::array<glm::vec2, 4>{{{0, 0}, {1, 0}, {0, 1}, {1, 1}}}, GL_STATIC_DRAW);
 
         vao->binding(1)->setAttribute(1);
         vao->binding(1)->setBuffer(textureBuffer.get(), 0, sizeof(glm::vec2));
