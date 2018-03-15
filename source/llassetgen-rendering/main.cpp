@@ -203,8 +203,6 @@ class Window : public WindowQt {
     }
 
     virtual void mousePressEvent(QMouseEvent* event) override {
-        makeCurrent();
-
         lastMousePos.x = event->x();
         lastMousePos.y = event->y();
 
@@ -213,8 +211,6 @@ class Window : public WindowQt {
         } else if (event->button() == Qt::RightButton) {
             isRotating = true;
         }
-
-        doneCurrent();
     }
 
     virtual void mouseMoveEvent(QMouseEvent* event) override {
@@ -222,8 +218,6 @@ class Window : public WindowQt {
         if (!isPanning && !isRotating) return;
 
         auto speed = 0.005f;  // magic.
-
-        makeCurrent();
 
         if ((event->buttons() & Qt::LeftButton) && isPanning) {
             auto deltaX = (event->x() - lastMousePos.x) * speed;
@@ -244,8 +238,6 @@ class Window : public WindowQt {
         lastMousePos.y = event->y();
 
         paint();
-
-        doneCurrent();
     }
 
     virtual void mouseReleaseEvent(QMouseEvent* event) override {
