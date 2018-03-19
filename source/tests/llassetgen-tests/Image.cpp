@@ -127,3 +127,15 @@ TEST_F(DistanceTransformTest, ParabolaEnvelope) {
     output.exportPng<DistanceTransform::OutputType>(test_destination_path + "ParabolaEnvelope.png", -20, 50);
     EXPECT_EQ(1, 1);
 }
+
+TEST_F(DistanceTransformTest, Compare) {
+    Image deadReckoningResult(test_destination_path + "DeadReckoning.png", 16),
+          parabolaEnvelopeResult(test_destination_path + "ParabolaEnvelope.png", 16);
+    float diff = 0;
+    for(size_t y = 0; y < deadReckoningResult.getHeight(); ++y)
+        for(size_t x = 0; x < deadReckoningResult.getWidth(); ++x)
+            if(deadReckoningResult.getPixel<uint16_t>({x, y}) != parabolaEnvelopeResult.getPixel<uint16_t>({x, y}))
+                ++diff;
+    diff /= deadReckoningResult.getWidth() * deadReckoningResult.getHeight();
+    ASSERT_LT(diff, 0.03);
+}

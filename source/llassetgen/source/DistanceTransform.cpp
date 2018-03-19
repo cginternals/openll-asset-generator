@@ -98,8 +98,8 @@ namespace llassetgen {
                     setPixel<OutputType, flipped>(
                         {i, offset},
                         square(begin == 0
-                            ? (end - i)                                            // Falling slope
-                            : ((i < (end + begin) / 2) ? i - begin + 1 : end - i)  // Rising and falling slope
+                            ? (end - i) // Falling slope
+                            : ((i < (end + begin) / 2) ? i - begin + 1 : end - i) // Rising and falling slope
                         )
                     );
             prev = next;
@@ -111,13 +111,13 @@ namespace llassetgen {
                 setPixel<OutputType, flipped>(
                     {i, offset},
                     (begin == 0)
-                        ? std::numeric_limits<OutputType>::max()  // Empty
+                        ? std::numeric_limits<OutputType>::max() // Empty
                         : square(prev
-                            ? ((i < (length - 1 + begin) / 2) ? i - begin + 1 : length - 1 - i)  // Rising and falling slope
-                            : (i - begin + 1)         // Rising slope
+                            ? ((i < (length - 1 + begin) / 2) ? i - begin + 1 : length - 1 - i) // Rising and falling slope
+                            : (i - begin + 1) // Rising slope
                         )
                 );
-        if (prev) setPixel<OutputType, flipped>({length - 1, offset}, 0);  // Mark edge
+        if (prev) setPixel<OutputType, flipped>({length - 1, offset}, 0); // Mark edge
     }
 
     template <bool flipped>
@@ -155,12 +155,12 @@ namespace llassetgen {
         parabolas.reset(new Parabola[length + 1]);
         lineBuffer.reset(new OutputType[length]);
 
-        for(DimensionType y = 0; y < input.getHeight(); ++y)
-            edgeDetection<false, true>(y, input.getWidth());
+        for(DimensionType x = 0; x < input.getWidth(); ++x)
+            edgeDetection<true, true>(x, input.getHeight());
 
-        for (DimensionType x = 0; x < input.getWidth(); ++x) {
-            edgeDetection<true, false>(x, input.getHeight());
-            transformLine<true>(x, input.getHeight());
+        for(DimensionType y = 0; y < input.getHeight(); ++y) {
+            edgeDetection<false, false>(y, input.getWidth());
+            transformLine<false>(y, input.getWidth());
         }
     }
 }
