@@ -11,15 +11,15 @@
 
 using namespace llassetgen;
 
-class FontRenderer {
+class FontFinder {
    public:
-    static FontRenderer fromName(const std::string& fontName);
-    static FontRenderer fromPath(const std::string& fontPath);
+    static FontFinder fromName(const std::string& fontName);
+    static FontFinder fromPath(const std::string& fontPath);
 
-    std::unique_ptr<Image> renderGlyph(unsigned long glyph, unsigned int size);
+    Image renderGlyph(unsigned long glyph, unsigned int size);
 
    private:
-    FontRenderer() = default;
+    FontFinder() = default;
 
 #ifdef _WIN32
     bool getFontData(const std::string& fontName);

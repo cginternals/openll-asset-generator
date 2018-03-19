@@ -3,7 +3,7 @@
 #include <map>
 #include <ostream>
 
-#include "FontRenderer.h"
+#include "FontFinder.h"
 
 using namespace llassetgen;
 
@@ -84,11 +84,11 @@ int main(int argc, char** argv) {
         if (glyphsOpt->count()) {
             // Example: llassetgen-cmd distfield -a parabola -g G -f Verdana -s 64 glyph.png
             try {
-                FontRenderer renderer = fontPathOpt->count() ? FontRenderer::fromPath(fontPath)
-                                                             : FontRenderer::fromName(fontName);
+                FontFinder fontFinder = fontPathOpt->count() ? FontFinder::fromPath(fontPath)
+                                                             : FontFinder::fromName(fontName);
 
                 auto ucs4Glyphs = UTF8toUCS4(glyphs);
-                input = renderer.renderGlyph(ucs4Glyphs[0], fontSize);
+                input = fontFinder.renderGlyph(ucs4Glyphs[0], fontSize);
             } catch (const std::exception& e) {
                 std::cerr << "Error: " << e.what() << std::endl;
                 return 2;

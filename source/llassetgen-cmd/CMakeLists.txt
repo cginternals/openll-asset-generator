@@ -27,11 +27,11 @@ set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(headers
     ${include_path}/CLI11.h
-    ${include_path}/FontRenderer.h)
+    ${include_path}/FontFinder.h)
 
 set(sources
     ${source_path}/main.cpp
-    ${source_path}/FontRenderer.cpp)
+    ${source_path}/FontFinder.cpp)
 
 #
 # Create executable

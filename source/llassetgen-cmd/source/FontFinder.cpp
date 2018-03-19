@@ -6,42 +6,42 @@
     #include <wingdi.h>
 #endif
 
-#include "FontRenderer.h"
+#include "FontFinder.h"
 
 using namespace llassetgen;
 
-FontRenderer FontRenderer::fromPath(const std::string& fontPath) {
-    FontRenderer renderer{};
-    FT_Error err = FT_New_Face(freetype, fontPath.c_str(), 0, &renderer.fontFace);
+FontFinder FontFinder::fromPath(const std::string& fontPath) {
+    FontFinder fontFinder{};
+    FT_Error err = FT_New_Face(freetype, fontPath.c_str(), 0, &fontFinder.fontFace);
     if (err) {
         throw std::runtime_error("Font could not be loaded");
     }
-    return renderer;
+    return fontFinder;
 }
 
-FontRenderer FontRenderer::fromName(const std::string& fontName) {
+FontFinder FontFinder::fromName(const std::string& fontName) {
 #ifdef __unix__
     std::string fontPath;
     if (!findFontPath(fontName, fontPath)) {
         throw std::runtime_error("Font not found");
     }
-    return FontRenderer::fromPath(fontPath);
+    return FontFinder::fromPath(fontPath);
 #elif _WIN32
-    FontRenderer renderer;
-    if (!renderer.getFontData(fontName)) {
+    FontFinder fontFinder;
+    if (!fontFinder.getFontData(fontName)) {
         throw std::runtime_error("font not found");
     }
 
-    FT_Error err = FT_New_Memory_Face(freetype, &renderer.fontData[0], renderer.fontData.size(), 0, &renderer.fontFace);
+    FT_Error err = FT_New_Memory_Face(freetype, &fontFinder.fontData[0], fontFinder.fontData.size(), 0, &fontFinder.fontFace);
     if (err) {
         throw std::runtime_error("font could not be loaded");
     }
-    return renderer;
+    return fontFinder;
 #endif
 }
 
 #ifdef __unix__
-bool FontRenderer::findFontPath(const std::string& fontName, std::string& fontPath) {
+bool FontFinder::findFontPath(const std::string& fontName, std::string& fontPath) {
     FcConfig* config = FcInitLoadConfigAndFonts();
     FcPattern* pat = FcNameParse(reinterpret_cast<const FcChar8*>(fontName.c_str()));
     FcConfigSubstitute(config, pat, FcMatchPattern);
@@ -65,7 +65,7 @@ bool FontRenderer::findFontPath(const std::string& fontName, std::string& fontPa
 #endif
 
 #if _WIN32
-bool FontRenderer::getFontData(const std::string& fontName) {
+bool FontFinder::getFontData(const std::string& fontName) {
     bool result = false;
 
     LOGFONTA lf;
@@ -92,7 +92,7 @@ bool FontRenderer::getFontData(const std::string& fontName) {
 }
 #endif
 
-std::unique_ptr<Image> FontRenderer::renderGlyph(unsigned long glyph, unsigned int size) {
+Image FontFinder::renderGlyph(unsigned long glyph, unsigned int size) {
     FT_Error err;
     err = FT_Set_Pixel_Sizes(fontFace, 0, static_cast<FT_UInt>(size));
     if (err) {
@@ -102,12 +102,12 @@ std::unique_ptr<Image> FontRenderer::renderGlyph(unsigned long glyph, unsigned i
     FT_UInt charIndex = FT_Get_Char_Index(fontFace, static_cast<FT_ULong>(glyph));
     err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
 
-    if (err || fontFace->glyph->bitmap.buffer == nullptr) {
+    FT_Bitmap& bitmap = fontFace->glyph->bitmap;
+    if (err || bitmap.buffer == nullptr) {
         throw std::runtime_error("glyph could not be rendered");
     }
 
-    FT_Bitmap& bitmap = fontFace->glyph->bitmap;
-    auto img = std::unique_ptr<Image>(new Image(bitmap.width, bitmap.rows, 1));
-    img->load(bitmap);
+    Image img(bitmap.width, bitmap.rows, 1);
+    img.load(bitmap);
     return img;
 }
