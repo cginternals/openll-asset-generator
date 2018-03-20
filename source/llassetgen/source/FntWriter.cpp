@@ -52,14 +52,14 @@ namespace llassetgen {
 		font_info.outline_thickness = 0;
 	}
 
-	void FntWriter::setCharInfo(FT_UInt gindex, Vec2<float> position, Vec2<float> size, Vec2<float> offset) {
+	void FntWriter::setCharInfo(FT_UInt gindex, Rect<uint32_t> char_area, Vec2<float> offset) {
 		FT_Load_Glyph(face,	gindex, FT_LOAD_DEFAULT);
 		CharInfo char_info;
 		char_info.id = gindex;
-		char_info.x = position.x;
-		char_info.y = position.y;
-		char_info.width = size.x;
-		char_info.height = size.y;
+		char_info.x = char_area.position.x;
+		char_info.y = char_area.position.y;
+		char_info.width = char_area.size.x;
+		char_info.height = char_area.size.y;
 		char_info.x_advance = float(face->glyph->linearHoriAdvance) * 16.16f;
 		char_info.x_offset = offset.x;
 		char_info.y_offset = offset.y;
@@ -99,12 +99,12 @@ namespace llassetgen {
 		setKerningInfo();
 	}
 
-	void FntWriter::setAtlasProperties(Image atlas) {
+	void FntWriter::setAtlasProperties(Vec2<uint32_t> size) {
 		// collect common_info
 		font_common.line_height = 0; // dont know where to get that
 		font_common.base = 0; // dont know where to get that
-		font_common.scale_w = atlas.getWidth();
-		font_common.scale_h = atlas.getHeight();
+		font_common.scale_w = size.x;
+		font_common.scale_h = size.y;
 		font_common.pages = 1;
 		font_common.is_packed = 0;
 	}

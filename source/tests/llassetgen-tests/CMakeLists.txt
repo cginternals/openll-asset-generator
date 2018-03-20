@@ -21,6 +21,7 @@ set(sources
     main.cpp
     Packing.cpp
     Image.cpp
+	FntWriter.cpp
 )
 
 

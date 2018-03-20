@@ -68,10 +68,10 @@ namespace llassetgen {
 		public:
 			FntWriter(FT_Face face, std::string face_name);
 			void readFont();
-			void setAtlasProperties(Image atlas);
+			void setAtlasProperties(Vec2<uint32_t> size);
 			void SaveFnt(std::string filepath);
 			void setFontInfo();
-			void setCharInfo(FT_UInt charcode, Vec2<float> position, Vec2<float> size, Vec2<float> offset);
+			void setCharInfo(FT_UInt charcode, Rect<uint32_t> char_area, Vec2<float> offset);
 			void setKerningInfo();
 		private:
 			FT_Face face;
