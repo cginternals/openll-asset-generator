@@ -64,11 +64,11 @@ TEST(ImageTest, CreateAndWritePNG) {
     for (size_t y = 0; y < blank_16bit.getHeight(); y++) {
         for (size_t x = 0; x < blank_16bit.getWidth(); x++) {
             if (x == 3 && y == 4) {
-                EXPECT_EQ(blank_16bit.getPixel<uint32_t>(Vec2<size_t>(x, y)), 26781);
+                EXPECT_EQ(blank_16bit.getPixel<uint16_t>(Vec2<size_t>(x, y)), 26781);
             } else if (x == 4 && y == 5) {
-                EXPECT_EQ(blank_16bit.getPixel<uint32_t>(Vec2<size_t>(x, y)), 42949);
+                EXPECT_EQ(blank_16bit.getPixel<uint16_t>(Vec2<size_t>(x, y)), 42949);
             } else {
-                EXPECT_EQ(blank_16bit.getPixel<uint32_t>(Vec2<size_t>(x, y)), 0);
+                EXPECT_EQ(blank_16bit.getPixel<uint16_t>(Vec2<size_t>(x, y)), 0);
             }
         }
     }
