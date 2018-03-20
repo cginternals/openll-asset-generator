@@ -6,9 +6,9 @@
 namespace llassetgen {
     template <class ImageIter>
     Image fontAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, size_t padding, uint8_t bitDepth) {
-        assert(imgEnd - imgBegin == packing.rects.size());
+        assert(std::distance(imgBegin, imgEnd) == static_cast<ptrdiff_t>(packing.rects.size()));
 
-        Image atlas(packing.atlasSize.x, packing.atlasSize.y, bitDepth);
+        Image atlas {packing.atlasSize.x, packing.atlasSize.y, bitDepth};
         atlas.clear();
 
         auto rectIt = packing.rects.begin();
@@ -21,9 +21,10 @@ namespace llassetgen {
 
     template<class DTType, class ImageIter>
     Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing) {
-        assert(imgEnd - imgBegin == packing.rects.size());
-        Image atlas(packing.atlasSize.x, packing.atlasSize.y, 8 * sizeof(DistanceTransform::OutputType));
-        atlas.fillRect({0,0}, {atlas.getWidth(), atlas.getHeight()}, std::numeric_limits<DistanceTransform::OutputType>::infinity());
+        assert(std::distance(imgBegin, imgEnd) == static_cast<ptrdiff_t>(packing.rects.size()));
+
+        Image atlas {packing.atlasSize.x, packing.atlasSize.y, DistanceTransform::bitDepth};
+        atlas.fillRect({0,0}, atlas.getSize(), DistanceTransform::backgroundVal);
 
         auto rectIt = packing.rects.begin();
         for (; imgBegin < imgEnd; rectIt++, imgBegin++) {
