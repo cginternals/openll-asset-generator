@@ -40,12 +40,34 @@ namespace llassetgen {
           data(new uint8_t[stride * height]),
           isOwnerOfData(true) {}
 
+    Image::Image(FT_Bitmap bitmap, size_t padding)
+        : Image(bitmap.width + 2 * padding, bitmap.rows + 2 * padding, 1) {
+        if (padding > 0) {
+            Vec2<size_t> paddingVec{padding, padding};
+            Image&& paddedView = view(paddingVec, getSize() - paddingVec);
+            fillPadding(padding);
+            paddedView.load(bitmap);
+        } else {
+            load(bitmap);
+        }
+    }
+
+    void Image::fillPadding(size_t padding) {
+        Vec2<size_t> innerMin {padding, padding},
+                     innerMax = getSize() - innerMin;
+
+        fillRect({0, 0}, {innerMax.x, innerMin.y});
+        fillRect({innerMax.x, 0}, {getWidth(), innerMax.y});
+        fillRect({innerMin.x, innerMax.y}, getSize());
+        fillRect({0, innerMin.y}, {innerMin.x, getHeight()});
+    }
+
     Image Image::view(Vec2<size_t> outerMin, Vec2<size_t> outerMax, size_t padding) {
         assert(outerMax.x <= getWidth() && outerMax.y <= getHeight());
         outerMin += min;
         outerMax += min;
         Vec2<size_t> paddingVec(padding, padding);
-        return Image(outerMin + paddingVec, outerMax - paddingVec, stride, bitDepth, data);
+        return { outerMin + paddingVec, outerMax - paddingVec, stride, bitDepth, data };
     }
 
     size_t Image::getWidth() const { return max.x - min.x; }
@@ -355,5 +377,9 @@ namespace llassetgen {
 
         png_destroy_write_struct(&png, &info);
         out_file.close();
+    }
+
+    Vec2<size_t> Image::getSize() const {
+        return {getWidth(), getHeight()};
     }
 }
