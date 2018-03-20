@@ -135,8 +135,7 @@ namespace llassetgen {
 
     void Image::load(const FT_Bitmap& ft_bitmap) {
         assert(getWidth() == ft_bitmap.width && getHeight() == ft_bitmap.rows && bitDepth == getFtBitdepth(ft_bitmap));
-        if (min.x == 0 && min.y == 0) {
-            assert(stride == static_cast<size_t>(ft_bitmap.pitch));
+        if (min.x == 0 && min.y == 0 && ft_bitmap.pitch == stride) {
             memcpy(data, ft_bitmap.buffer, ft_bitmap.pitch * ft_bitmap.rows);
         } else if (min.x % 8 == 0) {
             assert(bitDepth == 1);
