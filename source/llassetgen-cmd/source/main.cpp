@@ -4,6 +4,7 @@
 #include <ostream>
 
 #include "FontFinder.h"
+#include <llassetgen/Atlas.h>
 
 using namespace llassetgen;
 
@@ -36,6 +37,14 @@ void distField(std::string& algorithm, Image& input, std::string& outPath) {
     output.exportPng<DistanceTransform::OutputType>(outPath, 20, -30);
 }
 
+std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, size_t padding = 0) {
+    std::vector<Vec2<size_t>> imageSizes(images.size());
+    std::transform(images.begin(), images.end(), imageSizes.begin(),
+        [padding](const Image& img){ return img.getSize(); }
+    );
+    return imageSizes;
+};
+
 int main(int argc, char** argv) {
     llassetgen::init();
 
@@ -64,7 +73,7 @@ int main(int argc, char** argv) {
 
     glyphsOpt->requires_one({fontPathOpt, fontNameOpt});
 
-    unsigned int fontSize = 128;
+    int fontSize = 128;
     distfield->add_option("-s,--fontsize", fontSize)->requires(glyphsOpt);
 
     std::string imgPath;
@@ -88,7 +97,14 @@ int main(int argc, char** argv) {
                                                              : FontFinder::fromName(fontName);
 
                 auto ucs4Glyphs = UTF8toUCS4(glyphs);
-                input = fontFinder.renderGlyph(ucs4Glyphs[0], fontSize);
+                size_t padding = 20;
+                std::vector<Image> glyphImages;
+                fontFinder.renderGlyphs(ucs4Glyphs, glyphImages, fontSize, padding);
+                std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages);
+                Packing p = shelfPackAtlas(imageSizes.begin(), imageSizes.end(), false);
+                Image atlas = distanceFieldAtlas<ParabolaEnvelope>(glyphImages.begin(), glyphImages.end(), p);
+                atlas.exportPng<DistanceTransform::OutputType>(outPath, 20, -30);
+                return 0;
             } catch (const std::exception& e) {
                 std::cerr << "Error: " << e.what() << std::endl;
                 return 2;

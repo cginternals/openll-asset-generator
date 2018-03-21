@@ -16,7 +16,8 @@ class FontFinder {
     static FontFinder fromName(const std::string& fontName);
     static FontFinder fromPath(const std::string& fontPath);
 
-    Image renderGlyph(unsigned long glyph, unsigned int size);
+    Image renderGlyph(unsigned long glyph, int size, size_t padding = 0);
+    void renderGlyphs(const std::u32string& glyphs, std::vector<Image>& v, int size, size_t padding = 0);
 
    private:
     FontFinder() = default;

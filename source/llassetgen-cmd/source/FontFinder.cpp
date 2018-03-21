@@ -92,7 +92,7 @@ bool FontFinder::getFontData(const std::string& fontName) {
 }
 #endif
 
-Image FontFinder::renderGlyph(unsigned long glyph, unsigned int size) {
+Image FontFinder::renderGlyph(unsigned long glyph, int size, size_t padding) {
     FT_Error err;
     err = FT_Set_Pixel_Sizes(fontFace, 0, static_cast<FT_UInt>(size));
     if (err) {
@@ -106,8 +106,12 @@ Image FontFinder::renderGlyph(unsigned long glyph, unsigned int size) {
     if (err || bitmap.buffer == nullptr) {
         throw std::runtime_error("glyph could not be rendered");
     }
+    return {bitmap, padding};
+}
 
-    Image img(bitmap.width, bitmap.rows, 1);
-    img.load(bitmap);
-    return img;
+void FontFinder::renderGlyphs(const std::u32string& glyphs, std::vector<Image>& v, int size, size_t padding) {
+    std::transform(glyphs.begin(), glyphs.end(), std::back_inserter(v),
+        [=](char32_t glyph){
+            return renderGlyph(glyph, size, padding);
+        });
 }
