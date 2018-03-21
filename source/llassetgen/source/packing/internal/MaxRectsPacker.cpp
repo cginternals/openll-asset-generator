@@ -26,10 +26,10 @@ class RectReplacer {
     RectReplacer(std::vector<Rect<PackingSizeType>>& _vector, Rect<PackingSizeType>& _existing)
         : vector(_vector), existing(_existing){};
 
-    void add_replacement(Rect<PackingSizeType>&& element);
+    void addReplacement(Rect<PackingSizeType>&& element);
 };
 
-void RectReplacer::add_replacement(Rect<PackingSizeType>&& element) {
+void RectReplacer::addReplacement(Rect<PackingSizeType>&& element) {
     if (!usedExisting) {
         existing = element;
         usedExisting = true;
@@ -52,21 +52,23 @@ void cropRect(const Rect<PackingSizeType>& rect, const Rect<PackingSizeType>& bb
 
     if (bboxMin.x < rectMax.x && bboxMax.x > rectMin.x) {
         if (isInRange(bboxMin.y, rectMin.y, rectMax.y)) {
-            replacer.add_replacement({rectMin, {rect.size.x, bboxMin.y - rectMin.y}});
+            replacer.addReplacement({rectMin, {rect.size.x, bboxMin.y - rectMin.y}});
         }
 
         if (isInRange(bboxMax.y, rectMin.y, rectMax.y)) {
-            replacer.add_replacement({{rectMin.x, bboxMax.y}, {rect.size.x, rectMax.y - bboxMax.y}});
+            replacer.addReplacement({{rectMin.x,   bboxMax.y},
+                                     {rect.size.x, rectMax.y - bboxMax.y}});
         }
     }
 
     if (bboxMin.y < rectMax.y && bboxMax.y > rectMin.y) {
         if (isInRange(bboxMin.x, rectMin.x, rectMax.x)) {
-            replacer.add_replacement({rectMin, {bboxMin.x - rectMin.x, rect.size.y}});
+            replacer.addReplacement({rectMin, {bboxMin.x - rectMin.x, rect.size.y}});
         }
 
         if (isInRange(bboxMax.x, rectMin.x, rectMax.x)) {
-            replacer.add_replacement({{bboxMax.x, rectMin.y}, {rectMax.x - bboxMax.x, rect.size.y}});
+            replacer.addReplacement({{bboxMax.x,             rectMin.y},
+                                     {rectMax.x - bboxMax.x, rect.size.y}});
         }
     }
 }
@@ -153,7 +155,8 @@ namespace llassetgen {
             auto& freeRect = *std::min_element(freeList.begin(), freeList.end(), BssfComparator{rect});
             if (allowRotations) {
                 Rect<PackingSizeType> rectRotated{rect.position, {rect.size.y, rect.size.x}};
-                auto& freeRectRotated = *std::min_element(freeList.begin(), freeList.end(), BssfComparator{rectRotated});
+                auto& freeRectRotated =
+                    *std::min_element(freeList.begin(), freeList.end(), BssfComparator{rectRotated});
                 if (bssfScore(freeRectRotated, rectRotated) < bssfScore(freeRect, rect)) {
                     rect.size = rectRotated.size;
                     return freeRectRotated;
