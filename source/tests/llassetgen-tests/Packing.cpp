@@ -26,19 +26,21 @@ class PackingTest : public testing::Test {
     /**
      * Expect a fixed size packing to succeed and validate the result.
      */
-    void expectSuccessfulValidPacking(const std::vector<Vec>& rectSizes, Vec atlasSize, bool allowRotations);
+    Packing expectSuccessfulValidPacking(const std::vector<Vec>& rectSizes, Vec atlasSize, bool allowRotations);
 
     /**
      * Expects a variable size packing to return a valid result.
      */
-    void expectValidPacking(const std::vector<Vec>& rectSizes, bool allowRotations) {
-        validatePacking(run(rectSizes, allowRotations), rectSizes, allowRotations);
+    Packing expectValidPacking(const std::vector<Vec>& rectSizes, bool allowRotations) {
+        Packing packing = run(rectSizes, allowRotations);
+        validatePacking(packing, rectSizes, allowRotations);
+        return packing;
     }
 
     /**
      * Validate a packing given the input parameters.
      */
-    void validatePacking(Packing packing, const std::vector<Vec>& rectSizes, bool allowRotations);
+    void validatePacking(const Packing& packing, const std::vector<Vec>& rectSizes, bool allowRotations);
 
     void expectPackingFailure(const std::vector<Vec>& rectSizes, bool allowRotations, Vec atlasSize) {
         std::vector<Rect> emptyVec{};
@@ -74,15 +76,29 @@ class PackingTest : public testing::Test {
         expectValidPacking({{1, 2}, {3, 4}, {5, 6}}, false);
         expectValidPacking({{1, 2}, {3, 4}, {5, 6}}, true);
     }
+
+    void testNonSquareSizePrediction() {
+        auto expectValidNonSquarePacking = [this](const std::vector<Vec>& rectSizes, bool allowRotations) {
+            Packing p = expectValidPacking(rectSizes, allowRotations);
+            EXPECT_NE(p.atlasSize.x, p.atlasSize.y);
+        };
+        // Should not result in a square packing with any packing method.
+        expectValidNonSquarePacking({{1, 1024}}, false);
+        expectValidNonSquarePacking({{1, 1024}}, true);
+        expectValidNonSquarePacking({{1024, 1}}, false);
+        expectValidNonSquarePacking({{1024, 1}}, true);
+    }
 };
 
-void PackingTest::expectSuccessfulValidPacking(const std::vector<Vec>& rectSizes, Vec atlasSize, bool allowRotations) {
+Packing PackingTest::expectSuccessfulValidPacking(const std::vector<Vec>& rectSizes, Vec atlasSize,
+                                                  bool allowRotations) {
     Packing packing = run(rectSizes, allowRotations, atlasSize);
     EXPECT_EQ(atlasSize, packing.atlasSize);
     validatePacking(packing, rectSizes, allowRotations);
+    return packing;
 }
 
-void PackingTest::validatePacking(Packing packing, const std::vector<Vec>& rectSizes, bool allowRotations) {
+void PackingTest::validatePacking(const Packing& packing, const std::vector<Vec>& rectSizes, bool allowRotations) {
     EXPECT_EQ(rectSizes.size(), packing.rects.size());
 
     for (size_t i = 0; i < packing.rects.size(); i++) {
@@ -114,13 +130,6 @@ class ShelfNextFitPackingTest : public PackingTest {
     }
 };
 
-TEST_F(ShelfNextFitPackingTest, TestRejectTooWide) { testRejectTooWide(); }
-TEST_F(ShelfNextFitPackingTest, TestRejectTooHigh) { testRejectTooHigh(); }
-TEST_F(ShelfNextFitPackingTest, TestRotateOnly) { testRotateOnly(); }
-TEST_F(ShelfNextFitPackingTest, TestAcceptAtlasSized) { testAcceptAtlasSized(); }
-TEST_F(ShelfNextFitPackingTest, TestAcceptMultipleTiny) { testAcceptMultipleTiny(); }
-TEST_F(ShelfNextFitPackingTest, TestVariableSizePacking) { testVariableSizePacking(); }
-
 class MaxRectsPackingTest : public PackingTest {
    protected:
     Packing run(const std::vector<Vec>& rectSizes, bool allowRotations, Vec atlasSize) override {
@@ -132,12 +141,19 @@ class MaxRectsPackingTest : public PackingTest {
     }
 };
 
-TEST_F(MaxRectsPackingTest, TestRejectTooWide) { testRejectTooWide(); }
-TEST_F(MaxRectsPackingTest, TestRejectTooHigh) { testRejectTooHigh(); }
-TEST_F(MaxRectsPackingTest, TestRotateOnly) { testRotateOnly(); }
-TEST_F(MaxRectsPackingTest, TestAcceptAtlasSized) { testAcceptAtlasSized(); }
-TEST_F(MaxRectsPackingTest, TestAcceptMultipleTiny) { testAcceptMultipleTiny(); }
-TEST_F(MaxRectsPackingTest, TestVariableSizePacking) { testVariableSizePacking(); }
+#define ADD_TESTS_FOR_FIXTURE(Fixture)                                      \
+    TEST_F(Fixture, TestRejectTooWide) { testRejectTooWide(); }             \
+    TEST_F(Fixture, TestRejectTooHigh) { testRejectTooHigh(); }             \
+    TEST_F(Fixture, TestRotateOnly) { testRotateOnly(); }                   \
+    TEST_F(Fixture, TestAcceptAtlasSized) { testAcceptAtlasSized(); }       \
+    TEST_F(Fixture, TestAcceptMultipleTiny) { testAcceptMultipleTiny(); }   \
+    TEST_F(Fixture, TestVariableSizePacking) { testVariableSizePacking(); } \
+    TEST_F(Fixture, TestNonSquareSizePrediction) { testNonSquareSizePrediction(); }
+
+ADD_TESTS_FOR_FIXTURE(ShelfNextFitPackingTest)
+ADD_TESTS_FOR_FIXTURE(MaxRectsPackingTest)
+
+#undef ADD_TESTS_FOR_FIXTURE
 
 TEST(TestPackingInternals, TestCeilLog2) {
     for (int i = 0; i < 64; i++) {
