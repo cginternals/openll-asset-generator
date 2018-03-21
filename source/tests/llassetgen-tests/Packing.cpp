@@ -88,6 +88,18 @@ class PackingTest : public testing::Test {
         expectValidNonSquarePacking({{1024, 1}}, false);
         expectValidNonSquarePacking({{1024, 1}}, true);
     }
+
+    void testTooSmallSizePrediction() {
+        // These have a combined area of 28 < 4*8, but can't be packed into a
+        // 4x8 atlas. Testing both direction forces both directions of growth
+        // in packing methods that support it.
+        std::vector<Vec> rectSizes{{8, 2}, {8, 1}, {1, 4}};
+        std::vector<Vec> rectSizesRotated{{2, 8}, {1, 8}, {4, 1}};
+        expectValidPacking(rectSizes, false);
+        expectValidPacking(rectSizes, true);
+        expectValidPacking(rectSizesRotated, false);
+        expectValidPacking(rectSizesRotated, true);
+    }
 };
 
 Packing PackingTest::expectSuccessfulValidPacking(const std::vector<Vec>& rectSizes, Vec atlasSize,
@@ -141,14 +153,15 @@ class MaxRectsPackingTest : public PackingTest {
     }
 };
 
-#define ADD_TESTS_FOR_FIXTURE(Fixture)                                      \
-    TEST_F(Fixture, TestRejectTooWide) { testRejectTooWide(); }             \
-    TEST_F(Fixture, TestRejectTooHigh) { testRejectTooHigh(); }             \
-    TEST_F(Fixture, TestRotateOnly) { testRotateOnly(); }                   \
-    TEST_F(Fixture, TestAcceptAtlasSized) { testAcceptAtlasSized(); }       \
-    TEST_F(Fixture, TestAcceptMultipleTiny) { testAcceptMultipleTiny(); }   \
-    TEST_F(Fixture, TestVariableSizePacking) { testVariableSizePacking(); } \
-    TEST_F(Fixture, TestNonSquareSizePrediction) { testNonSquareSizePrediction(); }
+#define ADD_TESTS_FOR_FIXTURE(Fixture)                                              \
+    TEST_F(Fixture, TestRejectTooWide) { testRejectTooWide(); }                     \
+    TEST_F(Fixture, TestRejectTooHigh) { testRejectTooHigh(); }                     \
+    TEST_F(Fixture, TestRotateOnly) { testRotateOnly(); }                           \
+    TEST_F(Fixture, TestAcceptAtlasSized) { testAcceptAtlasSized(); }               \
+    TEST_F(Fixture, TestAcceptMultipleTiny) { testAcceptMultipleTiny(); }           \
+    TEST_F(Fixture, TestVariableSizePacking) { testVariableSizePacking(); }         \
+    TEST_F(Fixture, TestNonSquareSizePrediction) { testNonSquareSizePrediction(); } \
+    TEST_F(Fixture, TestTooSmallSizePrediction) { testTooSmallSizePrediction(); }
 
 ADD_TESTS_FOR_FIXTURE(ShelfNextFitPackingTest)
 ADD_TESTS_FOR_FIXTURE(MaxRectsPackingTest)
