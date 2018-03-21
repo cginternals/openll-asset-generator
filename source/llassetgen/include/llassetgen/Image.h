@@ -29,10 +29,12 @@ namespace llassetgen {
        public:
         ~Image();
         Image(size_t width, size_t height, size_t _bitDepth);
+        Image(FT_Bitmap_ bitmap, size_t padding = 0);
         Image view(Vec2<size_t> _min, Vec2<size_t> _max, size_t padding = 0);
         size_t getWidth() const;
         size_t getHeight() const;
         size_t getBitDepth() const;
+        Vec2<size_t> getSize() const;
         bool isValid(Vec2<size_t> pos) const;
         template <typename pixelType>
         pixelType getPixel(Vec2<size_t> pos) const;
@@ -40,6 +42,7 @@ namespace llassetgen {
         void setPixel(Vec2<size_t> pos, pixelType data) const;
         template <typename pixelType = uint8_t>
         void fillRect(Vec2<size_t> _min, Vec2<size_t> _max, pixelType in = 0) const;
+        void fillPadding(size_t padding);
         void clear() const;
 
         void load(const FT_Bitmap_& ft_bitmap);
