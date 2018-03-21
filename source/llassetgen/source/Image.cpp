@@ -25,8 +25,8 @@
 
 namespace llassetgen {
     Image::~Image() {
-        if(isOwnerOfData)
-            delete[] data;
+//        if (isOwnerOfData)
+//            delete[] data;
     }
 
     Image::Image(Vec2<size_t> _min, Vec2<size_t> _max, size_t _stride, uint8_t _bitDepth, uint8_t* _data)
