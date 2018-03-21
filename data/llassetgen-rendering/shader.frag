@@ -14,6 +14,7 @@ uniform vec4 fontColor;
 uniform sampler2D glyphs;
 uniform bool showDistanceField;
 uniform uint superSampling;
+uniform float threshold;
 
 in vec4 color;
 in vec2 v_uv;

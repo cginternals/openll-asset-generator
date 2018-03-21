@@ -144,6 +144,7 @@ class Window : public WindowQt {
         program->setUniform("glyphs", samplerIndex);
         program->setUniform("showDistanceField", showDistanceField);
         program->setUniform("superSampling", superSampling);
+        program->setUniform("threshold", dtThreshold);
     }
 
     virtual void deinitializeGL() override {
@@ -189,6 +190,7 @@ class Window : public WindowQt {
         // program->setUniform("glyphs", samplerIndex);
         program->setUniform("showDistanceField", showDistanceField);
         program->setUniform("superSampling", superSampling);
+        program->setUniform("threshold", dtThreshold);
 
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         program->release();
@@ -294,6 +296,11 @@ class Window : public WindowQt {
 
     virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
+    virtual void dtThresholdChanged(QString value) override {
+        dtThreshold = value.toFloat();
+        paint();
+    }
+
     virtual void resetTransform3D() override {
         transform3D = glm::mat4();  // set identity
         paint();
@@ -330,6 +337,7 @@ class Window : public WindowQt {
     glm::mat4 projection = glm::perspective(45.f, 1.f, 0.0001f, 100.f);
     unsigned int superSampling = 0;
     bool showDistanceField = false;
+    float dtThreshold = 0.5;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -412,25 +420,28 @@ void setupGUI(QMainWindow* window) {
     QObject::connect(backgroundB, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorBChanged(QString)));
     backgroundColorLayout->addRow("B:", backgroundB);
 
-    // MISCELLANEOUS GUI
+    // DISTANCE FIELD OPTIONS
 
-    auto miscGroupBox = new QGroupBox("Miscellaneous");
-    miscGroupBox->setMaximumHeight(150);
-    auto miscLayout = new QFormLayout();
-    miscGroupBox->setLayout(miscLayout);
+    auto dtGroupBox = new QGroupBox("Distance Field");
+    dtGroupBox->setMaximumHeight(150);
+    auto dtLayout = new QFormLayout();
+    dtGroupBox->setLayout(dtLayout);
 
-    // reset transform 3D to inital state
-    auto* resetButton = new QPushButton("Reset");
-    resetButton->setMaximumWidth(90);
-    QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
-    miscLayout->addRow("Reset View", resetButton);
+    // threshold for distance field rendering
+    auto* dtT = new QLineEdit();
+    auto dv = new QDoubleValidator(0.3, 1, 5);
+    dtT->setValidator(dv);
+    dtT->setPlaceholderText("0.5");
+    dtT->setMaximumWidth(45);
+    QObject::connect(dtT, SIGNAL(textEdited(QString)), glwindow, SLOT(dtThresholdChanged(QString)));
+    dtLayout->addRow("Threshold:", dtT);
 
     // switch between viewing the rendered glyphs and the underlying distance field
     auto* switchRenderingButton = new QPushButton("Distance Field");
     switchRenderingButton->setCheckable(true);
     switchRenderingButton->setMaximumWidth(90);
     QObject::connect(switchRenderingButton, SIGNAL(toggled(bool)), glwindow, SLOT(toggleDistanceField(bool)));
-    miscLayout->addRow("Switch Rendering", switchRenderingButton);
+    dtLayout->addRow("Switch Rendering", switchRenderingButton);
 
     // Supersampling
     auto* ssComboBox = new QComboBox();
@@ -445,12 +456,26 @@ void setupGUI(QMainWindow* window) {
     ssComboBox->addItem("4x4");
 
     QObject::connect(ssComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(superSamplingChanged(int)));
-    miscLayout->addRow("Super Sampling", ssComboBox);
+    dtLayout->addRow("Super Sampling", ssComboBox);
+
+    // MISCELLANEOUS GUI
+
+    auto miscGroupBox = new QGroupBox("Miscellaneous");
+    miscGroupBox->setMaximumHeight(150);
+    auto miscLayout = new QFormLayout();
+    miscGroupBox->setLayout(miscLayout);
+
+    // reset transform 3D to inital state
+    auto* resetButton = new QPushButton("Reset");
+    resetButton->setMaximumWidth(90);
+    QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
+    miscLayout->addRow("Reset View", resetButton);
 
     // gather all parameters into one layout (separately from the gl window)
     auto* guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
     guiLayout->addWidget(backgroundColorGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(fontColorGroupBox, 0, Qt::AlignLeft);
+    guiLayout->addWidget(dtGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(miscGroupBox, 0, Qt::AlignLeft);
 
     auto* mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
