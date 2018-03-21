@@ -191,11 +191,22 @@ namespace llassetgen {
         }
 
         void MaxRectsPacker::cropRects(const Rect<PackingSizeType>& placedRect) {
-            size_t originalRectCount = freeList.size();
-            for (size_t i = 0; i < originalRectCount; ++i) {
-                auto freeRectCopy = freeList[i];
-                RectReplacer replacer{freeList, freeList[i]};
-                cropRect(freeRectCopy, placedRect, replacer);
+            size_t rectsToCrop = freeList.size();
+            for (size_t i = 0; i < rectsToCrop;) {
+                if (placedRect == freeList[i]) {
+                    std::swap(freeList[i], freeList[freeList.size() - 1]);
+                    freeList.resize(freeList.size() - 1);
+                    --rectsToCrop;
+                    // Is the swapped rectangle already created due to a crop?
+                    if (freeList.size() != rectsToCrop) {
+                        ++i;
+                    }
+                } else {
+                    auto freeRectCopy = freeList[i];
+                    RectReplacer replacer{freeList, freeList[i]};
+                    cropRect(freeRectCopy, placedRect, replacer);
+                    ++i;
+                }
             }
         }
     }
