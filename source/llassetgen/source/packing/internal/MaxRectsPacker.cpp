@@ -112,19 +112,19 @@ namespace llassetgen {
         }
 
         bool MaxRectsPacker::pack(Rect<PackingSizeType>& rect) {
-            Rect<PackingSizeType>& freeRect = findFreeRect(rect);
+            auto freeRectIter = findFreeRect(rect);
             if (allowGrowth) {
-                while (!canContain(freeRect, rect)) {
+                while (freeRectIter == freeList.end() || !canContain(*freeRectIter, rect)) {
                     grow();
-                    freeRect = findFreeRect(rect);
+                    freeRectIter = findFreeRect(rect);
                 }
             } else {
-                if (!canContain(freeRect, rect)) {
+                if (freeRectIter == freeList.end() || !canContain(*freeRectIter, rect)) {
                     return false;
                 }
             }
 
-            rect.position = freeRect.position;
+            rect.position = freeRectIter->position;
             cropRects(rect);
             pruneFreeList();
 
@@ -139,6 +139,7 @@ namespace llassetgen {
                     }
                 }
 
+                freeList.push_back({{0, atlasSize_.y}, atlasSize_});
                 atlasSize_.y *= 2;
             } else {
                 for (auto& freeRect : freeList) {
@@ -147,23 +148,23 @@ namespace llassetgen {
                     }
                 }
 
+                freeList.push_back({{atlasSize_.x, 0}, atlasSize_});
                 atlasSize_.x *= 2;
             }
         }
 
-        Rect<PackingSizeType>& MaxRectsPacker::findFreeRect(Rect<PackingSizeType>& rect) {
-            auto& freeRect = *std::min_element(freeList.begin(), freeList.end(), BssfComparator{rect});
+        std::vector<Rect<PackingSizeType>>::iterator MaxRectsPacker::findFreeRect(Rect<PackingSizeType>& rect) {
+            auto freeRectIter = std::min_element(freeList.begin(), freeList.end(), BssfComparator{rect});
             if (allowRotations) {
                 Rect<PackingSizeType> rectRotated{rect.position, {rect.size.y, rect.size.x}};
-                auto& freeRectRotated =
-                    *std::min_element(freeList.begin(), freeList.end(), BssfComparator{rectRotated});
-                if (bssfScore(freeRectRotated, rectRotated) < bssfScore(freeRect, rect)) {
+                auto freeRectRotatedIter = std::min_element(freeList.begin(), freeList.end(), BssfComparator{rectRotated});
+                if (bssfScore(*freeRectRotatedIter, rectRotated) < bssfScore(*freeRectIter, rect)) {
                     rect.size = rectRotated.size;
-                    return freeRectRotated;
+                    return freeRectRotatedIter;
                 }
             }
 
-            return freeRect;
+            return freeRectIter;
         }
 
         void MaxRectsPacker::pruneFreeList() {
