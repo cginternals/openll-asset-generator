@@ -14,7 +14,7 @@ PackingSizeType ceilDiv(PackingSizeType dividend, PackingSizeType divisor) {
 template <class T>
 std::pair<T, T> flip(std::pair<T, T> pair) {
     return {pair.second, pair.first};
-};
+}
 
 namespace llassetgen {
     namespace internal {
