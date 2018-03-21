@@ -69,17 +69,12 @@ namespace llassetgen {
         pos += min;
         if (bitDepth <= 8) {
             uint8_t byte = data[pos.y * stride + pos.x * bitDepth / 8],
-                    offsetInByte = 8 - bitDepth - pos.x * bitDepth % 8, // TODO: Use little endian internally: pos.x * bitDepth % 8
+                    offsetInByte = 8 - bitDepth - pos.x * bitDepth % 8,
                     mask = (1 << bitDepth) - 1;
             return static_cast<pixelType>((byte >> offsetInByte) & mask);
         } else {
             assert(bitDepth == sizeof(pixelType) * 8);
-            pixelType value = reinterpret_cast<pixelType*>(data)[pos.y * getWidth() + pos.x];
-
-            // TODO: Use little endian internally: return value;
-            auto value32 = __builtin_bswap32(reinterpret_cast<uint32_t&>(value));
-            auto value16 = __builtin_bswap16(reinterpret_cast<uint16_t&>(value));
-            return (bitDepth == 32) ? reinterpret_cast<pixelType&>(value32) : reinterpret_cast<pixelType&>(value16);
+            return reinterpret_cast<pixelType*>(data)[pos.y * getWidth() + pos.x];
         }
     }
 
@@ -93,18 +88,13 @@ namespace llassetgen {
         pos += min;
         if (bitDepth <= 8) {
             uint8_t& byte = data[pos.y * stride + pos.x * bitDepth / 8];
-            uint8_t offsetInByte = 8 - bitDepth - pos.x * bitDepth % 8, // TODO: Use little endian internally: pos.x * bitDepth % 8
+            uint8_t offsetInByte = 8 - bitDepth - pos.x * bitDepth % 8,
                     mask = (1 << bitDepth) - 1;
             byte &= ~(mask << offsetInByte);
             byte |= (static_cast<uint8_t>(in) & mask) << offsetInByte;
         } else {
             assert(bitDepth == sizeof(pixelType) * 8);
-            pixelType* value = reinterpret_cast<pixelType*>(data) + (pos.y * getWidth() + pos.x);
-
-            // TODO: Use little endian internally: *value = in;
-            auto value32 = __builtin_bswap32(reinterpret_cast<uint32_t&>(in));
-            auto value16 = __builtin_bswap16(reinterpret_cast<uint16_t&>(in));
-            *value = (bitDepth == 32) ? reinterpret_cast<pixelType&>(value32) : reinterpret_cast<pixelType&>(value16);
+            reinterpret_cast<pixelType*>(data)[pos.y * getWidth() + pos.x] = in;
         }
     }
 
@@ -328,7 +318,6 @@ namespace llassetgen {
             png_set_swap(png);
         }
 
-        // TODO: Use little endian internally
         if (bitDepth >= 24) {
             std::unique_ptr<uint16_t[]> row(new uint16_t[getWidth()]);
             // possible 32 float or 32 or 24 bit int data
