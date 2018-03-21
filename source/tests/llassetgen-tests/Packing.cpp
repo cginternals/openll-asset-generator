@@ -151,6 +151,53 @@ class MaxRectsPackingTest : public PackingTest {
     Packing run(const std::vector<Vec>& rectSizes, bool allowRotations) override {
         return llassetgen::maxRectsPackAtlas(rectSizes.begin(), rectSizes.end(), allowRotations);
     }
+
+   public:
+    void testNoFreeRect() {
+        // No free rect available when packing the second rect.
+        expectPackingFailure({{1, 1}, {1, 1}}, false, {1, 1});
+        expectPackingFailure({{1, 1}, {1, 1}}, false, {1, 1});
+
+        // Uses internal packer because chosen atlas size always has enough
+        // area for all rectangles.
+        for (bool allowRotations : {false, true}) {
+            llassetgen::internal::MaxRectsPacker packer{{1, 1}, allowRotations, true};
+            Rect r1{{0, 0}, {1, 1}};
+            Rect r2{{0, 0}, {1, 1}};
+            EXPECT_TRUE(packer.pack(r1));
+            EXPECT_TRUE(packer.pack(r2));
+            EXPECT_TRUE(packer.atlasSize().x > 1 || packer.atlasSize().y > 1);
+        }
+    }
+
+    void testFreeRectPruning() {
+        // Test case forces the following to happen:
+        //  - Rectangle placed top-left, creating two free rectangles which
+        //    overlap in the bottom-right
+        //  - Fill the non-overlapping part of one rectangle, causing the
+        //    remainder to be pruned. Chosen due to best short-side fit.
+        //  - Fill the other rectangle completely. Chosen because only it can
+        //    fit the rectangle
+        //  - Last rectangle is the size of the pruned rectangle, and should
+        //    fail to pack
+        //
+        // To avoid reordering of the rectangles, this test uses the internal
+        // packing class directly.
+        auto test = [](const std::vector<Vec>& rectSizes, const Vec& nonFitting) {
+            llassetgen::internal::MaxRectsPacker packer{{8, 8}, false, false};
+            for (Vec size : rectSizes) {
+                Rect r{{0, 0}, size};
+                EXPECT_TRUE(packer.pack(r));
+            }
+
+            Rect r{{0, 0}, nonFitting};
+            EXPECT_FALSE(packer.pack(r));
+        };
+
+        // Test both orientations
+        test({{4, 3}, {4, 3}, {8, 5}}, {4, 5});
+        test({{3, 4}, {3, 4}, {5, 8}}, {5, 4});
+    }
 };
 
 #define ADD_TESTS_FOR_FIXTURE(Fixture)                                              \
@@ -167,6 +214,9 @@ ADD_TESTS_FOR_FIXTURE(ShelfNextFitPackingTest)
 ADD_TESTS_FOR_FIXTURE(MaxRectsPackingTest)
 
 #undef ADD_TESTS_FOR_FIXTURE
+
+TEST_F(MaxRectsPackingTest, TestNoFreeRect) { testNoFreeRect(); }
+TEST_F(MaxRectsPackingTest, TestFreeRectPruning) { testFreeRectPruning(); }
 
 TEST(TestPackingInternals, TestCeilLog2) {
     for (int i = 0; i < 64; i++) {
