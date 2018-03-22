@@ -56,8 +56,7 @@ void cropRect(const Rect<PackingSizeType>& rect, const Rect<PackingSizeType>& bb
         }
 
         if (isInRange(bboxMax.y, rectMin.y, rectMax.y)) {
-            replacer.addReplacement({{rectMin.x,   bboxMax.y},
-                                     {rect.size.x, rectMax.y - bboxMax.y}});
+            replacer.addReplacement({{rectMin.x, bboxMax.y}, {rect.size.x, rectMax.y - bboxMax.y}});
         }
     }
 
@@ -67,8 +66,7 @@ void cropRect(const Rect<PackingSizeType>& rect, const Rect<PackingSizeType>& bb
         }
 
         if (isInRange(bboxMax.x, rectMin.x, rectMax.x)) {
-            replacer.addReplacement({{bboxMax.x,             rectMin.y},
-                                     {rectMax.x - bboxMax.x, rect.size.y}});
+            replacer.addReplacement({{bboxMax.x, rectMin.y}, {rectMax.x - bboxMax.x, rect.size.y}});
         }
     }
 }
@@ -153,11 +151,13 @@ namespace llassetgen {
             }
         }
 
-        std::vector<Rect<PackingSizeType>>::iterator MaxRectsPacker::findFreeRect(Rect<PackingSizeType>& rect) {
+        std::vector<Rect<PackingSizeType>>::const_iterator MaxRectsPacker::findFreeRect(
+            Rect<PackingSizeType>& rect) const {
             auto freeRectIter = std::min_element(freeList.begin(), freeList.end(), BssfComparator{rect});
             if (allowRotations) {
                 Rect<PackingSizeType> rectRotated{rect.position, {rect.size.y, rect.size.x}};
-                auto freeRectRotatedIter = std::min_element(freeList.begin(), freeList.end(), BssfComparator{rectRotated});
+                auto freeRectRotatedIter =
+                    std::min_element(freeList.begin(), freeList.end(), BssfComparator{rectRotated});
                 if (bssfScore(*freeRectRotatedIter, rectRotated) < bssfScore(*freeRectIter, rect)) {
                     rect.size = rectRotated.size;
                     return freeRectRotatedIter;
