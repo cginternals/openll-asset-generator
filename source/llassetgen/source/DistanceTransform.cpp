@@ -86,38 +86,40 @@ namespace llassetgen {
 
     template <bool flipped, bool fill>
     void ParabolaEnvelope::edgeDetection(DimensionType offset, DimensionType length) {
-        InputType prev = 0;
-        DimensionType begin = 0;
+        InputType prevInput = 0;
+        DimensionType fillBegin = 0;
         for (DimensionType j = 0; j < length; ++j) {
-            InputType next = getPixel<InputType, flipped>({j, offset});
-            if (next == prev)
+            InputType nextInput = getPixel<InputType, flipped>({j, offset});
+            if (nextInput == prevInput)
                 continue;
-            DimensionType end = (next) ? j : j - 1;
-            if (fill)
-                for (DimensionType i = begin; i < end; ++i)
+            prevInput = nextInput;
+            DimensionType fillEnd = (nextInput) ? j : j - 1;
+            setPixel<OutputType, flipped>({fillEnd, offset}, 0); // Mark edge
+            if (fill) {
+                for (DimensionType i = fillBegin; i < fillEnd; ++i)
                     setPixel<OutputType, flipped>(
                         {i, offset},
-                        square(begin == 0
-                            ? (end - i) // Falling slope
-                            : ((i < (end + begin) / 2) ? i - begin + 1 : end - i) // Rising and falling slope
+                        square(fillBegin == 0
+                            ? (fillEnd - i) // Falling slope
+                            : ((i < (fillEnd + fillBegin) / 2) ? i - fillBegin + 1 : fillEnd - i) // Rising and falling slope
                         )
                     );
-            prev = next;
-            begin = end + 1;
-            setPixel<OutputType, flipped>({end, offset}, 0);  // Mark edge
+                fillBegin = fillEnd + 1;
+            }
         }
         if (fill)
-            for (DimensionType i = begin; i < length; ++i)
+            for (DimensionType i = fillBegin; i < length; ++i)
                 setPixel<OutputType, flipped>(
                     {i, offset},
-                    (begin == 0)
+                    (fillBegin == 0)
                         ? std::numeric_limits<OutputType>::max() // Empty
-                        : square(prev
-                            ? ((i < (length - 1 + begin) / 2) ? i - begin + 1 : length - 1 - i) // Rising and falling slope
-                            : (i - begin + 1) // Rising slope
+                        : square(prevInput
+                            ? ((i < (length - 1 + fillBegin) / 2) ? i - fillBegin + 1 : length - 1 - i) // Rising and falling slope
+                            : (i - fillBegin + 1) // Rising slope
                         )
                 );
-        if (prev) setPixel<OutputType, flipped>({length - 1, offset}, 0); // Mark edge
+        if (prevInput)
+            setPixel<OutputType, flipped>({length - 1, offset}, 0); // Mark edge
     }
 
     template <bool flipped>
@@ -126,26 +128,28 @@ namespace llassetgen {
         parabolas[0].begin = -std::numeric_limits<OutputType>::infinity();
         parabolas[0].value = getPixel<OutputType, flipped>({0, offset});
         parabolas[1].begin = +std::numeric_limits<OutputType>::infinity();
-        for (DimensionType parabola = 0, i = 1; i < length; ++i) {
-            OutputType begin;
+        for (DimensionType parabolaIndex = 0, j = 1; j < length; ++j) {
+            OutputType parabolaBegin;
             do {
-                DimensionType apex = parabolas[parabola].apex;
-                auto pixel = getPixel<OutputType, flipped>({i, offset});
-                begin = (pixel + square(i) - (parabolas[parabola].value + square(apex))) / (2 * (i - apex));
-            } while (begin <= parabolas[parabola--].begin);
-            parabola += 2;
-            parabolas[parabola].apex = i;
-            parabolas[parabola].begin = begin;
-            parabolas[parabola].value = getPixel<OutputType, flipped>({i, offset});
-            parabolas[parabola + 1].begin = std::numeric_limits<OutputType>::infinity();
+                DimensionType apex = parabolas[parabolaIndex].apex;
+                OutputType value = getPixel<OutputType, flipped>({j, offset});
+                parabolaBegin = (value + square(j) - (parabolas[parabolaIndex].value + square(apex))) / (2 * (j - apex));
+            } while (parabolaBegin <= parabolas[parabolaIndex--].begin);
+            parabolaIndex += 2;
+            parabolas[parabolaIndex].apex = j;
+            parabolas[parabolaIndex].begin = parabolaBegin;
+            parabolas[parabolaIndex].value = getPixel<OutputType, flipped>({j, offset});
+            parabolas[parabolaIndex + 1].begin = std::numeric_limits<OutputType>::infinity();
         }
-        for (DimensionType parabola = 0, i = 0; i < length; ++i) {
-            while (parabolas[++parabola].begin < i)
+        for (DimensionType parabolaIndex = 0, j = 0; j < length; ++j) {
+            while (parabolas[++parabolaIndex].begin < j)
                 ;
-            --parabola;
-            auto pixel = getPixel<InputType, flipped>({i, offset}) ? -1 : 1;
-            auto value = std::sqrt(parabolas[parabola].value + square(i - parabolas[parabola].apex)) * pixel;
-            setPixel<OutputType, flipped>({i, offset}, value);
+            --parabolaIndex;
+            InputType signMask = getPixel<InputType, flipped>({j, offset});
+            setPixel<OutputType, flipped>(
+                {j, offset},
+                std::sqrt(parabolas[parabolaIndex].value + square(j - parabolas[parabolaIndex].apex)) * (signMask ? -1 : 1)
+            );
         }
     }
 
