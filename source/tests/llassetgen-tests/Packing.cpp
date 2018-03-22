@@ -218,7 +218,7 @@ ADD_TESTS_FOR_FIXTURE(MaxRectsPackingTest)
 TEST_F(MaxRectsPackingTest, TestNoFreeRect) { testNoFreeRect(); }
 TEST_F(MaxRectsPackingTest, TestFreeRectPruning) { testFreeRectPruning(); }
 
-TEST(TestPackingInternals, TestCeilLog2) {
+TEST(PackingInternalsTest, TestCeilLog2) {
     for (int i = 0; i < 64; i++) {
         std::uint64_t twoToTheI = static_cast<std::uint64_t>(1) << i;
         EXPECT_EQ(i, llassetgen::internal::ceilLog2(twoToTheI));
