@@ -20,7 +20,7 @@ namespace llassetgen {
     }
 
     template <class ImageIter>
-    Image fontAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, size_t padding, uint8_t bitDepth) {
+    Image fontAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, uint8_t bitDepth = 1) {
         internal::checkImageIteratorType<ImageIter>();
         assert(std::distance(imgBegin, imgEnd) == static_cast<ptrdiff_t>(packing.rects.size()));
 
@@ -29,8 +29,8 @@ namespace llassetgen {
 
         auto rectIt = packing.rects.begin();
         for (; imgBegin < imgEnd; rectIt++, imgBegin++) {
-            Image view = atlas.view(rectIt->position, rectIt->position + rectIt->size, padding);
-            view.load(*imgBegin);
+            Image view = atlas.view(rectIt->position, rectIt->position + rectIt->size);
+            view.copyDataFrom(*imgBegin);
         }
         return atlas;
     }

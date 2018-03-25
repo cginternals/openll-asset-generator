@@ -382,4 +382,17 @@ namespace llassetgen {
     Vec2<size_t> Image::getSize() const {
         return {getWidth(), getHeight()};
     }
+
+    void Image::copyDataFrom(const Image& src) {
+        assert(getHeight() == src.getHeight() &&
+               getWidth() == src.getWidth() &&
+               getBitDepth() == src.getBitDepth());
+
+        for (size_t y = 0; y < getHeight(); y++) {
+            for (size_t x = 0; x < getWidth(); x++) {
+                Vec2<size_t> pos {x, y};
+                setPixel<uint8_t>(pos, src.getPixel<uint8_t>(pos));
+            }
+        }
+    }
 }
