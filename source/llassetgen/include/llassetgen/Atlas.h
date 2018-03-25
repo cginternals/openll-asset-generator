@@ -2,12 +2,12 @@
 
 #include <llassetgen/Image.h>
 #include <llassetgen/Packing.h>
-#include "DistanceTransform.h"
+#include <llassetgen/DistanceTransform.h>
 
 namespace llassetgen {
     namespace internal {
         template<class Iter>
-        constexpr int checkIteratorType() {
+        constexpr int checkImageIteratorType() {
             using IterTraits = typename std::iterator_traits<Iter>;
             using IterRefType = typename IterTraits::reference;
             using IterCategory = typename IterTraits::iterator_category;
@@ -21,7 +21,7 @@ namespace llassetgen {
 
     template <class ImageIter>
     Image fontAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, size_t padding, uint8_t bitDepth) {
-        internal::checkIteratorType<ImageIter>();
+        internal::checkImageIteratorType<ImageIter>();
         assert(std::distance(imgBegin, imgEnd) == static_cast<ptrdiff_t>(packing.rects.size()));
 
         Image atlas {packing.atlasSize.x, packing.atlasSize.y, bitDepth};
@@ -37,8 +37,9 @@ namespace llassetgen {
 
     template<class DTType, class ImageIter>
     Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing) {
-        internal::checkIteratorType<ImageIter>();
-        static_assert(std::is_base_of<DistanceTransform, DTType>::value);
+        internal::checkImageIteratorType<ImageIter>();
+        static_assert(std::is_base_of<DistanceTransform, DTType>::value,
+                      "DTType must be a DistanceTransform");
         assert(std::distance(imgBegin, imgEnd) == static_cast<ptrdiff_t>(packing.rects.size()));
 
         Image atlas {packing.atlasSize.x, packing.atlasSize.y, DistanceTransform::bitDepth};
