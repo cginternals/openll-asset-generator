@@ -6,7 +6,7 @@ os:
   - osx
 
 compiler:
-  - gcc-5
+  - gcc
   - clang
 
 env:
@@ -19,7 +19,7 @@ env:
 matrix:
   exclude:
   - os: osx
-    compiler: gcc-5
+    compiler: gcc
 
 addons:
   apt:
@@ -29,6 +29,7 @@ addons:
       - cmake3
       - cppcheck
       - clang-tidy-3.8
+      - gcc-5
       - g++-5
       - libfreetype6-dev
       - libpng-dev
@@ -39,6 +40,8 @@ before_install:
   - chmod +x ./configure
 
 before_script:
+  - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+  - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
   - ./configure
   - ./configure $CMAKE_CONFIGURATION
 
