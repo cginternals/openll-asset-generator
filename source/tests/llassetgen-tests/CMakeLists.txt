@@ -19,6 +19,7 @@ message(STATUS "Test ${target}")
 
 set(sources
     main.cpp
+    Atlas.cpp
     Packing.cpp
     Image.cpp
 )
