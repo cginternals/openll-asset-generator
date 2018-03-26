@@ -67,6 +67,9 @@ int parseAtlas(int argc, char **argv) {
 
     glyphsOpt->requires_one({fontPathOpt, fontNameOpt});
 
+    int padding = 0;
+    app.add_option("--padding,-p", padding);
+
     int fontSize = 128;
     app.add_option("-s,--fontsize", fontSize);
 
@@ -81,7 +84,6 @@ int parseAtlas(int argc, char **argv) {
                                                      : FontFinder::fromName(fontName);
 
         auto ucs4Glyphs = UTF8toUCS4(glyphs);
-        size_t padding = 20;
         std::vector<Image> glyphImages;
         fontFinder.renderGlyphs(ucs4Glyphs, glyphImages, fontSize, padding);
         std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages);
