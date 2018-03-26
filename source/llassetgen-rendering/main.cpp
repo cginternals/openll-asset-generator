@@ -7,6 +7,7 @@
 
 #include <QApplication>
 #include <QBoxLayout>
+#include <QComboBox>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLineEdit>
@@ -136,10 +137,12 @@ class Window : public WindowQt {
         vao->binding(1)->setFormat(2, GL_FLOAT);
         vao->enable(1);
 
-        program->setUniform("projection", projection);
         program->setUniform("modelView", transform3D);
-        program->setUniform("glyphs", samplerIndex);
+        program->setUniform("projection", projection);
+
         program->setUniform("fontColor", fontColor);
+        program->setUniform("glyphs", samplerIndex);
+        program->setUniform("superSampling", superSampling);
     }
 
     virtual void deinitializeGL() override {
@@ -176,9 +179,16 @@ class Window : public WindowQt {
         }
 
         program->use();
-        program->setUniform("projection", projection);
+
         program->setUniform("modelView", transform3D);
+        program->setUniform("projection", projection);
+
         program->setUniform("fontColor", fontColor);
+        // uncomment if you need to change the index for that texture
+        // program->setUniform("glyphs", samplerIndex);
+
+        program->setUniform("superSampling", superSampling);
+
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         program->release();
 
@@ -288,6 +298,11 @@ class Window : public WindowQt {
         paint();
     }
 
+    virtual void superSamplingChanged(int index) override {
+        superSampling = static_cast<unsigned int>(index);
+        paint();
+    }
+
    protected:
     std::unique_ptr<globjects::Buffer> cornerBuffer;
     std::unique_ptr<globjects::Buffer> textureBuffer;
@@ -307,6 +322,7 @@ class Window : public WindowQt {
     int samplerIndex = 0;
     glm::mat4 transform3D = glm::mat4();
     glm::mat4 projection = glm::perspective(45.f, 1.f, 0.0001f, 100.f);
+    unsigned int superSampling = 0;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -401,6 +417,21 @@ void setupGUI(QMainWindow* window) {
     resetButton->setMaximumWidth(90);
     QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
     miscLayout->addRow("Reset View", resetButton);
+
+    // Supersampling
+    auto* ssComboBox = new QComboBox();
+    // item order is important, their index is used in fragment shader
+    ssComboBox->addItem("None");
+    ssComboBox->addItem("1x3");
+    ssComboBox->addItem("2x4");
+    ssComboBox->addItem("2x2 rotated grid");
+    ssComboBox->addItem("Quincunx");
+    ssComboBox->addItem("8 Rooks");
+    ssComboBox->addItem("3x3");
+    ssComboBox->addItem("4x4");
+
+    QObject::connect(ssComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(superSamplingChanged(int)));
+    miscLayout->addRow("Super Sampling", ssComboBox);
 
     // gather all parameters into one layout (separately from the gl window)
     auto* guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
