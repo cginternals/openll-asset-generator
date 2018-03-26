@@ -90,6 +90,9 @@ int parseAtlas(int argc, char **argv) {
         if (distfieldOpt->count()) {
             Image atlas = distanceFieldAtlas<ParabolaEnvelope>(glyphImages.begin(), glyphImages.end(), p);
             atlas.exportPng<DistanceTransform::OutputType>(outPath, 20, -30);
+        } else {
+            Image atlas = fontAtlas(glyphImages.begin(), glyphImages.end(), p);
+            atlas.exportPng<uint8_t>(outPath);
         }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
