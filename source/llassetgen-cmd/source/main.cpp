@@ -8,6 +8,8 @@
 
 using namespace llassetgen;
 
+using VecIter = std::vector<Vec2<size_t>>::const_iterator;
+
 std::map<std::string, void(*)(Image&, Image&)> dtAlgos{
     {"deadrec", [](Image &input, Image &output) {
         DeadReckoning(input, output).transform();
@@ -15,6 +17,11 @@ std::map<std::string, void(*)(Image&, Image&)> dtAlgos{
     {"parabola", [](Image &input, Image &output) {
         ParabolaEnvelope(input, output).transform();
     }},
+};
+
+std::map<std::string, Packing(*)(VecIter, VecIter, bool)> packingAlgos{
+    {"shelf", shelfPackAtlas},
+    {"maxrects", maxRectsPackAtlas}
 };
 
 template <class Func>
@@ -48,8 +55,11 @@ std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, size_t padding
 int parseAtlas(int argc, char **argv) {
     CLI::App app{"OpenLL Font Asset Generator"};
 
-    std::string algorithm = "deadrec";  // default value
+    std::string algorithm;
     CLI::Option* distfieldOpt = app.add_set("-d,--distfield", algorithm, algoNames(dtAlgos));
+
+    std::string packing = "shelf";
+    app.add_set("-k,--packing", packing, algoNames(packingAlgos));
 
     std::string glyphs;
     CLI::Option* glyphsOpt = app.add_option("-g,--glyph", glyphs);
@@ -82,7 +92,7 @@ int parseAtlas(int argc, char **argv) {
         std::vector<Image> glyphImages;
         fontFinder.renderGlyphs(ucs4Glyphs, glyphImages, fontSize, padding);
         std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages);
-        Packing p = shelfPackAtlas(imageSizes.begin(), imageSizes.end(), false);
+        Packing p = packingAlgos[packing](imageSizes.begin(), imageSizes.end(), false);
 
         if (distfieldOpt->count()) {
             Image atlas = distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), p, dtAlgos[algorithm]);
