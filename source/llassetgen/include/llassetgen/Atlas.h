@@ -5,6 +5,8 @@
 #include <llassetgen/DistanceTransform.h>
 
 namespace llassetgen {
+    using DTFunc = void (*) (Image&, Image&);
+
     namespace internal {
         template<class Iter>
         constexpr int checkImageIteratorType() {
@@ -35,11 +37,9 @@ namespace llassetgen {
         return atlas;
     }
 
-    template<class DTType, class ImageIter>
-    Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing) {
+    template<class ImageIter>
+    Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, DTFunc dtFunc) {
         internal::checkImageIteratorType<ImageIter>();
-        static_assert(std::is_base_of<DistanceTransform, DTType>::value,
-                      "DTType must be a DistanceTransform");
         assert(std::distance(imgBegin, imgEnd) == static_cast<ptrdiff_t>(packing.rects.size()));
 
         Image atlas {packing.atlasSize.x, packing.atlasSize.y, DistanceTransform::bitDepth};
@@ -48,7 +48,7 @@ namespace llassetgen {
         auto rectIt = packing.rects.begin();
         for (; imgBegin < imgEnd; rectIt++, imgBegin++) {
             Image output = atlas.view(rectIt->position, rectIt-> position + rectIt->size);
-            DTType(*imgBegin, output).transform();
+            dtFunc(*imgBegin, output);
         }
 
         return atlas;

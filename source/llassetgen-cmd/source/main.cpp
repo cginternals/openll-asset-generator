@@ -8,24 +8,19 @@
 
 using namespace llassetgen;
 
-std::map<std::string, std::function<std::unique_ptr<DistanceTransform>(Image&, Image&)>> dtFactory {
-    {
-        "deadrec",
-        [](Image &input, Image &output) {
-            return std::unique_ptr<DistanceTransform>(new DeadReckoning(input, output));
-        }
-    },
-    {
-        "parabola",
-        [](Image& input, Image& output) {
-            return std::unique_ptr<DistanceTransform>(new ParabolaEnvelope(input, output));
-        }
-    }
+std::map<std::string, void(*)(Image&, Image&)> dtAlgos{
+    {"deadrec", [](Image &input, Image &output) {
+        DeadReckoning(input, output).transform();
+    }},
+    {"parabola", [](Image &input, Image &output) {
+        ParabolaEnvelope(input, output).transform();
+    }},
 };
 
-std::set<std::string> algoOptions() {
+template <class Func>
+std::set<std::string> algoNames(std::map<std::string, Func> map) {
     std::set<std::string> options;
-    for (const auto& algo : dtFactory) {
+    for (const auto& algo : map) {
         options.insert(algo.first);
     }
     return options;
@@ -54,7 +49,7 @@ int parseAtlas(int argc, char **argv) {
     CLI::App app{"OpenLL Font Asset Generator"};
 
     std::string algorithm = "deadrec";  // default value
-    CLI::Option* distfieldOpt = app.add_set("-d,--distfield", algorithm, algoOptions());
+    CLI::Option* distfieldOpt = app.add_set("-d,--distfield", algorithm, algoNames(dtAlgos));
 
     std::string glyphs;
     CLI::Option* glyphsOpt = app.add_option("-g,--glyph", glyphs);
@@ -90,7 +85,7 @@ int parseAtlas(int argc, char **argv) {
         Packing p = shelfPackAtlas(imageSizes.begin(), imageSizes.end(), false);
 
         if (distfieldOpt->count()) {
-            Image atlas = distanceFieldAtlas<ParabolaEnvelope>(glyphImages.begin(), glyphImages.end(), p);
+            Image atlas = distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), p, dtAlgos[algorithm]);
             atlas.exportPng<DistanceTransform::OutputType>(outPath, 20, -30);
         } else {
             Image atlas = fontAtlas(glyphImages.begin(), glyphImages.end(), p);
@@ -109,7 +104,7 @@ int parseDistField(int argc, char** argv) {
     // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
 
     std::string algorithm = "deadrec";  // default value
-    app.add_set("-a,--algorithm", algorithm, algoOptions());
+    app.add_set("-a,--algorithm", algorithm, algoNames(dtAlgos));
 
     std::string imgPath;
     app.add_option("--image,-i", imgPath)->required()->check(CLI::ExistingFile);
@@ -121,8 +116,7 @@ int parseDistField(int argc, char** argv) {
 
     Image input = Image(imgPath);
     Image output = Image(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
-    std::unique_ptr<DistanceTransform> dt = dtFactory[algorithm](input, output);
-    dt->transform();
+    dtAlgos[algorithm](input, output);
     output.exportPng<DistanceTransform::OutputType>(outPath, 20, -30);
     return 0;
 }
