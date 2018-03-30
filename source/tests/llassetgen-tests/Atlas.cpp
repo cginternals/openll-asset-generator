@@ -14,8 +14,11 @@ TEST(AtlasTest, CreateDistanceFieldAtlas) {
         glyphs.emplace_back(size.x, size.y, 1);
     }
 
+    auto dtFunc = [](Image& in, Image& out) {
+        DeadReckoning(in, out).transform();
+    };
     Packing p = shelfPackAtlas(atlasTestSizes.begin(), atlasTestSizes.end(), false);
-    Image atlas = distanceFieldAtlas<DeadReckoning>(glyphs.begin(), glyphs.end(), p);
+    Image atlas = distanceFieldAtlas(glyphs.begin(), glyphs.end(), p, dtFunc);
 
     std::string outPath = atlasTestDestinationPath + "dt_atlas.png";
     atlas.exportPng<DistanceTransform::OutputType>(outPath, -50, 50);
