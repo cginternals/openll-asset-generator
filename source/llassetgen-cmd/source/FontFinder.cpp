@@ -6,7 +6,9 @@
     #include <wingdi.h>
 #endif
 
-#include "FontFinder.h"
+#include <iostream>
+
+#include <FontFinder.h>
 
 using namespace llassetgen;
 
@@ -100,11 +102,14 @@ Image FontFinder::renderGlyph(unsigned long glyph, int size, size_t padding) {
     }
 
     FT_UInt charIndex = FT_Get_Char_Index(fontFace, static_cast<FT_ULong>(glyph));
-    err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
+    if (charIndex == 0) {
+        std::cout << "Warning: font does not contain glyph with code " << glyph << std::endl;
+    }
 
+    err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
     FT_Bitmap& bitmap = fontFace->glyph->bitmap;
     if (err || bitmap.buffer == nullptr) {
-        throw std::runtime_error("glyph could not be rendered");
+        throw std::runtime_error("glyph with code " + std::to_string(glyph) + " could not be rendered");
     }
     return {bitmap, padding};
 }
