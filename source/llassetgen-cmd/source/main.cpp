@@ -56,6 +56,7 @@ std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, size_t padding
 };
 
 int parseAtlas(int argc, char **argv) {
+    // Example: llassetgen-cmd atlas -d parabola --ascii -f Verdana atlas.png
     CLI::App app{"OpenLL Font Asset Generator"};
 
     std::string algorithm;
@@ -66,6 +67,9 @@ int parseAtlas(int argc, char **argv) {
 
     std::string glyphs;
     CLI::Option* glyphsOpt = app.add_option("-g,--glyph", glyphs);
+
+    std::vector<unsigned int> charCodes;
+    app.add_option("-c,--charcode", charCodes);
 
     std::string fontPath;
     CLI::Option* fontPathOpt = app.add_option("--fontpath", fontPath)->check(CLI::ExistingFile);
@@ -90,17 +94,21 @@ int parseAtlas(int argc, char **argv) {
     CLI11_PARSE(app, argc, argv);
 
     if (asciiOpt->count()) glyphs += ascii;
-    if (glyphs.empty()) {
+
+    auto ucs4Glyphs = UTF8toUCS4(glyphs);
+    for (const auto c : charCodes) {
+        ucs4Glyphs.push_back(c);
+    }
+
+    if (ucs4Glyphs.empty()) {
         std::cerr << "Error: at least one glyph required" << std::endl;
         return 2;
     }
 
-    // Example: llassetgen-cmd atlas -d parabola -g ABC -f Verdana -s 64 atlas.png
     try {
         FontFinder fontFinder = fontPathOpt->count() ? FontFinder::fromPath(fontPath)
                                                      : FontFinder::fromName(fontName);
 
-        auto ucs4Glyphs = UTF8toUCS4(glyphs);
         std::vector<Image> glyphImages;
         fontFinder.renderGlyphs(ucs4Glyphs, glyphImages, fontSize, padding);
         std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages);
