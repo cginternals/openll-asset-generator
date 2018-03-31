@@ -24,6 +24,9 @@ std::map<std::string, Packing(*)(VecIter, VecIter, bool)> packingAlgos{
     {"maxrects", maxRectsPackAtlas}
 };
 
+// all printable ascii characters, except for space
+constexpr char ascii[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
 template <class Func>
 std::set<std::string> algoNames(std::map<std::string, Func> map) {
     std::set<std::string> options;
@@ -70,6 +73,7 @@ int parseAtlas(int argc, char **argv) {
     std::string fontName;
     CLI::Option* fontNameOpt = app.add_option("--fontname,-f", fontName);
 
+    // TODO: app.requires_one
     glyphsOpt->requires_one({fontPathOpt, fontNameOpt});
 
     int padding = 0;
@@ -78,10 +82,18 @@ int parseAtlas(int argc, char **argv) {
     int fontSize = 128;
     app.add_option("-s,--fontsize", fontSize);
 
+    CLI::Option* asciiOpt = app.add_flag("--ascii");
+
     std::string outPath;
     app.add_option("outfile", outPath)->required();
 
     CLI11_PARSE(app, argc, argv);
+
+    if (asciiOpt->count()) glyphs += ascii;
+    if (glyphs.empty()) {
+        std::cerr << "Error: at least one glyph required" << std::endl;
+        return 2;
+    }
 
     // Example: llassetgen-cmd atlas -d parabola -g ABC -f Verdana -s 64 atlas.png
     try {
