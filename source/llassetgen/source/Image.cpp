@@ -29,6 +29,10 @@ namespace llassetgen {
             delete[] data;
     }
 
+    Image::Image(Image&& src) :min(src.min), max(src.max), stride(src.stride), bitDepth(src.bitDepth), data(src.data), isOwnerOfData(src.isOwnerOfData) {
+        src.isOwnerOfData = false;
+    }
+
     Image::Image(Vec2<size_t> _min, Vec2<size_t> _max, size_t _stride, uint8_t _bitDepth, uint8_t* _data)
         : min(_min), max(_max), stride(_stride), bitDepth(_bitDepth), data(_data), isOwnerOfData(false) {}
 
@@ -116,6 +120,66 @@ namespace llassetgen {
             memset(data, 0, stride * getHeight());
         } else {
             fillRect(min, max, 0);
+        }
+    }
+
+    template LLASSETGEN_API void Image::centerDownsampling<float>(const Image& src) const;
+    template LLASSETGEN_API void Image::centerDownsampling<uint32_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::centerDownsampling<uint16_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::centerDownsampling<uint8_t>(const Image& src) const;
+    template <typename pixelType>
+    void Image::centerDownsampling(const Image& src) const {
+        assert(src.getWidth()%getWidth() == 0 && src.getHeight()%getHeight() == 0);
+        size_t x_scale = src.getWidth()/getWidth(),
+               y_scale = src.getHeight()/getHeight();
+        for (size_t y = 0; y < getHeight(); y++) {
+            for (size_t x = 0; x < getWidth(); x++) {
+                setPixel<pixelType>({x, y}, src.getPixel<pixelType>({x*x_scale+x_scale/2, y*y_scale+y_scale/2}));
+            }
+        }
+    }
+
+    template LLASSETGEN_API void Image::averageDownsampling<float>(const Image& src) const;
+    template LLASSETGEN_API void Image::averageDownsampling<uint32_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::averageDownsampling<uint16_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::averageDownsampling<uint8_t>(const Image& src) const;
+    template <typename pixelType>
+    void Image::averageDownsampling(const Image& src) const {
+        assert(src.getWidth()%getWidth() == 0 && src.getHeight()%getHeight() == 0);
+        size_t x_scale = src.getWidth()/getWidth(),
+               y_scale = src.getHeight()/getHeight();
+        for (size_t y = 0; y < getHeight(); y++) {
+            for (size_t x = 0; x < getWidth(); x++) {
+                pixelType value = 0;
+                for (size_t j = 0; j < y_scale; j++) {
+                    for (size_t i = 0; i < x_scale; i++) {
+                        value += src.getPixel<pixelType>({x*x_scale+i, y*y_scale+j});
+                    }
+                }
+                setPixel<pixelType>({x, y}, value/(x_scale*y_scale));
+            }
+        }
+    }
+
+    template LLASSETGEN_API void Image::minDownsampling<float>(const Image& src) const;
+    template LLASSETGEN_API void Image::minDownsampling<uint32_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::minDownsampling<uint16_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::minDownsampling<uint8_t>(const Image& src) const;
+    template <typename pixelType>
+    void Image::minDownsampling(const Image& src) const {
+        assert(src.getWidth()%getWidth() == 0 && src.getHeight()%getHeight() == 0);
+        size_t x_scale = src.getWidth()/getWidth(),
+               y_scale = src.getHeight()/getHeight();
+        for (size_t y = 0; y < getHeight(); y++) {
+            for (size_t x = 0; x < getWidth(); x++) {
+                pixelType value = std::numeric_limits<pixelType>::max();
+                for (size_t j = 0; j < y_scale; j++) {
+                    for (size_t i = 0; i < x_scale; i++) {
+                        value = std::min(value, src.getPixel<pixelType>({x*x_scale+i, y*y_scale+j}));
+                    }
+                }
+                setPixel<pixelType>({x, y}, value);
+            }
         }
     }
 

@@ -28,19 +28,31 @@ namespace llassetgen {
 
        public:
         ~Image();
+        Image(const Image&) = delete;
+        Image(Image&& src);
         Image(size_t width, size_t height, size_t _bitDepth);
         Image view(Vec2<size_t> _min, Vec2<size_t> _max, size_t padding = 0);
+
         size_t getWidth() const;
         size_t getHeight() const;
         size_t getBitDepth() const;
+
         bool isValid(Vec2<size_t> pos) const;
         template <typename pixelType>
         pixelType getPixel(Vec2<size_t> pos) const;
         template <typename pixelType>
         void setPixel(Vec2<size_t> pos, pixelType data) const;
+
         template <typename pixelType = uint8_t>
         void fillRect(Vec2<size_t> _min, Vec2<size_t> _max, pixelType in = 0) const;
         void clear() const;
+
+        template <typename pixelType>
+        void centerDownsampling(const Image& src) const;
+        template <typename pixelType>
+        void averageDownsampling(const Image& src) const;
+        template <typename pixelType>
+        void minDownsampling(const Image& src) const;
 
         void load(const FT_Bitmap_& ft_bitmap);
         Image(const std::string& filepath, uint8_t _bitDepth = 0);
