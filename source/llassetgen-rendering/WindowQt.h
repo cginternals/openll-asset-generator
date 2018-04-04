@@ -51,8 +51,13 @@ class WindowQt : public QWindow {
     virtual void fontColorRChanged(QString value);
     virtual void fontColorGChanged(QString value);
     virtual void fontColorBChanged(QString value);
+    virtual void dtAlgorithmChanged(int index);
     virtual void dtThresholdChanged(QString value);
+    virtual void fontSizeChanged(QString value);
+    virtual void drBlackChanged(QString value);
+    virtual void drWhiteChanged(QString value);
     virtual void resetTransform3D();
+    virtual void triggerNewDT();
     virtual void superSamplingChanged(int index);
     virtual void toggleDistanceField(bool activated);
 

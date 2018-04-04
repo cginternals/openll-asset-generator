@@ -80,6 +80,9 @@ class Window : public WindowQt {
 
         // TODO load using own png loader instead of Qt (blocked: wait for this feature to be merged into master, then
         // pull). TODO: Make sure this file structure is the same on other OS
+
+        // TODO trigger distance transform creation with one algorithm; then later, if user chooses different algorithm
+        // or parameters, change the image.
         auto path = QApplication::applicationDirPath();
         auto* image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_DT.png");
 
@@ -299,6 +302,11 @@ class Window : public WindowQt {
 
     virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
+    virtual void dtAlgorithmChanged(int index) override {
+        //TODO llassetgen::foobar
+        std::cout << "change Algo" << std::endl;
+    }
+
     virtual void dtThresholdChanged(QString value) override {
         dtThreshold = value.toFloat();
         paint();
@@ -306,6 +314,12 @@ class Window : public WindowQt {
 
     virtual void resetTransform3D() override {
         transform3D = glm::mat4();  // set identity
+        paint();
+    }
+
+    virtual void triggerNewDT() override {
+        //TODO get all DT options and create nur Distance Field
+        std::cout << "trigger new DF" << std::endl;
         paint();
     }
 
@@ -317,6 +331,21 @@ class Window : public WindowQt {
     virtual void toggleDistanceField(bool activated) override {
         showDistanceField = activated;
         paint();
+    }
+
+    virtual void fontSizeChanged(QString value) override {
+        //TODO
+        std::cout << "fontSizeChanged: " + value.toStdString() << std::endl;
+    }
+
+    virtual void drBlackChanged(QString value) override {
+        //TODO
+        std::cout << "drBlack Changed: " + value.toStdString() << std::endl;
+    }
+
+    virtual void drWhiteChanged(QString value) override {
+        //TODO
+        std::cout << "drWhite Changed: " + value.toStdString() << std::endl;
     }
 
    protected:
@@ -351,7 +380,7 @@ void prepareColorInput(QLineEdit* input, const QString placeholder) {
     auto colorValidator = new QIntValidator(0, 255);
     input->setValidator(colorValidator);
     input->setPlaceholderText(placeholder);
-    input->setMaximumWidth(45);
+    input->setMaximumWidth(35);
 };
 
 /* This function creates GUI elements and connects them to their correspondent functions using Qt signal-slot.
@@ -373,9 +402,11 @@ void setupGUI(QMainWindow* window) {
     window->setMinimumSize(640, 480);
     window->setWindowTitle("Open Font Asset Generator");
 
+    int groupboxMaxHeight = 160;
+
     // FONT COLOR
     auto fontColorGroupBox = new QGroupBox("Font Color");
-    fontColorGroupBox->setMaximumHeight(150);
+    fontColorGroupBox->setMaximumHeight(groupboxMaxHeight);
     auto fontColorLayout = new QFormLayout();
 
     fontColorGroupBox->setLayout(fontColorLayout);
@@ -401,7 +432,7 @@ void setupGUI(QMainWindow* window) {
     // BACKGROUND COLOR
 
     auto backgroundColorGroupBox = new QGroupBox("Background Color");
-    backgroundColorGroupBox->setMaximumHeight(150);
+    backgroundColorGroupBox->setMaximumHeight(groupboxMaxHeight);
     auto backgroundColorLayout = new QFormLayout();
     backgroundColorGroupBox->setLayout(backgroundColorLayout);
 
@@ -423,12 +454,73 @@ void setupGUI(QMainWindow* window) {
     QObject::connect(backgroundB, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorBChanged(QString)));
     backgroundColorLayout->addRow("B:", backgroundB);
 
-    // DISTANCE FIELD OPTIONS
+    // DISTANCE FIELD CREATION OPTIONS
 
-    auto dtGroupBox = new QGroupBox("Distance Field");
-    dtGroupBox->setMaximumHeight(150);
+    auto dtGroupBox = new QGroupBox("Distance Field Options");
+    dtGroupBox->setMaximumHeight(groupboxMaxHeight);
     auto dtLayout = new QFormLayout();
     dtGroupBox->setLayout(dtLayout);
+
+    // switch between different distance field arithms
+    auto* dtComboBox = new QComboBox();
+    // item order is important
+    dtComboBox->addItem("Dead Reckoning");
+    dtComboBox->addItem("Parabola Envelope");
+    QObject::connect(dtComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(dtAlgorithmChanged(int)));
+    dtLayout->addRow("Algorithm: ", dtComboBox);
+
+    // original font size for distance field rendering
+    auto* fontSize = new QLineEdit();
+    auto fsv = new QIntValidator();
+    fsv->setBottom(1);
+    fontSize->setValidator(fsv);
+    fontSize->setPlaceholderText("1024");
+    fontSize->setMaximumWidth(45);
+    QObject::connect(fontSize, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
+    dtLayout->addRow("Original Font Size:", fontSize);
+
+    // dynamic range for distance field rendering
+    auto drv = new QIntValidator();
+
+    auto* drBlack = new QLineEdit();
+    drBlack->setValidator(drv);
+    drBlack->setPlaceholderText("-100");
+    drBlack->setMaximumWidth(45);
+    QObject::connect(drBlack, SIGNAL(textEdited(QString)), glwindow, SLOT(drBlackChanged(QString)));
+    dtLayout->addRow("Lower dynamic range:", drBlack);
+
+    auto* drWhite = new QLineEdit();
+    drWhite->setValidator(drv);
+    drWhite->setPlaceholderText("100");
+    drWhite->setMaximumWidth(45);
+    QObject::connect(drWhite, SIGNAL(textEdited(QString)), glwindow, SLOT(drWhiteChanged(QString)));
+    dtLayout->addRow("Upper dynamic range:", drWhite);
+
+    // trigger distance field creation
+    auto* triggerDTButton = new QPushButton("OK");
+    triggerDTButton->setMaximumWidth(90);
+    QObject::connect(triggerDTButton, SIGNAL(clicked()), glwindow, SLOT(triggerNewDT()));
+    dtLayout->addRow("Apply options: ", triggerDTButton);
+
+    // TODO
+    // dynamic range on one line?
+    // Downsampling parameter
+    // Font name
+    // glyph presets?
+    // export everything
+
+    // RENDERING OPTIONS
+
+    auto renderingGroupBox = new QGroupBox("Rendering");
+    renderingGroupBox->setMaximumHeight(groupboxMaxHeight);
+    auto renderingLayout = new QFormLayout();
+    renderingGroupBox->setLayout(renderingLayout);
+
+    // reset transform 3D to inital state
+    auto* resetButton = new QPushButton("Reset");
+    resetButton->setMaximumWidth(90);
+    QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
+    renderingLayout->addRow("Reset View", resetButton);
 
     // threshold for distance field rendering
     auto* dtT = new QLineEdit();
@@ -437,17 +529,18 @@ void setupGUI(QMainWindow* window) {
     dtT->setPlaceholderText("0.5");
     dtT->setMaximumWidth(45);
     QObject::connect(dtT, SIGNAL(textEdited(QString)), glwindow, SLOT(dtThresholdChanged(QString)));
-    dtLayout->addRow("Threshold:", dtT);
+    renderingLayout->addRow("Threshold:", dtT);
 
     // switch between viewing the rendered glyphs and the underlying distance field
     auto* switchRenderingButton = new QPushButton("Distance Field");
     switchRenderingButton->setCheckable(true);
     switchRenderingButton->setMaximumWidth(90);
     QObject::connect(switchRenderingButton, SIGNAL(toggled(bool)), glwindow, SLOT(toggleDistanceField(bool)));
-    dtLayout->addRow("Switch Rendering", switchRenderingButton);
+    renderingLayout->addRow("Switch Rendering", switchRenderingButton);
 
     // Supersampling
     auto* ssComboBox = new QComboBox();
+    ssComboBox->setMaximumWidth(90);
     // item order is important, their index is used in fragment shader
     ssComboBox->addItem("None");
     ssComboBox->addItem("1x3");
@@ -457,29 +550,16 @@ void setupGUI(QMainWindow* window) {
     ssComboBox->addItem("8 Rooks");
     ssComboBox->addItem("3x3");
     ssComboBox->addItem("4x4");
-
     QObject::connect(ssComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(superSamplingChanged(int)));
-    dtLayout->addRow("Super Sampling", ssComboBox);
+    renderingLayout->addRow("Super Sampling", ssComboBox);
 
-    // MISCELLANEOUS GUI
-
-    auto miscGroupBox = new QGroupBox("Miscellaneous");
-    miscGroupBox->setMaximumHeight(150);
-    auto miscLayout = new QFormLayout();
-    miscGroupBox->setLayout(miscLayout);
-
-    // reset transform 3D to inital state
-    auto* resetButton = new QPushButton("Reset");
-    resetButton->setMaximumWidth(90);
-    QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
-    miscLayout->addRow("Reset View", resetButton);
 
     // gather all parameters into one layout (separately from the gl window)
     auto* guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
     guiLayout->addWidget(backgroundColorGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(fontColorGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(dtGroupBox, 0, Qt::AlignLeft);
-    guiLayout->addWidget(miscGroupBox, 0, Qt::AlignLeft);
+    guiLayout->addWidget(renderingGroupBox, 0, Qt::AlignLeft);
 
     auto* mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
     mainLayout->addLayout(guiLayout, 0);
