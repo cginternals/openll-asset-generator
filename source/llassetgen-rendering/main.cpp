@@ -249,7 +249,10 @@ class Window : public WindowQt {
 
             transform3D = glm::rotate(transform3D, deltaX, glm::vec3(0, 1, 0));
             transform3D = glm::rotate(transform3D, deltaY, glm::vec3(1, 0, 0));
-            // What's for rotation around z? maybe some GUI Elements?
+            // What's for rotation around z? Maybe some GUI Elements?
+            // Since this navigation is not well elaborated but rudimentary, a rotation around z is achieved
+            // by moving the mouse (counter)-clockwise while holding right button pressed. This is an ugly
+            // navigation, but it's "okay enough" for our purpose.
         }
 
         lastMousePos.x = event->x();
