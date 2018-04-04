@@ -160,3 +160,5 @@ void WindowQt::fontColorBChanged(QString /*unused*/) {}
 void WindowQt::resetTransform3D() {}
 
 void WindowQt::superSamplingChanged(int /*unused*/) {}
+
+void WindowQt::toggleDistanceField(bool /*unused*/) {}
