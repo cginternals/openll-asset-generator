@@ -159,7 +159,13 @@ void WindowQt::fontColorBChanged(QString /*unused*/) {}
 
 void WindowQt::dtAlgorithmChanged(int /*unused*/) {}
 
+void WindowQt::glyphPresetChanged(int /*unused*/) {}
+
+void WindowQt::packingSizeChanged(int /*unused*/) {}
+
 void WindowQt::dtThresholdChanged(QString /*unused*/) {}
+
+void WindowQt::fontNameChanged(QString /*unused*/) {}
 
 void WindowQt::fontSizeChanged(QString /*unused*/) {}
 
@@ -169,7 +175,7 @@ void WindowQt::drWhiteChanged(QString /*unused*/) {}
 
 void WindowQt::resetTransform3D() {}
 
-void WindowQt::triggerNewDT() {};
+void WindowQt::triggerNewDT(){};
 
 void WindowQt::superSamplingChanged(int /*unused*/) {}
 

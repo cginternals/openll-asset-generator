@@ -314,6 +314,16 @@ class Window : public WindowQt {
         paint();
     }
 
+    virtual void glyphPresetChanged(int index) override {
+        // TODO llassetgen::foobar
+        std::cout << "change glyph preset" << std::endl;
+    }
+
+    virtual void packingSizeChanged(int index) override {
+        // TODO llassetgen::foobar
+        std::cout << "change downscaling" << std::endl;
+    }
+
     virtual void resetTransform3D() override {
         transform3D = glm::mat4();  // set identity
         paint();
@@ -333,6 +343,11 @@ class Window : public WindowQt {
     virtual void toggleDistanceField(bool activated) override {
         showDistanceField = activated;
         paint();
+    }
+
+    virtual void fontNameChanged(QString value) override {
+        // TODO
+        std::cout << "fontNameChanged: " + value.toStdString() << std::endl;
     }
 
     virtual void fontSizeChanged(QString value) override {
@@ -458,10 +473,52 @@ void setupGUI(QMainWindow* window) {
 
     // DISTANCE FIELD CREATION OPTIONS
 
-    auto* dtGroupBox = new QGroupBox("Distance Field Options");
-    dtGroupBox->setMaximumHeight(groupboxMaxHeight);
+    auto* dfGroupBox = new QGroupBox("Distance Field Options");
+    dfGroupBox->setMaximumHeight(groupboxMaxHeight);
+    auto* dfLayout = new QHBoxLayout();
+    dfGroupBox->setLayout(dfLayout);
+
+    // ATLAS CREATION OPTIONS
+    // TODO:
+    // Downsampling parameter
+    // export everything
+
+    auto* acLayout = new QFormLayout();
+    dfLayout->addLayout(acLayout);
+
+    // typeface of font
+    auto* fontName = new QLineEdit();
+    fontName->setPlaceholderText("Arial");
+    fontName->setMaximumWidth(45);
+    QObject::connect(fontName, SIGNAL(textEdited(QString)), glwindow, SLOT(fontNameChanged(QString)));
+    acLayout->addRow("Font Name:", fontName);
+
+    // glyph presets
+    auto* gpComboBox = new QComboBox();
+    // item order is important
+    gpComboBox->addItem("ASCII");
+    gpComboBox->addItem("Other?");
+    QObject::connect(gpComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(glyphPresetChanged(int)));
+    acLayout->addRow("Glyph Preset:", gpComboBox);
+
+    // packing size (used for downscaling)
+    auto* psComboBox = new QComboBox();
+    // item order is important
+    psComboBox->addItem("64");
+    psComboBox->addItem("128");
+    psComboBox->addItem("265");
+    psComboBox->addItem("512");
+    psComboBox->addItem("1024");
+    psComboBox->addItem("2048");
+    psComboBox->addItem("4096");
+    psComboBox->addItem("8192");
+    QObject::connect(psComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(packingSizeChanged(int)));
+    acLayout->addRow("Texture size:", psComboBox);
+
+    // DISTANCE TRANSFORM OPTIONS
+
     auto* dtLayout = new QFormLayout();
-    dtGroupBox->setLayout(dtLayout);
+    dfLayout->addLayout(dtLayout);
 
     // switch between different distance field arithms
     auto* dtComboBox = new QComboBox();
@@ -469,7 +526,7 @@ void setupGUI(QMainWindow* window) {
     dtComboBox->addItem("Dead Reckoning");
     dtComboBox->addItem("Parabola Envelope");
     QObject::connect(dtComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(dtAlgorithmChanged(int)));
-    dtLayout->addRow("Algorithm: ", dtComboBox);
+    dtLayout->addRow("Algorithm:", dtComboBox);
 
     // original font size for distance field rendering
     auto* fontSize = new QLineEdit();
@@ -502,19 +559,13 @@ void setupGUI(QMainWindow* window) {
     drLayout->addWidget(drWhite);
     drLayout->addWidget(new QLabel("]"));
 
-    dtLayout->addRow("Dynamic Range", drLayout);
+    dtLayout->addRow("Dynamic Range:", drLayout);
 
     // trigger distance field creation
     auto* triggerDTButton = new QPushButton("OK");
     triggerDTButton->setMaximumWidth(90);
     QObject::connect(triggerDTButton, SIGNAL(clicked()), glwindow, SLOT(triggerNewDT()));
-    dtLayout->addRow("Apply options: ", triggerDTButton);
-
-    // TODO
-    // Downsampling parameter
-    // Font name
-    // glyph presets?
-    // export everything
+    dtLayout->addRow("Apply options:", triggerDTButton);
 
     // RENDERING OPTIONS
 
@@ -527,7 +578,7 @@ void setupGUI(QMainWindow* window) {
     auto* resetButton = new QPushButton("Reset");
     resetButton->setMaximumWidth(90);
     QObject::connect(resetButton, SIGNAL(clicked()), glwindow, SLOT(resetTransform3D()));
-    renderingLayout->addRow("Reset View", resetButton);
+    renderingLayout->addRow("Reset View:", resetButton);
 
     // threshold for distance field rendering
     auto* dtT = new QLineEdit();
@@ -543,7 +594,7 @@ void setupGUI(QMainWindow* window) {
     switchRenderingButton->setCheckable(true);
     switchRenderingButton->setMaximumWidth(90);
     QObject::connect(switchRenderingButton, SIGNAL(toggled(bool)), glwindow, SLOT(toggleDistanceField(bool)));
-    renderingLayout->addRow("Switch Rendering", switchRenderingButton);
+    renderingLayout->addRow("Switch Rendering:", switchRenderingButton);
 
     // Supersampling
     auto* ssComboBox = new QComboBox();
@@ -558,13 +609,13 @@ void setupGUI(QMainWindow* window) {
     ssComboBox->addItem("3x3");
     ssComboBox->addItem("4x4");
     QObject::connect(ssComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(superSamplingChanged(int)));
-    renderingLayout->addRow("Super Sampling", ssComboBox);
+    renderingLayout->addRow("Super Sampling:", ssComboBox);
 
     // gather all parameters into one layout (separately from the gl window)
     auto* guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
     guiLayout->addWidget(backgroundColorGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(fontColorGroupBox, 0, Qt::AlignLeft);
-    guiLayout->addWidget(dtGroupBox, 0, Qt::AlignLeft);
+    guiLayout->addWidget(dfGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(renderingGroupBox, 0, Qt::AlignLeft);
 
     auto* mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
