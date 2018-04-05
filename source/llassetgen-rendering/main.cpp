@@ -10,6 +10,8 @@
 #include <QComboBox>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QPushButton>
@@ -303,7 +305,7 @@ class Window : public WindowQt {
     virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
     virtual void dtAlgorithmChanged(int index) override {
-        //TODO llassetgen::foobar
+        // TODO llassetgen::foobar
         std::cout << "change Algo" << std::endl;
     }
 
@@ -318,7 +320,7 @@ class Window : public WindowQt {
     }
 
     virtual void triggerNewDT() override {
-        //TODO get all DT options and create nur Distance Field
+        // TODO get all DT options and create new Distance Field
         std::cout << "trigger new DF" << std::endl;
         paint();
     }
@@ -334,17 +336,17 @@ class Window : public WindowQt {
     }
 
     virtual void fontSizeChanged(QString value) override {
-        //TODO
+        // TODO
         std::cout << "fontSizeChanged: " + value.toStdString() << std::endl;
     }
 
     virtual void drBlackChanged(QString value) override {
-        //TODO
+        // TODO
         std::cout << "drBlack Changed: " + value.toStdString() << std::endl;
     }
 
     virtual void drWhiteChanged(QString value) override {
-        //TODO
+        // TODO
         std::cout << "drWhite Changed: " + value.toStdString() << std::endl;
     }
 
@@ -377,7 +379,7 @@ class Window : public WindowQt {
 };
 
 void prepareColorInput(QLineEdit* input, const QString placeholder) {
-    auto colorValidator = new QIntValidator(0, 255);
+    auto* colorValidator = new QIntValidator(0, 255);
     input->setValidator(colorValidator);
     input->setPlaceholderText(placeholder);
     input->setMaximumWidth(35);
@@ -405,9 +407,9 @@ void setupGUI(QMainWindow* window) {
     int groupboxMaxHeight = 160;
 
     // FONT COLOR
-    auto fontColorGroupBox = new QGroupBox("Font Color");
+    auto* fontColorGroupBox = new QGroupBox("Font Color");
     fontColorGroupBox->setMaximumHeight(groupboxMaxHeight);
-    auto fontColorLayout = new QFormLayout();
+    auto* fontColorLayout = new QFormLayout();
 
     fontColorGroupBox->setLayout(fontColorLayout);
 
@@ -431,9 +433,9 @@ void setupGUI(QMainWindow* window) {
 
     // BACKGROUND COLOR
 
-    auto backgroundColorGroupBox = new QGroupBox("Background Color");
+    auto* backgroundColorGroupBox = new QGroupBox("Background Color");
     backgroundColorGroupBox->setMaximumHeight(groupboxMaxHeight);
-    auto backgroundColorLayout = new QFormLayout();
+    auto* backgroundColorLayout = new QFormLayout();
     backgroundColorGroupBox->setLayout(backgroundColorLayout);
 
     // Background Color RED
@@ -456,9 +458,9 @@ void setupGUI(QMainWindow* window) {
 
     // DISTANCE FIELD CREATION OPTIONS
 
-    auto dtGroupBox = new QGroupBox("Distance Field Options");
+    auto* dtGroupBox = new QGroupBox("Distance Field Options");
     dtGroupBox->setMaximumHeight(groupboxMaxHeight);
-    auto dtLayout = new QFormLayout();
+    auto* dtLayout = new QFormLayout();
     dtGroupBox->setLayout(dtLayout);
 
     // switch between different distance field arithms
@@ -471,7 +473,7 @@ void setupGUI(QMainWindow* window) {
 
     // original font size for distance field rendering
     auto* fontSize = new QLineEdit();
-    auto fsv = new QIntValidator();
+    auto* fsv = new QIntValidator();
     fsv->setBottom(1);
     fontSize->setValidator(fsv);
     fontSize->setPlaceholderText("1024");
@@ -480,21 +482,27 @@ void setupGUI(QMainWindow* window) {
     dtLayout->addRow("Original Font Size:", fontSize);
 
     // dynamic range for distance field rendering
-    auto drv = new QIntValidator();
+    auto* drLayout = new QHBoxLayout();
+    auto* drv = new QIntValidator();
 
     auto* drBlack = new QLineEdit();
     drBlack->setValidator(drv);
     drBlack->setPlaceholderText("-100");
-    drBlack->setMaximumWidth(45);
+    drBlack->setMaximumWidth(38);
     QObject::connect(drBlack, SIGNAL(textEdited(QString)), glwindow, SLOT(drBlackChanged(QString)));
-    dtLayout->addRow("Lower dynamic range:", drBlack);
+    drLayout->addWidget(new QLabel("["));
+    drLayout->addWidget(drBlack);
+    drLayout->addWidget(new QLabel(","));
 
     auto* drWhite = new QLineEdit();
     drWhite->setValidator(drv);
     drWhite->setPlaceholderText("100");
-    drWhite->setMaximumWidth(45);
+    drWhite->setMaximumWidth(38);
     QObject::connect(drWhite, SIGNAL(textEdited(QString)), glwindow, SLOT(drWhiteChanged(QString)));
-    dtLayout->addRow("Upper dynamic range:", drWhite);
+    drLayout->addWidget(drWhite);
+    drLayout->addWidget(new QLabel("]"));
+
+    dtLayout->addRow("Dynamic Range", drLayout);
 
     // trigger distance field creation
     auto* triggerDTButton = new QPushButton("OK");
@@ -503,7 +511,6 @@ void setupGUI(QMainWindow* window) {
     dtLayout->addRow("Apply options: ", triggerDTButton);
 
     // TODO
-    // dynamic range on one line?
     // Downsampling parameter
     // Font name
     // glyph presets?
@@ -511,9 +518,9 @@ void setupGUI(QMainWindow* window) {
 
     // RENDERING OPTIONS
 
-    auto renderingGroupBox = new QGroupBox("Rendering");
+    auto* renderingGroupBox = new QGroupBox("Rendering");
     renderingGroupBox->setMaximumHeight(groupboxMaxHeight);
-    auto renderingLayout = new QFormLayout();
+    auto* renderingLayout = new QFormLayout();
     renderingGroupBox->setLayout(renderingLayout);
 
     // reset transform 3D to inital state
@@ -524,7 +531,7 @@ void setupGUI(QMainWindow* window) {
 
     // threshold for distance field rendering
     auto* dtT = new QLineEdit();
-    auto dv = new QDoubleValidator(0.3, 1, 5);
+    auto* dv = new QDoubleValidator(0.3, 1, 5);
     dtT->setValidator(dv);
     dtT->setPlaceholderText("0.5");
     dtT->setMaximumWidth(45);
@@ -553,7 +560,6 @@ void setupGUI(QMainWindow* window) {
     QObject::connect(ssComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(superSamplingChanged(int)));
     renderingLayout->addRow("Super Sampling", ssComboBox);
 
-
     // gather all parameters into one layout (separately from the gl window)
     auto* guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
     guiLayout->addWidget(backgroundColorGroupBox, 0, Qt::AlignLeft);
@@ -567,7 +573,7 @@ void setupGUI(QMainWindow* window) {
 
     // since window already has a special layout, we have to put our layout on a widget
     // and then set it as central widget
-    auto central = new QWidget();
+    auto* central = new QWidget();
     central->setLayout(mainLayout);
 
     window->setCentralWidget(central);
