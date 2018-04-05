@@ -26,10 +26,10 @@ class RectReplacer {
     RectReplacer(std::vector<Rect<PackingSizeType>>& _vector, Rect<PackingSizeType>& _existing)
         : vector(_vector), existing(_existing){};
 
-    void add_replacement(Rect<PackingSizeType>&& element);
+    void addReplacement(Rect<PackingSizeType>&& element);
 };
 
-void RectReplacer::add_replacement(Rect<PackingSizeType>&& element) {
+void RectReplacer::addReplacement(Rect<PackingSizeType>&& element) {
     if (!usedExisting) {
         existing = element;
         usedExisting = true;
@@ -52,21 +52,21 @@ void cropRect(const Rect<PackingSizeType>& rect, const Rect<PackingSizeType>& bb
 
     if (bboxMin.x < rectMax.x && bboxMax.x > rectMin.x) {
         if (isInRange(bboxMin.y, rectMin.y, rectMax.y)) {
-            replacer.add_replacement({rectMin, {rect.size.x, bboxMin.y - rectMin.y}});
+            replacer.addReplacement({rectMin, {rect.size.x, bboxMin.y - rectMin.y}});
         }
 
         if (isInRange(bboxMax.y, rectMin.y, rectMax.y)) {
-            replacer.add_replacement({{rectMin.x, bboxMax.y}, {rect.size.x, rectMax.y - bboxMax.y}});
+            replacer.addReplacement({{rectMin.x, bboxMax.y}, {rect.size.x, rectMax.y - bboxMax.y}});
         }
     }
 
     if (bboxMin.y < rectMax.y && bboxMax.y > rectMin.y) {
         if (isInRange(bboxMin.x, rectMin.x, rectMax.x)) {
-            replacer.add_replacement({rectMin, {bboxMin.x - rectMin.x, rect.size.y}});
+            replacer.addReplacement({rectMin, {bboxMin.x - rectMin.x, rect.size.y}});
         }
 
         if (isInRange(bboxMax.x, rectMin.x, rectMax.x)) {
-            replacer.add_replacement({{bboxMax.x, rectMin.y}, {rectMax.x - bboxMax.x, rect.size.y}});
+            replacer.addReplacement({{bboxMax.x, rectMin.y}, {rectMax.x - bboxMax.x, rect.size.y}});
         }
     }
 }
@@ -110,19 +110,19 @@ namespace llassetgen {
         }
 
         bool MaxRectsPacker::pack(Rect<PackingSizeType>& rect) {
-            Rect<PackingSizeType>& freeRect = findFreeRect(rect);
+            auto freeRectIter = findFreeRect(rect);
             if (allowGrowth) {
-                while (!canContain(freeRect, rect)) {
+                while (freeRectIter == freeList.end() || !canContain(*freeRectIter, rect)) {
                     grow();
-                    freeRect = findFreeRect(rect);
+                    freeRectIter = findFreeRect(rect);
                 }
             } else {
-                if (!canContain(freeRect, rect)) {
+                if (freeRectIter == freeList.end() || !canContain(*freeRectIter, rect)) {
                     return false;
                 }
             }
 
-            rect.position = freeRect.position;
+            rect.position = freeRectIter->position;
             cropRects(rect);
             pruneFreeList();
 
@@ -137,6 +137,7 @@ namespace llassetgen {
                     }
                 }
 
+                freeList.push_back({{0, atlasSize_.y}, atlasSize_});
                 atlasSize_.y *= 2;
             } else {
                 for (auto& freeRect : freeList) {
@@ -145,22 +146,25 @@ namespace llassetgen {
                     }
                 }
 
+                freeList.push_back({{atlasSize_.x, 0}, atlasSize_});
                 atlasSize_.x *= 2;
             }
         }
 
-        Rect<PackingSizeType>& MaxRectsPacker::findFreeRect(Rect<PackingSizeType>& rect) {
-            auto& freeRect = *std::min_element(freeList.begin(), freeList.end(), BssfComparator{rect});
+        std::vector<Rect<PackingSizeType>>::const_iterator MaxRectsPacker::findFreeRect(
+            Rect<PackingSizeType>& rect) const {
+            auto freeRectIter = std::min_element(freeList.begin(), freeList.end(), BssfComparator{rect});
             if (allowRotations) {
                 Rect<PackingSizeType> rectRotated{rect.position, {rect.size.y, rect.size.x}};
-                auto& freeRectRotated = *std::min_element(freeList.begin(), freeList.end(), BssfComparator{rectRotated});
-                if (bssfScore(freeRectRotated, rectRotated) < bssfScore(freeRect, rect)) {
+                auto freeRectRotatedIter =
+                    std::min_element(freeList.begin(), freeList.end(), BssfComparator{rectRotated});
+                if (bssfScore(*freeRectRotatedIter, rectRotated) < bssfScore(*freeRectIter, rect)) {
                     rect.size = rectRotated.size;
-                    return freeRectRotated;
+                    return freeRectRotatedIter;
                 }
             }
 
-            return freeRect;
+            return freeRectIter;
         }
 
         void MaxRectsPacker::pruneFreeList() {
@@ -188,11 +192,22 @@ namespace llassetgen {
         }
 
         void MaxRectsPacker::cropRects(const Rect<PackingSizeType>& placedRect) {
-            size_t originalRectCount = freeList.size();
-            for (size_t i = 0; i < originalRectCount; ++i) {
-                auto freeRectCopy = freeList[i];
-                RectReplacer replacer{freeList, freeList[i]};
-                cropRect(freeRectCopy, placedRect, replacer);
+            size_t rectsToCrop = freeList.size();
+            for (size_t i = 0; i < rectsToCrop;) {
+                if (placedRect == freeList[i]) {
+                    std::swap(freeList[i], freeList[freeList.size() - 1]);
+                    freeList.resize(freeList.size() - 1);
+                    --rectsToCrop;
+                    // Is the swapped rectangle already created due to a crop?
+                    if (freeList.size() != rectsToCrop) {
+                        ++i;
+                    }
+                } else {
+                    auto freeRectCopy = freeList[i];
+                    RectReplacer replacer{freeList, freeList[i]};
+                    cropRect(freeRectCopy, placedRect, replacer);
+                    ++i;
+                }
             }
         }
     }

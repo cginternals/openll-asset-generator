@@ -19,7 +19,8 @@ namespace llassetgen {
             bool pack(Rect<PackingSizeType>& rect);
 
            private:
-            LLASSETGEN_NO_EXPORT Rect<PackingSizeType>& findFreeRect(Rect<PackingSizeType>& rect);
+            LLASSETGEN_NO_EXPORT std::vector<Rect<PackingSizeType>>::const_iterator findFreeRect(
+                Rect<PackingSizeType>& rect) const;
             LLASSETGEN_NO_EXPORT void grow();
             LLASSETGEN_NO_EXPORT void cropRects(const Rect<PackingSizeType>& placedRect);
             LLASSETGEN_NO_EXPORT void pruneFreeList();
