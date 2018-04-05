@@ -397,7 +397,7 @@ void prepareColorInput(QLineEdit* input, const QString placeholder) {
     auto* colorValidator = new QIntValidator(0, 255);
     input->setValidator(colorValidator);
     input->setPlaceholderText(placeholder);
-    input->setMaximumWidth(35);
+    input->setMaximumWidth(28);
 };
 
 /* This function creates GUI elements and connects them to their correspondent functions using Qt signal-slot.
@@ -421,55 +421,59 @@ void setupGUI(QMainWindow* window) {
 
     int groupboxMaxHeight = 160;
 
-    // FONT COLOR
-    auto* fontColorGroupBox = new QGroupBox("Font Color");
-    fontColorGroupBox->setMaximumHeight(groupboxMaxHeight);
-    auto* fontColorLayout = new QFormLayout();
+    // COLOR OPTIONS
 
-    fontColorGroupBox->setLayout(fontColorLayout);
+    auto* colorGroupBox = new QGroupBox("Rendering Colors RGB");
+    colorGroupBox->setMaximumHeight(groupboxMaxHeight);
+    auto* colorLayout = new QFormLayout();
+
+    colorGroupBox->setLayout(colorLayout);
+
+    // FONT COLOR
+
+    auto* fontColorLayout = new QHBoxLayout();
+    colorLayout->addRow("Font:", fontColorLayout);
 
     // font Color RED
     auto* fontR = new QLineEdit();
     prepareColorInput(fontR, "0");
     QObject::connect(fontR, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorRChanged(QString)));
-    fontColorLayout->addRow("R:", fontR);
+    fontColorLayout->addWidget(fontR);
 
     // font Color GREEN
     auto* fontG = new QLineEdit();
     prepareColorInput(fontG, "0");
     QObject::connect(fontG, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorGChanged(QString)));
-    fontColorLayout->addRow("G:", fontG);
+    fontColorLayout->addWidget(fontG);
 
     // font Color BLUE
     auto* fontB = new QLineEdit();
     prepareColorInput(fontB, "0");
     QObject::connect(fontB, SIGNAL(textEdited(QString)), glwindow, SLOT(fontColorBChanged(QString)));
-    fontColorLayout->addRow("B:", fontB);
+    fontColorLayout->addWidget(fontB);
 
     // BACKGROUND COLOR
 
-    auto* backgroundColorGroupBox = new QGroupBox("Background Color");
-    backgroundColorGroupBox->setMaximumHeight(groupboxMaxHeight);
-    auto* backgroundColorLayout = new QFormLayout();
-    backgroundColorGroupBox->setLayout(backgroundColorLayout);
+    auto* backgroundColorLayout = new QHBoxLayout();
+    colorLayout->addRow("Back:", backgroundColorLayout);
 
     // Background Color RED
     auto* backgroundR = new QLineEdit();
     prepareColorInput(backgroundR, "255");
     QObject::connect(backgroundR, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorRChanged(QString)));
-    backgroundColorLayout->addRow("R:", backgroundR);
+    backgroundColorLayout->addWidget(backgroundR);
 
     // Background Color GREEN
     auto* backgroundG = new QLineEdit();
     prepareColorInput(backgroundG, "255");
     QObject::connect(backgroundG, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorGChanged(QString)));
-    backgroundColorLayout->addRow("G:", backgroundG);
+    backgroundColorLayout->addWidget(backgroundG);
 
     // Background Color BLUE
     auto* backgroundB = new QLineEdit();
     prepareColorInput(backgroundB, "255");
     QObject::connect(backgroundB, SIGNAL(textEdited(QString)), glwindow, SLOT(backgroundColorBChanged(QString)));
-    backgroundColorLayout->addRow("B:", backgroundB);
+    backgroundColorLayout->addWidget(backgroundB);
 
     // DISTANCE FIELD CREATION OPTIONS
 
@@ -613,10 +617,9 @@ void setupGUI(QMainWindow* window) {
 
     // gather all parameters into one layout (separately from the gl window)
     auto* guiLayout = new QBoxLayout(QBoxLayout::LeftToRight);
-    guiLayout->addWidget(backgroundColorGroupBox, 0, Qt::AlignLeft);
-    guiLayout->addWidget(fontColorGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(dfGroupBox, 0, Qt::AlignLeft);
     guiLayout->addWidget(renderingGroupBox, 0, Qt::AlignLeft);
+    guiLayout->addWidget(colorGroupBox, 0, Qt::AlignLeft);
 
     auto* mainLayout = new QBoxLayout(QBoxLayout::TopToBottom);
     mainLayout->addLayout(guiLayout, 0);
