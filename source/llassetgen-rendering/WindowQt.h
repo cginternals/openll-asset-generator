@@ -53,6 +53,7 @@ class WindowQt : public QWindow {
     virtual void fontColorBChanged(QString value);
     virtual void resetTransform3D();
     virtual void superSamplingChanged(int index);
+    virtual void toggleDistanceField(bool activated);
 
    protected:
     QScopedPointer<QOpenGLContext> glcontext;
