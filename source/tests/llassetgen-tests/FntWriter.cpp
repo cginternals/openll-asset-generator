@@ -6,6 +6,9 @@
 
 #include <fstream>
 
+#include <chrono>
+#include <ctime>
+
 using namespace llassetgen;
 
 TEST(FntWriterTest, getKerning) {
@@ -24,7 +27,8 @@ TEST(FntWriterTest, getKerning) {
 	bool has_kerning = FT_HAS_KERNING(face);
 	EXPECT_EQ(has_kerning, true);
 
-	FntWriter writer = FntWriter(face, face_name);
+	int font_size = 32;
+	FntWriter writer = FntWriter(face, face_name, font_size);
 	writer.readFont();
 
 	FT_ULong charcode;
@@ -42,7 +46,8 @@ TEST(FntWriterTest, getKerning) {
 		offset += {1.0f, 1.0f};
 	}
 
-	writer.setAtlasProperties({ 100, 200 });
+	int max_height = 20;
+	writer.setAtlasProperties({ 100, 200 }, max_height);
 
 	writer.SaveFnt(test_destination_path + "fnt.fnt");
 }

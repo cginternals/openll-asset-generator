@@ -16,6 +16,7 @@ namespace llassetgen {
 		bool is_italic;
 		std::string charset;
 		bool use_unicode;
+		/*
 		float stretch_h;
 		bool use_smoothing;
 		int supersampling_level;
@@ -30,6 +31,7 @@ namespace llassetgen {
 			float vert;
 		} spacing;
 		float outline_thickness;
+		*/
 	};
 
 	struct Common {
@@ -66,9 +68,9 @@ namespace llassetgen {
 
 	class LLASSETGEN_API FntWriter {
 		public:
-			FntWriter(FT_Face face, std::string face_name);
+			FntWriter(FT_Face face, std::string face_name, int font_size);
 			void readFont();
-			void setAtlasProperties(Vec2<uint32_t> size);
+			void setAtlasProperties(Vec2<uint32_t> size, int max_height);
 			void SaveFnt(std::string filepath);
 			void setFontInfo();
 			void setCharInfo(FT_UInt charcode, Rect<uint32_t> char_area, Vec2<float> offset);
@@ -80,5 +82,6 @@ namespace llassetgen {
 			Common font_common;
 			std::vector<CharInfo> char_infos;
 			std::vector<KerningInfo> kerning_infos;
+			FT_Pos max_y_bearing; 
 	};
 }
