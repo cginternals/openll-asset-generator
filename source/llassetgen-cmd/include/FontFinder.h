@@ -8,15 +8,16 @@
 #endif
 
 #include <llassetgen/llassetgen.h>
+#include <set>
 
 namespace llassetgen {
     class FontFinder {
        public:
-        static FontFinder fromName(const std::string &fontName);
-        static FontFinder fromPath(const std::string &fontPath);
+        static FontFinder fromName(const std::string& fontName);
+        static FontFinder fromPath(const std::string& fontPath);
 
         Image renderGlyph(unsigned long glyph, int size, size_t padding = 0);
-        void renderGlyphs(const std::u32string &glyphs, std::vector<Image> &v, int size, size_t padding = 0);
+        std::vector<Image> renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding = 0);
 
        private:
         FontFinder() = default;
@@ -24,7 +25,7 @@ namespace llassetgen {
 #ifdef _WIN32
         bool getFontData(const std::string& fontName);
 #elif __unix__
-        static bool findFontPath(const std::string &fontName, std::string &fontPath);
+        static bool findFontPath(const std::string& fontName, std::string& fontPath);
 #endif
 
         FT_Face fontFace;

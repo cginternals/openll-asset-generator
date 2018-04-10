@@ -56,6 +56,25 @@ std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, size_t padding
     return imageSizes;
 }
 
+std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vector<unsigned int>& charCodes, bool includeAscii) {
+    std::set<unsigned long> set;
+    for (const auto c : UTF8toUCS4(glyphs)) {
+        set.insert(c);
+    }
+
+    for (const auto c : charCodes) {
+        set.insert(c);
+    }
+
+    if (includeAscii) {
+        const char* p = ascii;
+        while (*p) {
+            set.insert(static_cast<unsigned long>(*p++));
+        }
+    }
+    return set;
+}
+
 int parseAtlas(int argc, char **argv) {
     // Example: llassetgen-cmd atlas -d parabola --ascii -f Verdana atlas.png
     CLI::App app{atlasHelp};
@@ -97,14 +116,8 @@ int parseAtlas(int argc, char **argv) {
 
     CLI11_PARSE(app, argc, argv);
 
-    if (asciiOpt->count()) glyphs += ascii;
-
-    auto ucs4Glyphs = UTF8toUCS4(glyphs);
-    for (const auto c : charCodes) {
-        ucs4Glyphs.push_back(c);
-    }
-
-    if (ucs4Glyphs.empty()) {
+    std::set<unsigned long> glyphSet = makeGlyphSet(glyphs, charCodes, static_cast<bool>(asciiOpt->count()));
+    if (glyphSet.empty()) {
         std::cerr << "Error: at least one glyph required" << std::endl;
         return 2;
     }
@@ -113,8 +126,7 @@ int parseAtlas(int argc, char **argv) {
         FontFinder fontFinder = fontPathOpt->count() ? FontFinder::fromPath(fontPath)
                                                      : FontFinder::fromName(fontName);
 
-        std::vector<Image> glyphImages;
-        fontFinder.renderGlyphs(ucs4Glyphs, glyphImages, fontSize, padding);
+        std::vector<Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding);
         std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages);
         Packing p = packingAlgos[packing](imageSizes.begin(), imageSizes.end(), false);
 

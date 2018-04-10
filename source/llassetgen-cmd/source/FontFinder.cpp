@@ -114,9 +114,12 @@ Image FontFinder::renderGlyph(unsigned long glyph, int size, size_t padding) {
     return {bitmap, padding};
 }
 
-void FontFinder::renderGlyphs(const std::u32string& glyphs, std::vector<Image>& v, int size, size_t padding) {
+std::vector<Image> FontFinder::renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding) {
+    std::vector<Image> v;
+    v.reserve(glyphs.size());
     std::transform(glyphs.begin(), glyphs.end(), std::back_inserter(v),
-        [=](char32_t glyph){
+        [&](char32_t glyph){
             return renderGlyph(glyph, size, padding);
         });
+    return v;
 }
