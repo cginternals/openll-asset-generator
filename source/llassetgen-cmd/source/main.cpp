@@ -11,22 +11,19 @@ using namespace llassetgen;
 
 using VecIter = std::vector<Vec2<size_t>>::const_iterator;
 
-std::map<std::string, void(*)(Image&, Image&)> dtAlgos{
-    {"deadrec", [](Image &input, Image &output) {
-        DeadReckoning(input, output).transform();
-    }},
-    {"parabola", [](Image &input, Image &output) {
-        ParabolaEnvelope(input, output).transform();
-    }},
+std::map<std::string, void (*)(Image&, Image&)> dtAlgos{
+    {"deadrec", [](Image& input, Image& output) { DeadReckoning(input, output).transform(); }},
+    {"parabola", [](Image& input, Image& output) { ParabolaEnvelope(input, output).transform(); }},
 };
 
-std::map<std::string, Packing(*)(VecIter, VecIter, bool)> packingAlgos{
+std::map<std::string, Packing (*)(VecIter, VecIter, bool)> packingAlgos{
     {"shelf", shelfPackAtlas},
     {"maxrects", maxRectsPackAtlas}
 };
 
 // all printable ascii characters, except for space
-constexpr char ascii[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+constexpr char ascii[] =
+    "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
 template <class Func>
 std::set<std::string> algoNames(std::map<std::string, Func> map) {
@@ -51,12 +48,12 @@ std::u32string UTF8toUCS4(const std::string& str) {
 std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, size_t padding = 0) {
     std::vector<Vec2<size_t>> imageSizes(images.size());
     std::transform(images.begin(), images.end(), imageSizes.begin(),
-        [padding](const Image& img){ return img.getSize(); }
-    );
+                   [padding](const Image& img) { return img.getSize(); });
     return imageSizes;
 }
 
-std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vector<unsigned int>& charCodes, bool includeAscii) {
+std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vector<unsigned int>& charCodes,
+                                     bool includeAscii) {
     std::set<unsigned long> set;
     for (const auto c : UTF8toUCS4(glyphs)) {
         set.insert(c);
@@ -75,7 +72,7 @@ std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vecto
     return set;
 }
 
-int parseAtlas(int argc, char **argv) {
+int parseAtlas(int argc, char** argv) {
     // Example: llassetgen-cmd atlas -d parabola --ascii -f Verdana atlas.png
     CLI::App app{atlasHelp};
 
@@ -164,7 +161,7 @@ int parseDistField(int argc, char** argv) {
     CLI11_PARSE(app, argc, argv);
 
     Image input = Image(imgPath);
-    Image output = Image(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
+    Image output = Image(input.getWidth(), input.getHeight(), DistanceTransform::bitDepth);
     dtAlgos[algorithm](input, output);
     output.exportPng<DistanceTransform::OutputType>(outPath, dynamicRange[1], dynamicRange[0]);
     return 0;
