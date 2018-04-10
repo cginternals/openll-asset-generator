@@ -16,7 +16,8 @@ namespace llassetgen {
         static FontFinder fromName(const std::string& fontName);
         static FontFinder fromPath(const std::string& fontPath);
 
-        Image renderGlyph(unsigned long glyph, int size, size_t padding = 0);
+        void setFontSize(int size);
+        Image renderGlyph(unsigned long glyph, size_t padding = 0);
         std::vector<Image> renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding = 0);
 
        private:

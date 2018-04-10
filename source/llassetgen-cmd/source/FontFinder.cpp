@@ -94,19 +94,20 @@ bool FontFinder::getFontData(const std::string& fontName) {
 }
 #endif
 
-Image FontFinder::renderGlyph(unsigned long glyph, int size, size_t padding) {
-    FT_Error err;
-    err = FT_Set_Pixel_Sizes(fontFace, 0, static_cast<FT_UInt>(size));
+void FontFinder::setFontSize(int size) {
+    FT_Error err = FT_Set_Pixel_Sizes(fontFace, 0, static_cast<FT_UInt>(size));
     if (err) {
         throw std::runtime_error("could not set font size");
     }
+}
 
+Image FontFinder::renderGlyph(unsigned long glyph, size_t padding) {
     FT_UInt charIndex = FT_Get_Char_Index(fontFace, static_cast<FT_ULong>(glyph));
     if (charIndex == 0) {
         std::cout << "Warning: font does not contain glyph with code " << glyph << std::endl;
     }
 
-    err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
+    FT_Error err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
     FT_Bitmap& bitmap = fontFace->glyph->bitmap;
     if (err || bitmap.buffer == nullptr) {
         throw std::runtime_error("glyph with code " + std::to_string(glyph) + " could not be rendered");
@@ -115,11 +116,13 @@ Image FontFinder::renderGlyph(unsigned long glyph, int size, size_t padding) {
 }
 
 std::vector<Image> FontFinder::renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding) {
+    setFontSize(size);
+
     std::vector<Image> v;
     v.reserve(glyphs.size());
     std::transform(glyphs.begin(), glyphs.end(), std::back_inserter(v),
         [&](char32_t glyph){
-            return renderGlyph(glyph, size, padding);
+            return renderGlyph(glyph, padding);
         });
     return v;
 }
