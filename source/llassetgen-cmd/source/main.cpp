@@ -53,7 +53,7 @@ std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, size_t padding
         [padding](const Image& img){ return img.getSize(); }
     );
     return imageSizes;
-};
+}
 
 int parseAtlas(int argc, char **argv) {
     // Example: llassetgen-cmd atlas -d parabola --ascii -f Verdana atlas.png
@@ -86,6 +86,9 @@ int parseAtlas(int argc, char **argv) {
     int fontSize = 128;
     app.add_option("-s,--fontsize", fontSize);
 
+    std::vector<int> dynamicRange = {-30, 20};
+    app.add_option("-r,--dynamicrange", dynamicRange)->requires(distfieldOpt)->expected(2);
+
     CLI::Option* asciiOpt = app.add_flag("--ascii");
 
     std::string outPath;
@@ -116,7 +119,7 @@ int parseAtlas(int argc, char **argv) {
 
         if (distfieldOpt->count()) {
             Image atlas = distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), p, dtAlgos[algorithm]);
-            atlas.exportPng<DistanceTransform::OutputType>(outPath, 20, -30);
+            atlas.exportPng<DistanceTransform::OutputType>(outPath, dynamicRange[1], dynamicRange[0]);
         } else {
             Image atlas = fontAtlas(glyphImages.begin(), glyphImages.end(), p);
             atlas.exportPng<uint8_t>(outPath);
@@ -142,12 +145,15 @@ int parseDistField(int argc, char** argv) {
     std::string outPath;
     app.add_option("outfile", outPath)->required();
 
+    std::vector<int> dynamicRange = {-30, 20};
+    app.add_option("-r,--dynamicrange", dynamicRange)->expected(2);
+
     CLI11_PARSE(app, argc, argv);
 
     Image input = Image(imgPath);
     Image output = Image(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
     dtAlgos[algorithm](input, output);
-    output.exportPng<DistanceTransform::OutputType>(outPath, 20, -30);
+    output.exportPng<DistanceTransform::OutputType>(outPath, dynamicRange[1], dynamicRange[0]);
     return 0;
 }
 
