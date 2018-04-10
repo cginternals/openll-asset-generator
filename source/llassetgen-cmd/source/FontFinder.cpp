@@ -104,7 +104,7 @@ void FontFinder::setFontSize(int size) {
 Image FontFinder::renderGlyph(unsigned long glyph, size_t padding) {
     FT_UInt charIndex = FT_Get_Char_Index(fontFace, static_cast<FT_ULong>(glyph));
     if (charIndex == 0) {
-        std::cout << "Warning: font does not contain glyph with code " << glyph << std::endl;
+        std::cerr << "Warning: font does not contain glyph with code " << glyph << std::endl;
     }
 
     FT_Error err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
@@ -120,9 +120,12 @@ std::vector<Image> FontFinder::renderGlyphs(const std::set<unsigned long>& glyph
 
     std::vector<Image> v;
     v.reserve(glyphs.size());
-    std::transform(glyphs.begin(), glyphs.end(), std::back_inserter(v),
-        [&](char32_t glyph){
-            return renderGlyph(glyph, padding);
-        });
+    for (const auto glyph : glyphs) {
+        Image img = renderGlyph(glyph, padding);
+        if (size < img.getHeight() - 2 * padding) {
+            std::cerr << "Warning: glyph with code " + std::to_string(glyph) + " higher than font size";
+        }
+        v.push_back(std::move(img));
+    }
     return v;
 }
