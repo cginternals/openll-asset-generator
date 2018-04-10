@@ -6,6 +6,15 @@ using namespace llassetgen;
 std::string atlasTestDestinationPath = "../../";
 std::vector<Vec2<size_t>> atlasTestSizes {{1, 1}, {34, 5}, {23, 79}, {16, 70}, {91, 64}, {98, 82}, {54, 63}, {100, 6}};
 
+template <class DTType>
+void createAtlas(std::vector<Image>& glyphs, Packing packing) {
+    auto dtFunc = [](Image& in, Image& out) { DTType(in, out).transform(); };
+    Image atlas = distanceFieldAtlas(glyphs.begin(), glyphs.end(), packing, dtFunc);
+
+    std::string outPath = atlasTestDestinationPath + "dt_atlas.png";
+    atlas.exportPng<DistanceTransform::OutputType>(outPath, -50, 50);
+}
+
 TEST(AtlasTest, CreateDistanceFieldAtlas) {
     std::vector<Image> glyphs;
     glyphs.reserve(atlasTestSizes.size());
@@ -15,10 +24,8 @@ TEST(AtlasTest, CreateDistanceFieldAtlas) {
     }
 
     Packing p = shelfPackAtlas(atlasTestSizes.begin(), atlasTestSizes.end(), false);
-    Image atlas = distanceFieldAtlas<DeadReckoning>(glyphs.begin(), glyphs.end(), p);
-
-    std::string outPath = atlasTestDestinationPath + "dt_atlas.png";
-    atlas.exportPng<DistanceTransform::OutputType>(outPath, -50, 50);
+    createAtlas<DeadReckoning>(glyphs, p);
+    createAtlas<ParabolaEnvelope>(glyphs, p);
 }
 
 TEST(AtlasTest, CreateFontAtlas) {
