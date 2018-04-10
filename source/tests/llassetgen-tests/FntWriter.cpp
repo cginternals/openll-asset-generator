@@ -6,9 +6,6 @@
 
 #include <fstream>
 
-#include <chrono>
-#include <ctime>
-
 using namespace llassetgen;
 
 TEST(FntWriterTest, getKerning) {
