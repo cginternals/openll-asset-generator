@@ -180,3 +180,5 @@ void WindowQt::triggerNewDT(){};
 void WindowQt::superSamplingChanged(int /*unused*/) {}
 
 void WindowQt::toggleDistanceField(bool /*unused*/) {}
+
+void WindowQt::exportGlyphAtlas(){};

@@ -63,6 +63,7 @@ class WindowQt : public QWindow {
     virtual void triggerNewDT();
     virtual void superSamplingChanged(int index);
     virtual void toggleDistanceField(bool activated);
+    virtual void exportGlyphAtlas();
 
    protected:
     QScopedPointer<QOpenGLContext> glcontext;

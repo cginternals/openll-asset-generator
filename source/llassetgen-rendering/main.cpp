@@ -305,8 +305,8 @@ class Window : public WindowQt {
     virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
     virtual void dtAlgorithmChanged(int index) override {
-        // TODO llassetgen::foobar
         std::cout << "change Algo" << std::endl;
+        dtAlgorithm = index;
     }
 
     virtual void dtThresholdChanged(QString value) override {
@@ -315,13 +315,13 @@ class Window : public WindowQt {
     }
 
     virtual void glyphPresetChanged(int index) override {
-        // TODO llassetgen::foobar
         std::cout << "change glyph preset" << std::endl;
+        glyphPreset = index;
     }
 
     virtual void packingSizeChanged(int index) override {
-        // TODO llassetgen::foobar
-        std::cout << "change downscaling" << std::endl;
+        std::cout << "change downsampling" << std::endl;
+        downSampling = index;
     }
 
     virtual void resetTransform3D() override {
@@ -346,23 +346,28 @@ class Window : public WindowQt {
     }
 
     virtual void fontNameChanged(QString value) override {
-        // TODO
         std::cout << "fontNameChanged: " + value.toStdString() << std::endl;
+        fontName = value.toStdString();
     }
 
     virtual void fontSizeChanged(QString value) override {
-        // TODO
         std::cout << "fontSizeChanged: " + value.toStdString() << std::endl;
+        fontSize = value.toInt();
     }
 
     virtual void drBlackChanged(QString value) override {
-        // TODO
         std::cout << "drBlack Changed: " + value.toStdString() << std::endl;
+        drBlack = value.toInt();
     }
 
     virtual void drWhiteChanged(QString value) override {
-        // TODO
         std::cout << "drWhite Changed: " + value.toStdString() << std::endl;
+        drWhite = value.toInt();
+    }
+
+    virtual void exportGlyphAtlas() override {
+        std::cout << "EXPORT" << std::endl;
+        // TODO export dialog: ask user for path
     }
 
    protected:
@@ -387,6 +392,13 @@ class Window : public WindowQt {
     unsigned int superSampling = 0;
     bool showDistanceField = false;
     float dtThreshold = 0.5;
+    int dtAlgorithm = 0;
+    int glyphPreset = 0;
+    int downSampling = 0;
+    std::string fontName = "Arial";
+    int fontSize = 1024;
+    int drBlack = -100;
+    int drWhite = 100;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -483,9 +495,6 @@ void setupGUI(QMainWindow* window) {
     dfGroupBox->setLayout(dfLayout);
 
     // ATLAS CREATION OPTIONS
-    // TODO:
-    // Downsampling parameter
-    // export everything
 
     auto* acLayout = new QFormLayout();
     dfLayout->addLayout(acLayout);
@@ -505,7 +514,7 @@ void setupGUI(QMainWindow* window) {
     QObject::connect(gpComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(glyphPresetChanged(int)));
     acLayout->addRow("Glyph Preset:", gpComboBox);
 
-    // packing size (used for downscaling)
+    // packing size (used for downsampling)
     auto* psComboBox = new QComboBox();
     // item order is important
     psComboBox->addItem("64");
@@ -567,9 +576,15 @@ void setupGUI(QMainWindow* window) {
 
     // trigger distance field creation
     auto* triggerDTButton = new QPushButton("OK");
-    triggerDTButton->setMaximumWidth(90);
+    triggerDTButton->setMaximumWidth(50);
     QObject::connect(triggerDTButton, SIGNAL(clicked()), glwindow, SLOT(triggerNewDT()));
-    dtLayout->addRow("Apply options:", triggerDTButton);
+    acLayout->addRow("Apply options:", triggerDTButton);
+
+    // export distance field
+    auto* exportButton = new QPushButton("Export");
+    exportButton->setMaximumWidth(90);
+    QObject::connect(exportButton, SIGNAL(clicked()), glwindow, SLOT(exportGlyphAtlas()));
+    dtLayout->addRow("Export Atlas:", exportButton);
 
     // RENDERING OPTIONS
 
