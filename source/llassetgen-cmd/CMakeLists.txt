@@ -27,6 +27,7 @@ set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(headers
     ${include_path}/CLI11.h
+    ${include_path}/helpstrings.h
     ${include_path}/FontFinder.h)
 
 set(sources

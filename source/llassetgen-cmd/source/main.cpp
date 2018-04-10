@@ -3,7 +3,8 @@
 #include <map>
 #include <ostream>
 
-#include "FontFinder.h"
+#include <FontFinder.h>
+#include <helpstrings.h>
 #include <llassetgen/Atlas.h>
 
 using namespace llassetgen;
@@ -57,42 +58,42 @@ std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, size_t padding
 
 int parseAtlas(int argc, char **argv) {
     // Example: llassetgen-cmd atlas -d parabola --ascii -f Verdana atlas.png
-    CLI::App app{"OpenLL Font Asset Generator"};
+    CLI::App app{atlasHelp};
 
     std::string algorithm;
-    CLI::Option* distfieldOpt = app.add_set("-d,--distfield", algorithm, algoNames(dtAlgos));
+    CLI::Option* distfieldOpt = app.add_set("-d, --distfield", algorithm, algoNames(dtAlgos), distfieldHelp);
 
     std::string packing = "shelf";
-    app.add_set("-k,--packing", packing, algoNames(packingAlgos));
+    app.add_set("-k, --packing", packing, algoNames(packingAlgos), packingHelp, true);
 
     std::string glyphs;
-    CLI::Option* glyphsOpt = app.add_option("-g,--glyph", glyphs);
+    CLI::Option* glyphsOpt = app.add_option("-g, --glyph", glyphs, glyphHelp);
 
     std::vector<unsigned int> charCodes;
-    app.add_option("-c,--charcode", charCodes);
-
-    std::string fontPath;
-    CLI::Option* fontPathOpt = app.add_option("--fontpath", fontPath)->check(CLI::ExistingFile);
+    app.add_option("-c, --charcode", charCodes, charcodeHelp);
 
     std::string fontName;
-    CLI::Option* fontNameOpt = app.add_option("--fontname,-f", fontName);
+    CLI::Option* fontNameOpt = app.add_option("-f, --fontname", fontName, fontnameHelp);
+
+    std::string fontPath;
+    CLI::Option* fontPathOpt = app.add_option("--fontpath", fontPath, fontpathHelp)->check(CLI::ExistingFile);
 
     // TODO: app.requires_one
     glyphsOpt->requires_one({fontPathOpt, fontNameOpt});
 
     int padding = 0;
-    app.add_option("--padding,-p", padding);
+    app.add_option("-p, --padding", padding, paddingHelp);
 
     int fontSize = 128;
-    app.add_option("-s,--fontsize", fontSize);
+    app.add_option("-s, --fontsize", fontSize, fontsizeHelp, true);
 
     std::vector<int> dynamicRange = {-30, 20};
-    app.add_option("-r,--dynamicrange", dynamicRange)->requires(distfieldOpt)->expected(2);
+    app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp, true)->requires(distfieldOpt)->expected(2);
 
-    CLI::Option* asciiOpt = app.add_flag("--ascii");
+    CLI::Option* asciiOpt = app.add_flag("--ascii", asciiHelp);
 
     std::string outPath;
-    app.add_option("outfile", outPath)->required();
+    app.add_option("outfile", outPath, aOutfileHelp)->required();
 
     CLI11_PARSE(app, argc, argv);
 
@@ -133,20 +134,20 @@ int parseAtlas(int argc, char **argv) {
 }
 
 int parseDistField(int argc, char** argv) {
-    CLI::App app{"OpenLL Font Asset Generator"};
+    CLI::App app{dfHelp};
     // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
 
-    std::string algorithm = "deadrec";  // default value
-    app.add_set("-a,--algorithm", algorithm, algoNames(dtAlgos));
+    std::string algorithm = "parabola";  // default value
+    app.add_set("-a, --algorithm", algorithm, algoNames(dtAlgos), algorithmHelp, true);
 
     std::string imgPath;
-    app.add_option("--image,-i", imgPath)->required()->check(CLI::ExistingFile);
+    app.add_option("-i, --image", imgPath, imageHelp)->required()->check(CLI::ExistingFile);
 
     std::string outPath;
-    app.add_option("outfile", outPath)->required();
+    app.add_option("outfile", outPath, dOutfileHelp)->required();
 
     std::vector<int> dynamicRange = {-30, 20};
-    app.add_option("-r,--dynamicrange", dynamicRange)->expected(2);
+    app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp, true)->expected(2);
 
     CLI11_PARSE(app, argc, argv);
 
@@ -161,8 +162,12 @@ int main(int argc, char** argv) {
     llassetgen::init();
 
     CLI::App app{"OpenLL Font Asset Generator"};
-    CLI::App* atlas = app.add_subcommand("atlas")->allow_extras();
-    CLI::App* distfield = app.add_subcommand("distfield")->allow_extras();
+    CLI::App* atlas = app.add_subcommand("atlas", atlasHelp)->allow_extras();
+    CLI::App* distfield = app.add_subcommand("distfield", dfHelp)->allow_extras();
+
+    app.set_help_flag();  // do not parse the help flag here, let the subcommand functions handle it
+    atlas->set_help_flag();
+    distfield->set_help_flag();
 
     CLI11_PARSE(app, argc, argv);
     --argc;
