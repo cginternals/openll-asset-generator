@@ -26,6 +26,8 @@ namespace llassetgen {
         LLASSETGEN_NO_EXPORT static void writeData(png_struct_def* png, uint8_t* data, size_t length);
         LLASSETGEN_NO_EXPORT static void flushData(png_struct_def* png);
 
+        LLASSETGEN_NO_EXPORT void fillPadding(size_t padding);
+
        public:
         ~Image();
         Image(size_t width, size_t height, size_t _bitDepth);
@@ -42,7 +44,6 @@ namespace llassetgen {
         void setPixel(Vec2<size_t> pos, pixelType data) const;
         template <typename pixelType = uint8_t>
         void fillRect(Vec2<size_t> _min, Vec2<size_t> _max, pixelType in = 0) const;
-        void fillPadding(size_t padding);
         void clear() const;
         void copyDataFrom(const Image& copy);
 
