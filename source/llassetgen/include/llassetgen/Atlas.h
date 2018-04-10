@@ -9,9 +9,9 @@ namespace llassetgen {
         template <class Iter>
         constexpr int checkImageIteratorType() {
             using IterTraits = typename std::iterator_traits<Iter>;
-            using IterRefType = typename IterTraits::reference;
+            using IterType = typename IterTraits::value_type;
             using IterCategory = typename IterTraits::iterator_category;
-            static_assert(std::is_assignable<Image, IterRefType>::value, "Input elements must be assignable to Image");
+            static_assert(std::is_assignable<Image, IterType>::value, "Input elements must be assignable to Image");
             static_assert(std::is_base_of<std::input_iterator_tag, IterCategory>::value,
                           "Input iterator must be an InputIterator");
             return 0;
