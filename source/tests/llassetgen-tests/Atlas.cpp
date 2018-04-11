@@ -23,9 +23,6 @@ TEST(AtlasTest, CreateDistanceFieldAtlas) {
         glyphs.emplace_back(size.x, size.y, 1);
     }
 
-    auto dtFunc = [](Image& in, Image& out) {
-        DeadReckoning(in, out).transform();
-    };
     Packing p = shelfPackAtlas(atlasTestSizes.begin(), atlasTestSizes.end(), false);
     createAtlas<DeadReckoning>(glyphs, p);
     createAtlas<ParabolaEnvelope>(glyphs, p);

@@ -111,6 +111,8 @@ int parseAtlas(int argc, char** argv) {
     std::string outPath;
     app.add_option("outfile", outPath, aOutfileHelp)->required();
 
+    app.set_config("--config", "", configHelp);
+
     CLI11_PARSE(app, argc, argv);
 
     std::set<unsigned long> glyphSet = makeGlyphSet(glyphs, charCodes, static_cast<bool>(asciiOpt->count()));
@@ -146,7 +148,7 @@ int parseDistField(int argc, char** argv) {
     CLI::App app{dfHelp};
     // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
 
-    std::string algorithm = "parabola";  // default value
+    std::string algorithm = "parabola";
     app.add_set("-a, --algorithm", algorithm, algoNames(dtAlgos), algorithmHelp, true);
 
     std::string imgPath;
@@ -157,6 +159,8 @@ int parseDistField(int argc, char** argv) {
 
     std::vector<int> dynamicRange = {-30, 20};
     app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp, true)->expected(2);
+
+    app.set_config("--config", "", configHelp);
 
     CLI11_PARSE(app, argc, argv);
 
