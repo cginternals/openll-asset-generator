@@ -13,7 +13,7 @@
 #include FT_OUTLINE_H
 
 namespace llassetgen {
-	FntWriter::FntWriter(FT_Face _face, std::string _face_name, int _font_size) {
+	FntWriter::FntWriter(FT_Face _face, std::string _face_name, int _font_size, float _scaling_factor, bool _scaled_glyph) {
 		face_name = _face_name;
 		face = _face;
 		font_info = Info();
@@ -22,6 +22,8 @@ namespace llassetgen {
 		kerning_infos = std::vector<KerningInfo>();
 		font_info.size = _font_size;
 		max_y_bearing = 0;
+		scaling_factor = _scaling_factor;
+		scaled_glyph = _scaled_glyph;
 	}
 
 	void FntWriter::setFontInfo() {
@@ -121,7 +123,7 @@ namespace llassetgen {
 		font_common.is_packed = 0;
 	}
 	
-	void FntWriter::SaveFnt(std::string filepath) {
+	void FntWriter::saveFnt(std::string filepath) {
 		font_common.base = max_y_bearing;
 
 		// check for correct file ending
@@ -166,10 +168,10 @@ namespace llassetgen {
 
 		// write common block
 		fnt_file << "common "
-			<< "lineHeight=" << font_common.line_height << " "
-			<< "base=" << font_common.base << " "
-			<< "scaleW=" << font_common.scale_w << " "
-			<< "scaleH=" << font_common.scale_h << " "
+			<< "lineHeight=" << float(font_common.line_height) * scaling_factor << " "
+			<< "base=" << float(font_common.base) * scaling_factor << " "
+			<< "scaleW=" << (scaled_glyph ? (float(font_common.scale_w) * scaling_factor) : font_common.scale_w) << " "
+			<< "scaleH=" << (scaled_glyph ? (float(font_common.scale_h) * scaling_factor) : font_common.scale_h) << " "
 			<< "pages=" << font_common.pages << " "
 			<< "packed=" << int(font_common.is_packed) << std::endl;
 
@@ -183,17 +185,17 @@ namespace llassetgen {
 		// write char count
 		fnt_file << "chars count=" << char_infos.size() << std::endl;
 
-		// write infor for each char
+		// write info for each char
 		for (auto char_info : char_infos) {
 			fnt_file << "char "
 				<< "id=" << char_info.id << " "
 				<< "x=" << char_info.x << " "
 				<< "y=" << char_info.y << " "
-				<< "width=" << char_info.width << " "
-				<< "height=" << char_info.height << " "
+				<< "width=" << (scaled_glyph ? (float(char_info.width) * scaling_factor) : char_info.width) << " "
+				<< "height=" << (scaled_glyph ? (float(char_info.height) * scaling_factor) : char_info.height) << " "
 				<< "xoffset=" << char_info.x_offset << " "
 				<< "yoffset=" << char_info.y_offset << " "
-				<< "xadvance=" << char_info.x_advance << " "
+				<< "xadvance=" << float(char_info.x_advance) * scaling_factor << " "
 				<< "page=" << char_info.page << " "
 				<< "chnl=" << int(char_info.chnl) << std::endl;
 		}
@@ -206,7 +208,7 @@ namespace llassetgen {
 			fnt_file << "kerning "
 				<< "first=" << kerning_info.first_id << " "
 				<< "second=" << kerning_info.second_id << " "
-				<< "amount=" << kerning_info.kerning << std::endl;
+				<< "amount=" << kerning_info.kerning * scaling_factor << std::endl;
 		}
 
 		// close file

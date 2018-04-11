@@ -68,10 +68,10 @@ namespace llassetgen {
 
 	class LLASSETGEN_API FntWriter {
 		public:
-			FntWriter(FT_Face face, std::string face_name, int font_size);
+			FntWriter(FT_Face face, std::string face_name, int font_size, float scaling_factor, bool scaled_glyph);
 			void readFont();
 			void setAtlasProperties(Vec2<uint32_t> size, int max_height);
-			void SaveFnt(std::string filepath);
+			void saveFnt(std::string filepath);
 			void setFontInfo();
 			void setCharInfo(FT_UInt charcode, Rect<uint32_t> char_area, Vec2<float> offset);
 			void setKerningInfo();
@@ -83,5 +83,7 @@ namespace llassetgen {
 			std::vector<CharInfo> char_infos;
 			std::vector<KerningInfo> kerning_infos;
 			FT_Pos max_y_bearing; 
+			float scaling_factor;
+			bool scaled_glyph;
 	};
 }
