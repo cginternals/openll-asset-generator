@@ -5,7 +5,7 @@
 #include <llassetgen/Geometry.h>
 
 namespace llassetgen {
-    using PackingSizeType = unsigned int;
+    using PackingSizeType = size_t;
 
     /*
      * Describes the packing of a texture atlas.
