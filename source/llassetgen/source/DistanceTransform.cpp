@@ -54,7 +54,7 @@ namespace llassetgen {
                     (center && (getPixel<InputType, false, true>({x - 1, y}) != center || getPixel<InputType, false, true>({x + 1, y}) != center ||
                                 getPixel<InputType, false, true>({x, y - 1}) != center || getPixel<InputType, false, true>({x, y + 1}) != center))
                     ? 0
-                    : std::numeric_limits<OutputType>::infinity()
+                    : backgroundVal
                 );
             }
 
@@ -123,9 +123,9 @@ namespace llassetgen {
     template <bool flipped>
     void ParabolaEnvelope::transformLine(DimensionType offset, DimensionType length) {
         parabolas[0].apex = 0;
-        parabolas[0].begin = -std::numeric_limits<OutputType>::infinity();
+        parabolas[0].begin = -backgroundVal;
         parabolas[0].value = getPixel<OutputType, flipped>({0, offset});
-        parabolas[1].begin = +std::numeric_limits<OutputType>::infinity();
+        parabolas[1].begin = +backgroundVal;
         for (DimensionType parabola = 0, i = 1; i < length; ++i) {
             OutputType begin;
             do {

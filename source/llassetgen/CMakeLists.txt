@@ -39,6 +39,7 @@ set(headers
     ${include_path}/packing/Algorithms.h
     ${include_path}/packing/Types.h
     ${include_path}/llassetgen.h
+    ${include_path}/Atlas.h
     ${include_path}/Image.h
     ${include_path}/DistanceTransform.h
 	${include_path}/FntWriter.h

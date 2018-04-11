@@ -153,6 +153,10 @@ namespace llassetgen {
 
         std::vector<Rect<PackingSizeType>>::const_iterator MaxRectsPacker::findFreeRect(
             Rect<PackingSizeType>& rect) const {
+            if (freeList.empty()) {
+                return freeList.end();
+            }
+
             auto freeRectIter = std::min_element(freeList.begin(), freeList.end(), BssfComparator{rect});
             if (allowRotations) {
                 Rect<PackingSizeType> rectRotated{rect.position, {rect.size.y, rect.size.x}};
