@@ -22,6 +22,7 @@ set(sources
     Atlas.cpp
     Packing.cpp
     Image.cpp
+	FntWriter.cpp
 )
 
 
