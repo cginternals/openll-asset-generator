@@ -79,14 +79,11 @@ class Window : public WindowQt {
 #endif
 
         // get glyph atlas
-
-        // TODO load using own png loader instead of Qt (blocked: wait for this feature to be merged into master, then
-        // pull). TODO: Make sure this file structure is the same on other OS
-
-        // TODO trigger distance transform creation with one algorithm; then later, if user chooses different algorithm
-        // or parameters, change the image.
         auto path = QApplication::applicationDirPath();
-        auto* image = new QImage(path + "/../../data/llassetgen-rendering/testfontatlas_DT.png");
+        auto imagePath = path + "/../../data/llassetgen-rendering/testfontatlas_DT.png";
+        calculateDistanceField(imagePath);
+
+        auto* image = new QImage(imagePath);
 
         // TODO see above TODO. Will have an appropiate error handling here.
         if (image->isNull()) {
@@ -399,10 +396,55 @@ class Window : public WindowQt {
     int fontSize = 1024;
     int drBlack = -100;
     int drWhite = 100;
+    int padding = 0;  // TODO GUI input for this?
 
     bool isPanning = false;
     bool isRotating = false;
     glm::vec2 lastMousePos = glm::vec2();
+
+    void calculateDistanceField(QString imagePath) {
+        auto outPath = imagePath.toStdString();
+
+        try {
+            llassetgen::FontFinder fontFinder = llassetgen::FontFinder::fromName(fontName);
+
+            std::set<unsigned long> glyphSet;
+
+            // all printable ascii characters, except for space
+            constexpr char ascii[] =
+                "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
+            const char* s = ascii;
+            while (*s) {
+                glyphSet.insert(static_cast<unsigned long>(*s++));
+            }
+
+            std::vector<llassetgen::Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding);
+
+            std::vector<llassetgen::Vec2<size_t>> imageSizes(glyphImages.size());
+
+            std::transform(
+                glyphImages.begin(), glyphImages.end(),
+                imageSizes.begin(), [padding = padding](const llassetgen::Image& img) { return img.getSize(); });
+
+            // TODO IF PACKING ALGO shelfPackAtlas maxRectsPackAtlas INDEX
+            llassetgen::Packing pack = llassetgen::maxRectsPackAtlas(imageSizes.begin(), imageSizes.end(), false);
+
+            // TODO IF DIST ALGO shelfPackAtlas maxRectsPackAtlas INDEX
+            /// {"deadrec", [](Image& input, Image& output) { DeadReckoning(input, output).transform(); }},
+            /// {"parabola", [](Image& input, Image& output) { ParabolaEnvelope(input, output).transform(); }},
+
+            llassetgen::Image atlas = llassetgen::distanceFieldAtlas(
+                glyphImages.begin(), glyphImages.end(), pack, [](llassetgen::Image& input, llassetgen::Image& output) {
+                    llassetgen::ParabolaEnvelope(input, output).transform();
+                });
+            atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
+
+        } catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return;  // 2; //TODO
+        }
+    }
 };
 
 void prepareColorInput(QLineEdit* input, const QString placeholder) {
@@ -500,17 +542,17 @@ void setupGUI(QMainWindow* window) {
     dfLayout->addLayout(acLayout);
 
     // typeface of font
-    auto* fontName = new QLineEdit();
-    fontName->setPlaceholderText("Arial");
-    fontName->setMaximumWidth(45);
-    QObject::connect(fontName, SIGNAL(textEdited(QString)), glwindow, SLOT(fontNameChanged(QString)));
-    acLayout->addRow("Font Name:", fontName);
+    auto* fontNameLE = new QLineEdit();
+    fontNameLE->setPlaceholderText("Arial");
+    fontNameLE->setMaximumWidth(45);
+    QObject::connect(fontNameLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontNameChanged(QString)));
+    acLayout->addRow("Font Name:", fontNameLE);
 
     // glyph presets
     auto* gpComboBox = new QComboBox();
     // item order is important
     gpComboBox->addItem("ASCII");
-    gpComboBox->addItem("Other?");
+    // gpComboBox->addItem("Other?"); //TODO more options?
     QObject::connect(gpComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(glyphPresetChanged(int)));
     acLayout->addRow("Glyph Preset:", gpComboBox);
 

@@ -2,7 +2,9 @@
 
 #include <cassert>
 
+#include "Atlas.h"
 #include "DistanceTransform.h"
+#include "FontFinder.h"
 #include "Packing.h"
 
 struct FT_LibraryRec_;
