@@ -149,7 +149,7 @@ inline void format_help(std::stringstream &out, std::string name, std::string de
             out << std::endl << std::setw(static_cast<int>(wid)) << "";
         out << description;
     }
-    out << std::endl;
+    out << std::endl << std::endl;
 }
 
 /// Verify the first character of an option
@@ -2309,7 +2309,7 @@ class App {
     }
 
     /// Makes a help message, with a column wid for column 1
-    std::string help(size_t wid = 30, std::string prev = "") const {
+    std::string help(size_t wid = 7, std::string prev = "") const {
         // Delegate to subcommand if needed
         if(prev.empty())
             prev = name_;
