@@ -10,7 +10,7 @@ std::string
     fontpathHelp{"Use the font file at the specified path"},
     paddingHelp{"Add padding to each glyph"},
     fontsizeHelp{"Specify the font size in pixels"},
-    dynamicrangeHelp{""},  // TODO
+    dynamicrangeHelp{"Takes two values, BLACK and WHITE. A lower black value will make the distance fields wider; a lower white value will make the distance fields brighter. In most cases, the black value should be lower than the white value. However, if you want to invert the colors of the atlas, you can swap the black and the white value"},
     asciiHelp{"Add all printable ASCII glyphs"},
     aOutfileHelp{"Output the font atlas to the specified path"},
     configHelp{"Read options from a configuration file. Options passed as arguments will override the configuration file. You can find an example file in the 'config' directory"},

@@ -104,7 +104,7 @@ int parseAtlas(int argc, char** argv) {
     app.add_option("-s, --fontsize", fontSize, fontsizeHelp, true);
 
     std::vector<int> dynamicRange = {-30, 20};
-    app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp, true)->requires(distfieldOpt)->expected(2);
+    app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp)->requires(distfieldOpt)->expected(2);
 
     CLI::Option* asciiOpt = app.add_flag("--ascii", asciiHelp);
 
@@ -131,7 +131,7 @@ int parseAtlas(int argc, char** argv) {
 
         if (distfieldOpt->count()) {
             Image atlas = distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), p, dtAlgos[algorithm]);
-            atlas.exportPng<DistanceTransform::OutputType>(outPath, dynamicRange[1], dynamicRange[0]);
+            atlas.exportPng<DistanceTransform::OutputType>(outPath, - dynamicRange[0], - dynamicRange[1]);
         } else {
             Image atlas = fontAtlas(glyphImages.begin(), glyphImages.end(), p);
             atlas.exportPng<uint8_t>(outPath);
