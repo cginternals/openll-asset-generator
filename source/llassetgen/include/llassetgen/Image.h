@@ -28,6 +28,7 @@ namespace llassetgen {
 
        public:
         ~Image();
+        Image& operator=(const Image&) = delete;
         Image(const Image&) = delete;
         Image(Image&& src);
         Image(size_t width, size_t height, size_t _bitDepth);
