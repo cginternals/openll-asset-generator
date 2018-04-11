@@ -11,6 +11,8 @@ namespace llassetgen {
         using InputType = uint8_t;
         using OutputType = float;
         using PositionType = Vec2<DimensionType>;
+        static constexpr size_t bitDepth = 8 * sizeof(OutputType);
+        static constexpr OutputType backgroundVal = std::numeric_limits<OutputType>::infinity();
 
        protected:
         template <typename PixelType, bool flipped = false, bool invalidBounds = false>
