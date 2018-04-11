@@ -171,11 +171,11 @@ int main(int argc, char** argv) {
     llassetgen::init();
 
     CLI::App app{"OpenLL Font Asset Generator"};
+    // pseudo-subcommands to generate a help message, the actual parsing happens in the subcommand functions
     CLI::App* atlas = app.add_subcommand("atlas", atlasHelp)->allow_extras();
     CLI::App* distfield = app.add_subcommand("distfield", dfHelp)->allow_extras();
 
-    app.set_help_flag();  // do not parse the help flag here, let the subcommand functions handle it
-    atlas->set_help_flag();
+    atlas->set_help_flag();  // do not let the pseudo-subcommands parse the help flag, let the actual subcommands handle it
     distfield->set_help_flag();
 
     CLI11_PARSE(app, argc, argv);
