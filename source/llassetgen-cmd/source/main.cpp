@@ -97,10 +97,10 @@ int parseAtlas(int argc, char** argv) {
     // TODO: app.requires_one
     glyphsOpt->requires_one({fontPathOpt, fontNameOpt});
 
-    int padding = 0;
+    unsigned int padding = 0;
     app.add_option("-p, --padding", padding, paddingHelp);
 
-    int fontSize = 128;
+    unsigned int fontSize = 128;
     app.add_option("-s, --fontsize", fontSize, fontsizeHelp, true);
 
     std::vector<int> dynamicRange = {-30, 20};
