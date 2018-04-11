@@ -104,7 +104,7 @@ int parseAtlas(int argc, char** argv) {
     app.add_option("-s, --fontsize", fontSize, fontsizeHelp, true);
 
     std::vector<int> dynamicRange = {-30, 20};
-    app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp)->requires(distfieldOpt)->expected(2);
+    app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp, true)->requires(distfieldOpt)->expected(2);
 
     CLI::Option* asciiOpt = app.add_flag("--ascii", asciiHelp);
 

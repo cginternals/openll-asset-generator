@@ -1297,12 +1297,12 @@ class Option : public OptionBase<Option> {
         if(get_expected() != 0) {
             if(!typeval_.empty())
                 out << " " << typeval_;
-            if(!defaultval_.empty())
-                out << "=" << defaultval_;
             if(get_expected() > 1)
                 out << " x " << get_expected();
             if(get_expected() == -1)
                 out << " ...";
+            if(!defaultval_.empty())
+                out << ", default = " << defaultval_;
         }
         if(!envname_.empty())
             out << " (env:" << envname_ << ")";
