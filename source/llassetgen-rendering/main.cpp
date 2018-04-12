@@ -80,33 +80,23 @@ class Window : public WindowQt {
 
         // get glyph atlas
         auto path = QApplication::applicationDirPath();
-        auto imagePath = path + "/../../data/llassetgen-rendering/testfontatlas_DT.png";
-        calculateDistanceField(imagePath);
+        imagePath = path + "/../../data/llassetgen-rendering/outputDT.png";
 
-        auto* image = new QImage(imagePath);
-
-        // TODO see above TODO. Will have an appropiate error handling here.
-        if (image->isNull()) {
-            std::cout << "Image NOT loaded successfully." << std::endl;
-        }
-
-        // mirrored: Qt flips images after
-        // loading; meant as convenience, but
-        // we need it to flip back here.
-        auto imageFormatted = image->convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
-        auto imageData = imageFormatted.bits();
-
-        texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
-        float imageW = image->width();
-        float imageH = image->height();
-        texture->image2D(0, GL_RGBA8, imageW, imageH, 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
-        // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
-        // ignore this, since we use black&white image data here?
+        // TODO uncomment when bugs in master are fixed
+        // calculateDistanceField();
 
         cornerBuffer = globjects::Buffer::create();
         textureBuffer = globjects::Buffer::create();
         program = globjects::Program::create();
         vao = globjects::VertexArray::create();
+
+        loadDistanceField();
+        /* already set in loadDistanceField()
+        vao->binding(0)->setAttribute(0);
+        vao->binding(0)->setBuffer(cornerBuffer.get(), 0, sizeof(glm::vec2));
+        vao->binding(0)->setFormat(2, GL_FLOAT);
+        vao->enable(0);
+        */
 
         // openll-asset-generator/data/llassetgen-rendering
         const std::string dataPath = path.toStdString() + "/../../data/llassetgen-rendering";
@@ -120,17 +110,6 @@ class Window : public WindowQt {
         fragmentShader = globjects::Shader::create(GL_FRAGMENT_SHADER, fragmentShaderTemplate.get());
 
         program->attach(vertexShader.get(), fragmentShader.get());
-
-        float quadW = 1.f;
-        float quadH = quadW * imageH / imageW;
-
-        cornerBuffer->setData(std::array<glm::vec2, 4>{{{0, 0}, {quadW, 0}, {0, quadH}, {quadW, quadH}}},
-                              GL_STATIC_DRAW);
-
-        vao->binding(0)->setAttribute(0);
-        vao->binding(0)->setBuffer(cornerBuffer.get(), 0, sizeof(glm::vec2));
-        vao->binding(0)->setFormat(2, GL_FLOAT);
-        vao->enable(0);
 
         textureBuffer->setData(std::array<glm::vec2, 4>{{{0, 0}, {1, 0}, {0, 1}, {1, 1}}}, GL_STATIC_DRAW);
 
@@ -327,8 +306,14 @@ class Window : public WindowQt {
     }
 
     virtual void triggerNewDT() override {
-        // TODO get all DT options and create new Distance Field
-        std::cout << "trigger new DF" << std::endl;
+        makeCurrent();
+
+        // TODO uncomment when bugs are fixed in master
+        // calculateDistanceField();
+        loadDistanceField();
+
+        doneCurrent();
+
         paint();
     }
 
@@ -363,7 +348,7 @@ class Window : public WindowQt {
     }
 
     virtual void exportGlyphAtlas() override {
-        std::cout << "EXPORT" << std::endl;
+        std::cout << "EXPORT: atlas is exported automatically when changes applied. TODO" << std::endl;
         // TODO export dialog: ask user for path
     }
 
@@ -402,7 +387,9 @@ class Window : public WindowQt {
     bool isRotating = false;
     glm::vec2 lastMousePos = glm::vec2();
 
-    void calculateDistanceField(QString imagePath) {
+    QString imagePath = "/../../data/llassetgen-rendering/outputDT.png";
+
+    void calculateDistanceField() {
         auto outPath = imagePath.toStdString();
 
         try {
@@ -444,6 +431,40 @@ class Window : public WindowQt {
             std::cerr << "Error: " << e.what() << std::endl;
             return;  // 2; //TODO
         }
+    }
+
+    void loadDistanceField() {
+        auto* image = new QImage(imagePath);
+
+        if (image->isNull()) {
+            std::cout << "Image NOT loaded successfully." << std::endl;
+        }
+
+        // mirrored: Qt flips images after
+        // loading; meant as convenience, but
+        // we need it to flip back here.
+        auto imageFormatted = image->convertToFormat(QImage::Format_RGBA8888).mirrored(false, true);
+        auto imageData = imageFormatted.bits();
+
+        texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
+        float imageW = image->width();
+        float imageH = image->height();
+        texture->image2D(0, GL_RGBA8, imageW, imageH, 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
+        // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
+        // ignore this, since we use black&white image data here?
+
+        float quadW = 1.f;
+        float quadH = quadW * imageH / imageW;
+
+        cornerBuffer->setData(std::array<glm::vec2, 4>{{{0, 0}, {quadW, 0}, {0, quadH}, {quadW, quadH}}},
+                              GL_STATIC_DRAW);
+
+        vao->binding(0)->setAttribute(0);
+        vao->binding(0)->setBuffer(cornerBuffer.get(), 0, sizeof(glm::vec2));
+        vao->binding(0)->setFormat(2, GL_FLOAT);
+        vao->enable(0);
+
+        program->setUniform("glyphs", samplerIndex);
     }
 };
 
@@ -694,17 +715,6 @@ int main(int argc, char** argv) {
     llassetgen::init();
 
     QApplication app(argc, argv);
-
-    auto path = app.applicationDirPath();
-    /*
-    std::unique_ptr<llassetgen::DistanceTransform> dt(new llassetgen::DeadReckoning());
-
-    dt->importPng(path.toStdString() + "/../../data/llassetgen-rendering/testfontatlas.png");
-    dt->transform();
-    dt->exportPng(path.toStdString() + "/../../data/llassetgen-rendering/testfontatlasDT.png", -20, 50, 8);
-    **/
-    // TODO: don't export, but use as texture directly?
-    // TODO: exported png is corrupted, wait for update/fix
 
     QMainWindow* window = new QMainWindow();
     setupGUI(window);
