@@ -75,7 +75,7 @@ namespace llassetgen {
 		char_info.y = char_area.position.y;
 		char_info.width = char_area.size.x;
 		char_info.height = char_area.size.y;
-		char_info.x_advance = float(face->glyph->linearHoriAdvance) * 16.16f;
+		char_info.x_advance = float(face->glyph->linearHoriAdvance) / 65536.f;
 		char_info.x_offset = offset.x;
 		char_info.y_offset = offset.y;
 		char_info.page = 1;
@@ -98,8 +98,8 @@ namespace llassetgen {
 					KerningInfo kerning_info;
 					kerning_info.first_id = left_gindex;
 					kerning_info.second_id = right_gindex;
-					// kerning is provided in 26.6 fractions of a pixel
-					kerning_info.kerning = float(kerning_vector.x) / 26.6f;
+					// kerning is provided in 26.6 fixed-point format
+					kerning_info.kerning = float(kerning_vector.x) / 64.f;
 					kerning_infos.push_back(kerning_info);
 				}
 				right_charcode = FT_Get_Next_Char(face, right_charcode, &right_gindex);
