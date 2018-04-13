@@ -45,11 +45,8 @@ namespace llassetgen {
 		}
 		std::reverse(font_info.charset.begin(), font_info.charset.end());
 
-		if (face->charmap->encoding == FT_ENCODING_UNICODE) {
-			font_info.use_unicode = true;
-		}
-		else {
-			font_info.use_unicode = false;
+		font_info.use_unicode = (face->charmap->encoding == FT_ENCODING_UNICODE)
+
 		}
 		// havent found any of the following information
 		// irrelevant for distance fields --> ignore them
