@@ -1,10 +1,10 @@
-#include <fstream> 
 #include <float.h>
-#include <string>
-#include <vector>
 #include <cassert>
+#include <fstream>
 #include <iostream>
 #include <set>
+#include <string>
+#include <vector>
 
 #include <llassetgen/FntWriter.h>
 #include <llassetgen/Image.h>
@@ -189,4 +189,3 @@ namespace llassetgen {
 		fntFile.close();
 	}
 }
-

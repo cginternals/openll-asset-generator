@@ -1,4 +1,4 @@
-#include <ft2build.h> // NOLINT include order required by freetype
+#include <ft2build.h>  // NOLINT include order required by freetype
 #include FT_FREETYPE_H
 
 #include <gmock/gmock.h>
