@@ -25,8 +25,12 @@
 
 namespace llassetgen {
     Image::~Image() {
-//        if (isOwnerOfData)
-//            delete[] data;
+        if (isOwnerOfData)
+            delete[] data;
+    }
+
+    Image::Image(Image&& src) :min(src.min), max(src.max), stride(src.stride), bitDepth(src.bitDepth), data(src.data), isOwnerOfData(src.isOwnerOfData) {
+        src.isOwnerOfData = false;
     }
 
     Image::Image(Vec2<size_t> _min, Vec2<size_t> _max, size_t _stride, uint8_t _bitDepth, uint8_t* _data)
@@ -77,8 +81,8 @@ namespace llassetgen {
     size_t Image::getBitDepth() const { return bitDepth; }
 
     bool Image::isValid(Vec2<size_t> pos) const {
-        Vec2<size_t> offset = min + pos;
-        return offset.x >= min.x && offset.x < max.x && offset.y >= min.y && offset.y < max.y;
+        pos += min;
+        return pos.x >= min.x && pos.x < max.x && pos.y >= min.y && pos.y < max.y;
     }
 
     template LLASSETGEN_API float Image::getPixel<float>(Vec2<size_t> pos) const;
@@ -88,21 +92,15 @@ namespace llassetgen {
     template <typename pixelType>
     pixelType Image::getPixel(Vec2<size_t> pos) const {
         assert(isValid(pos));
-        Vec2<size_t> offset = min + pos;
+        pos += min;
         if (bitDepth <= 8) {
-            uint8_t byte = data[offset.y * stride + offset.x * bitDepth / 8];
-            size_t bit_pos = offset.x % (8 / bitDepth);
-            byte <<= bit_pos * bitDepth;
-            byte >>= 8 - bitDepth;
-            uint32_t casted = static_cast<uint32_t>(byte);
-            return reinterpret_cast<pixelType&>(casted);
+            uint8_t byte = data[pos.y * stride + pos.x * bitDepth / 8],
+                    offsetInByte = 8 - bitDepth - pos.x * bitDepth % 8,
+                    mask = (1 << bitDepth) - 1;
+            return static_cast<pixelType>((byte >> offsetInByte) & mask);
         } else {
-            uint32_t return_data = 0;
-            for (size_t byte_pos = 0; byte_pos < bitDepth / 8; ++byte_pos) {
-                return_data <<= 8;
-                return_data |= data[offset.y * stride + offset.x * bitDepth / 8 + byte_pos];
-            }
-            return reinterpret_cast<pixelType&>(return_data);
+            assert(bitDepth == sizeof(pixelType) * 8);
+            return reinterpret_cast<pixelType*>(data)[pos.y * (8 * stride / bitDepth) + pos.x];
         }
     }
 
@@ -113,24 +111,16 @@ namespace llassetgen {
     template <typename pixelType>
     void Image::setPixel(Vec2<size_t> pos, pixelType in) const {
         assert(isValid(pos));
-        Vec2<size_t> offset = min + pos;
+        pos += min;
         if (bitDepth <= 8) {
-            uint8_t mask = 0xFF;
-            uint8_t in_byte = static_cast<uint8_t>(reinterpret_cast<uint32_t&>(in));
-            mask <<= 8 - bitDepth;
-            mask >>= 8 - bitDepth;
-
-            size_t bit_pos = offset.x % (8 / bitDepth);
-            in_byte <<= 8 - bit_pos * bitDepth - bitDepth;
-            mask <<= 8 - bit_pos * bitDepth - bitDepth;
-            data[offset.y * stride + offset.x * bitDepth / 8] =
-                (data[offset.y * stride + offset.x * bitDepth / 8] & ~mask) | in_byte;
+            uint8_t& byte = data[pos.y * stride + pos.x * bitDepth / 8];
+            uint8_t offsetInByte = 8 - bitDepth - pos.x * bitDepth % 8,
+                    mask = (1 << bitDepth) - 1;
+            byte &= ~(mask << offsetInByte);
+            byte |= (static_cast<uint8_t>(in) & mask) << offsetInByte;
         } else {
-            uint32_t in_int = reinterpret_cast<uint32_t&>(in);
-            for (int byte_pos = bitDepth / 8 - 1; byte_pos >= 0; byte_pos--) {
-                data[offset.y * stride + offset.x * bitDepth / 8 + byte_pos] = static_cast<uint8_t>(in_int);
-                in_int >>= 8;
-            }
+            assert(bitDepth == sizeof(pixelType) * 8);
+            reinterpret_cast<pixelType*>(data)[pos.y * (8 * stride / bitDepth) + pos.x] = in;
         }
     }
 
@@ -152,6 +142,66 @@ namespace llassetgen {
             memset(data, 0, stride * getHeight());
         } else {
             fillRect(min, max, 0);
+        }
+    }
+
+    template LLASSETGEN_API void Image::centerDownsampling<float>(const Image& src) const;
+    template LLASSETGEN_API void Image::centerDownsampling<uint32_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::centerDownsampling<uint16_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::centerDownsampling<uint8_t>(const Image& src) const;
+    template <typename pixelType>
+    void Image::centerDownsampling(const Image& src) const {
+        assert(src.getWidth()%getWidth() == 0 && src.getHeight()%getHeight() == 0);
+        size_t x_scale = src.getWidth()/getWidth(),
+               y_scale = src.getHeight()/getHeight();
+        for (size_t y = 0; y < getHeight(); y++) {
+            for (size_t x = 0; x < getWidth(); x++) {
+                setPixel<pixelType>({x, y}, src.getPixel<pixelType>({x*x_scale+x_scale/2, y*y_scale+y_scale/2}));
+            }
+        }
+    }
+
+    template LLASSETGEN_API void Image::averageDownsampling<float>(const Image& src) const;
+    template LLASSETGEN_API void Image::averageDownsampling<uint32_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::averageDownsampling<uint16_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::averageDownsampling<uint8_t>(const Image& src) const;
+    template <typename pixelType>
+    void Image::averageDownsampling(const Image& src) const {
+        assert(src.getWidth()%getWidth() == 0 && src.getHeight()%getHeight() == 0);
+        size_t x_scale = src.getWidth()/getWidth(),
+               y_scale = src.getHeight()/getHeight();
+        for (size_t y = 0; y < getHeight(); y++) {
+            for (size_t x = 0; x < getWidth(); x++) {
+                pixelType value = 0;
+                for (size_t j = 0; j < y_scale; j++) {
+                    for (size_t i = 0; i < x_scale; i++) {
+                        value += src.getPixel<pixelType>({x*x_scale+i, y*y_scale+j});
+                    }
+                }
+                setPixel<pixelType>({x, y}, value/(x_scale*y_scale));
+            }
+        }
+    }
+
+    template LLASSETGEN_API void Image::minDownsampling<float>(const Image& src) const;
+    template LLASSETGEN_API void Image::minDownsampling<uint32_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::minDownsampling<uint16_t>(const Image& src) const;
+    template LLASSETGEN_API void Image::minDownsampling<uint8_t>(const Image& src) const;
+    template <typename pixelType>
+    void Image::minDownsampling(const Image& src) const {
+        assert(src.getWidth()%getWidth() == 0 && src.getHeight()%getHeight() == 0);
+        size_t x_scale = src.getWidth()/getWidth(),
+               y_scale = src.getHeight()/getHeight();
+        for (size_t y = 0; y < getHeight(); y++) {
+            for (size_t x = 0; x < getWidth(); x++) {
+                pixelType value = std::numeric_limits<pixelType>::max();
+                for (size_t j = 0; j < y_scale; j++) {
+                    for (size_t i = 0; i < x_scale; i++) {
+                        value = std::min(value, src.getPixel<pixelType>({x*x_scale+i, y*y_scale+j}));
+                    }
+                }
+                setPixel<pixelType>({x, y}, value);
+            }
         }
     }
 
@@ -353,7 +403,6 @@ namespace llassetgen {
             png_set_swap(png);
         }
 
-        // TODO
         if (bitDepth >= 24) {
             std::unique_ptr<uint16_t[]> row(new uint16_t[getWidth()]);
             // possible 32 float or 32 or 24 bit int data
@@ -368,6 +417,7 @@ namespace llassetgen {
                 png_write_row(png, reinterpret_cast<png_bytep>(row.get()));
             }
         } else {
+            // TODO: Use black and white params here as well
             for (size_t y = 0; y < getHeight(); y++) {
                 png_write_row(png, reinterpret_cast<png_bytep>(&data[y * stride]));
             }
