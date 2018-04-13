@@ -27,7 +27,7 @@ namespace llassetgen {
 
 #ifdef _WIN32
         bool getFontData(const std::string& fontName);
-#elif __unix__
+#elif defined(__unix__) || defined(__APPLE__)
         static bool findFontPath(const std::string& fontName, std::string& fontPath);
 #endif
 

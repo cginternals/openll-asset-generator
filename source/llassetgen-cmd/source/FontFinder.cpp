@@ -1,4 +1,4 @@
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
     #include <fontconfig/fontconfig.h>
 #elif _WIN32
     #define NOMINMAX
@@ -22,7 +22,7 @@ FontFinder FontFinder::fromPath(const std::string& fontPath) {
 }
 
 FontFinder FontFinder::fromName(const std::string& fontName) {
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
     std::string fontPath;
     if (!findFontPath(fontName, fontPath)) {
         throw std::runtime_error("Font not found");
@@ -42,7 +42,7 @@ FontFinder FontFinder::fromName(const std::string& fontName) {
 #endif
 }
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 bool FontFinder::findFontPath(const std::string& fontName, std::string& fontPath) {
     FcConfig* config = FcInitLoadConfigAndFonts();
     FcPattern* pat = FcNameParse(reinterpret_cast<const FcChar8*>(fontName.c_str()));
