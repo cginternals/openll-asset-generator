@@ -6,6 +6,7 @@
 #include <llassetgen/Image.h>
 
 #include <ft2build.h>
+#include <llassetgen/packing/Types.h>
 #include FT_FREETYPE_H
 
 namespace llassetgen {
@@ -37,8 +38,8 @@ namespace llassetgen {
 	struct Common {
 		int line_height;
 		int base;
-		int scale_w;
-		int scale_h;
+		PackingSizeType scale_w;
+		PackingSizeType scale_h;
 		int pages;
 		bool is_packed;
 		uint8_t alpha_chnl;
@@ -49,10 +50,10 @@ namespace llassetgen {
 
 	struct CharInfo {
 		int id;
-		int x;
-		int y;
-		int width;
-		int height;
+		PackingSizeType x;
+		PackingSizeType y;
+		PackingSizeType width;
+		PackingSizeType height;
 		float x_offset;
 		float y_offset;
 		float x_advance;
@@ -70,10 +71,10 @@ namespace llassetgen {
 		public:
 			FntWriter(FT_Face face, std::string face_name, int font_size, float scaling_factor, bool scaled_glyph);
 			void readFont();
-			void setAtlasProperties(Vec2<uint32_t> size, int max_height);
+			void setAtlasProperties(Vec2<PackingSizeType> size, int max_height);
 			void saveFnt(std::string filepath);
 			void setFontInfo();
-			void setCharInfo(FT_UInt charcode, Rect<uint32_t> char_area, Vec2<float> offset);
+			void setCharInfo(FT_UInt charcode, Rect<PackingSizeType> char_area, Vec2<float> offset);
 			void setKerningInfo();
 		private:
 			FT_Face face;

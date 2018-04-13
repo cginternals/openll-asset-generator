@@ -6,6 +6,7 @@
 #include <FontFinder.h>
 #include <helpstrings.h>
 #include <llassetgen/Atlas.h>
+#include <llassetgen/FntWriter.h>
 
 using namespace llassetgen;
 
@@ -51,6 +52,16 @@ std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, size_t padding
                    [padding](const Image& img) { return img.getSize(); });
     return imageSizes;
 }
+
+std::pair<std::string, std::string> outNames(const std::string &outPath) {
+    std::string pathWithoutExtension;
+    if (outPath.substr(outPath.length() - 4) == ".png") {
+        pathWithoutExtension = outPath.substr(0, outPath.length() - 4);
+    } else {
+        pathWithoutExtension = outPath;
+    }
+    return std::make_pair(pathWithoutExtension + ".png", pathWithoutExtension + ".fnt");
+};
 
 std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vector<unsigned int>& charCodes,
                                      bool includeAscii) {
@@ -106,7 +117,11 @@ int parseAtlas(int argc, char** argv) {
     std::vector<int> dynamicRange = {-30, 20};
     app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp, true)->requires(distfieldOpt)->expected(2);
 
-    CLI::Option* asciiOpt = app.add_flag("--ascii", asciiHelp);
+    bool includeAscii = false;
+    app.add_flag("--ascii", includeAscii, asciiHelp);
+
+    bool createFnt = false;
+    app.add_flag("--fnt", createFnt, fntHelp);
 
     std::string outPath;
     app.add_option("outfile", outPath, aOutfileHelp)->required();
@@ -115,7 +130,10 @@ int parseAtlas(int argc, char** argv) {
 
     CLI11_PARSE(app, argc, argv);
 
-    std::set<unsigned long> glyphSet = makeGlyphSet(glyphs, charCodes, static_cast<bool>(asciiOpt->count()));
+    std::string fntPath;
+    std::tie(outPath, fntPath) = outNames(outPath);
+
+    std::set<unsigned long> glyphSet = makeGlyphSet(glyphs, charCodes, includeAscii);
     if (glyphSet.empty()) {
         std::cerr << "Error: at least one glyph required" << std::endl;
         return 2;
@@ -135,6 +153,19 @@ int parseAtlas(int argc, char** argv) {
         } else {
             Image atlas = fontAtlas(glyphImages.begin(), glyphImages.end(), p);
             atlas.exportPng<uint8_t>(outPath);
+        }
+
+        if (createFnt) {
+            std::string faceName = fontNameOpt->count() ? fontName : "Unknown";
+            FntWriter writer{fontFinder.fontFace, faceName, fontSize, 1, false};
+            writer.setAtlasProperties(p.atlasSize, fontSize);
+            writer.readFont();
+            auto gIt = glyphSet.begin();
+            for (auto rectIt = p.rects.begin(); rectIt < p.rects.end(); gIt++, rectIt++) {
+                FT_UInt charIndex = FT_Get_Char_Index(fontFinder.fontFace, static_cast<FT_ULong>(*gIt));
+                writer.setCharInfo(charIndex, *rectIt, {0, 0});
+            }
+            writer.saveFnt(fntPath);
         }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
