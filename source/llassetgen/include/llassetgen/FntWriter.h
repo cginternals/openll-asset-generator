@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <llassetgen/Image.h>
+#include <llassetgen/Packing.h>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -70,7 +71,7 @@ namespace llassetgen {
 		public:
 			FntWriter(FT_Face face, std::string face_name, int font_size, float scaling_factor, bool scaled_glyph);
 			void readFont();
-			void setAtlasProperties(Vec2<uint32_t> size, int max_height);
+			void setAtlasProperties(Vec2<PackingSizeType> size, int max_height);
 			void saveFnt(std::string filepath);
 			void setFontInfo();
 			void setCharInfo(FT_UInt charcode, Rect<uint32_t> char_area, Vec2<float> offset);

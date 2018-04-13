@@ -110,7 +110,7 @@ namespace llassetgen {
 		setKerningInfo();
 	}
 
-	void FntWriter::setAtlasProperties(Vec2<uint32_t> size, int max_height) {
+	void FntWriter::setAtlasProperties(Vec2<PackingSizeType> size, int max_height) {
 		// collect common_info
 		font_common.line_height = max_height;
 		font_common.scale_w = size.x;
