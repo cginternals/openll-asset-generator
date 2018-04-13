@@ -4,7 +4,7 @@
 using namespace llassetgen;
 
 std::string atlasTestDestinationPath = "../../";
-std::vector<Vec2<size_t>> atlasTestSizes {{1, 1}, {34, 5}, {23, 79}, {16, 70}, {91, 64}, {98, 82}, {54, 63}, {100, 6}};
+std::vector<Vec2<size_t>> atlasTestSizes{{1, 1}, {34, 5}, {23, 79}, {16, 70}, {91, 64}, {98, 82}, {54, 63}, {100, 6}};
 
 template <class DTType>
 void createAtlas(std::vector<Image>& glyphs, Packing packing) {
