@@ -55,21 +55,22 @@ namespace llassetgen {
           data(new uint8_t[stride * height]),
           isOwnerOfData(true) {}
 
-    Image::Image(FT_Bitmap bitmap, size_t padding)
-        : Image(bitmap.width + 2 * padding, bitmap.rows + 2 * padding, 1) {
-        if (padding > 0) {
-            Vec2<size_t> paddingVec{padding, padding};
-            Image&& paddedView = view(paddingVec, getSize() - paddingVec);
-            fillPadding(padding);
+    Image::Image(FT_Bitmap bitmap, size_t padding, size_t divisibleBy)
+        : Image(divisiblePadding(bitmap.width, padding, divisibleBy), divisiblePadding(bitmap.rows, padding, divisibleBy), 1) {
+        if (padding > 0 || bitmap.width % divisibleBy != 0 || bitmap.rows % divisibleBy != 0) {
+            Vec2<size_t> paddingVec{padding, padding},
+                         imgSize{bitmap.width, bitmap.rows};
+            Image&& paddedView = view(paddingVec, imgSize + paddingVec);
             paddedView.load(bitmap);
+            fillPadding({paddingVec, imgSize});
         } else {
             load(bitmap);
         }
     }
 
-    void Image::fillPadding(size_t padding) {
-        Vec2<size_t> innerMin {padding, padding},
-                     innerMax = getSize() - innerMin;
+    void Image::fillPadding(Rect<size_t> image) {
+        Vec2<size_t> innerMin = image.position,
+                     innerMax = image.position + image.size;
 
         fillRect({0, 0}, {innerMax.x, innerMin.y});
         fillRect({innerMax.x, 0}, {getWidth(), innerMax.y});
@@ -453,5 +454,10 @@ namespace llassetgen {
                 setPixel<uint8_t>(pos, src.getPixel<uint8_t>(pos));
             }
         }
+    }
+
+    size_t Image::divisiblePadding(size_t size, size_t padding, size_t divisor) {
+        size_t paddedSize = size + 2 * padding;
+        return paddedSize + (-paddedSize % divisor);
     }
 }

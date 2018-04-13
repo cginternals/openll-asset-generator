@@ -103,7 +103,7 @@ namespace llassetgen {
         }
     }
 
-    Image FontFinder::renderGlyph(unsigned long glyph, size_t padding) {
+    Image FontFinder::renderGlyph(unsigned long glyph, size_t padding, size_t divisibleBy) {
         FT_UInt charIndex = FT_Get_Char_Index(fontFace, static_cast<FT_ULong>(glyph));
         if (charIndex == 0) {
             std::cerr << "Warning: font does not contain glyph with code " << glyph << std::endl;
@@ -114,19 +114,16 @@ namespace llassetgen {
         if (err || bitmap.buffer == nullptr) {
             throw std::runtime_error("glyph with code " + std::to_string(glyph) + " could not be rendered");
         }
-        return {bitmap, padding};
+        return {bitmap, padding, divisibleBy};
     }
 
-    std::vector<Image> FontFinder::renderGlyphs(const std::set<unsigned long> &glyphs, int size, size_t padding) {
+    std::vector<Image> FontFinder::renderGlyphs(const std::set<unsigned long> &glyphs, int size, size_t padding, size_t divisibleBy) {
         setFontSize(size);
 
         std::vector<Image> v;
         v.reserve(glyphs.size());
         for (const auto glyph : glyphs) {
-            Image img = renderGlyph(glyph, padding);
-            if (size < img.getHeight() - 2 * padding) {
-                std::cerr << "Warning: glyph with code " + std::to_string(glyph) + " higher than font size";
-            }
+            Image img = renderGlyph(glyph, padding, divisibleBy);
             v.push_back(std::move(img));
         }
         return v;

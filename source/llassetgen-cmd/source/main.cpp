@@ -126,6 +126,9 @@ int parseAtlas(int argc, char** argv) {
     std::string outPath;
     app.add_option("outfile", outPath, aOutfileHelp)->required();
 
+    int downsamplingRatio = 1;
+    app.add_option("-w, --downsampling", downsamplingRatio, downsamplingRatioHelp);
+
     app.set_config("--config", "", configHelp);
 
     CLI11_PARSE(app, argc, argv);
@@ -143,7 +146,7 @@ int parseAtlas(int argc, char** argv) {
         FontFinder fontFinder = fontPathOpt->count() ? FontFinder::fromPath(fontPath)
                                                      : FontFinder::fromName(fontName);
 
-        std::vector<Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding);
+        std::vector<Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
         std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages);
         Packing p = packingAlgos[packing](imageSizes.begin(), imageSizes.end(), false);
 
