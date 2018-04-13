@@ -13,7 +13,7 @@
 #include FT_OUTLINE_H
 
 namespace llassetgen {
-	FntWriter::FntWriter(FT_Face _face, std::string _face_name, int _font_size, float _scaling_factor, bool _scaled_glyph) {
+	FntWriter::FntWriter(FT_Face _face, std::string _face_name, unsigned int _font_size, float _scaling_factor, bool _scaled_glyph) {
 		face_name = _face_name;
 		face = _face;
 		font_info = Info();

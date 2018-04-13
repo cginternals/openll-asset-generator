@@ -69,7 +69,7 @@ namespace llassetgen {
 
 	class LLASSETGEN_API FntWriter {
 		public:
-			FntWriter(FT_Face face, std::string face_name, int font_size, float scaling_factor, bool scaled_glyph);
+			FntWriter(FT_Face face, std::string face_name, unsigned int font_size, float scaling_factor, bool scaled_glyph);
 			void readFont();
 			void setAtlasProperties(Vec2<PackingSizeType> size, int max_height);
 			void saveFnt(std::string filepath);
