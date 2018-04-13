@@ -32,6 +32,7 @@ namespace llassetgen {
         ~Image();
         Image& operator=(const Image&) = delete;
         Image(const Image&) = delete;
+        Image& operator=(Image&&) noexcept;
         Image(Image&& src);
         Image(size_t width, size_t height, size_t _bitDepth);
         Image(FT_Bitmap_ bitmap, size_t padding = 0);

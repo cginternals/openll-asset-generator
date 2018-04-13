@@ -33,6 +33,17 @@ namespace llassetgen {
         src.isOwnerOfData = false;
     }
 
+    Image& Image::operator=(Image&& other) noexcept {
+        min = other.min;
+        max = other.max;
+        stride = other.stride;
+        bitDepth = other.bitDepth;
+        data = other.data;
+        isOwnerOfData = other.isOwnerOfData;
+        other.isOwnerOfData = false;
+        return *this;
+    }
+
     Image::Image(Vec2<size_t> _min, Vec2<size_t> _max, size_t _stride, uint8_t _bitDepth, uint8_t* _data)
         : min(_min), max(_max), stride(_stride), bitDepth(_bitDepth), data(_data), isOwnerOfData(false) {}
 
@@ -207,7 +218,7 @@ namespace llassetgen {
 
     void Image::load(const FT_Bitmap& ft_bitmap) {
         assert(getWidth() == ft_bitmap.width && getHeight() == ft_bitmap.rows && bitDepth == getFtBitdepth(ft_bitmap));
-        if (min.x == 0 && min.y == 0 && ft_bitmap.pitch == stride) {
+        if (min.x == 0 && min.y == 0 && static_cast<size_t>(ft_bitmap.pitch) == stride) {
             memcpy(data, ft_bitmap.buffer, ft_bitmap.pitch * ft_bitmap.rows);
         } else if (min.x % 8 == 0) {
             assert(bitDepth == 1);
