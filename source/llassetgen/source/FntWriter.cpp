@@ -38,12 +38,10 @@ namespace llassetgen {
 			font_info.is_bold = true;
 		}
 		int encoding = int(face->charmap->encoding);
-		for (int i = 0; i < 4; ++i) {
-			int mask = 0xFF;
-			font_info.charset += char(encoding & mask);
-			encoding >>= 8;
+		uint8_t *character = reinterpret_cast<uint8_t*>(&encoding);
+		for (int i = 3; i >= 0; --i) {
+			font_info.charset += char(character[i]);
 		}
-		std::reverse(font_info.charset.begin(), font_info.charset.end());
 
 		font_info.use_unicode = (face->charmap->encoding == FT_ENCODING_UNICODE);
 
