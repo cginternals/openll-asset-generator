@@ -78,7 +78,7 @@ namespace llassetgen {
             return static_cast<pixelType>((byte >> offsetInByte) & mask);
         } else {
             assert(bitDepth == sizeof(pixelType) * 8);
-            return reinterpret_cast<pixelType*>(data)[pos.y * getWidth() + pos.x];
+            return reinterpret_cast<pixelType*>(data)[pos.y * (8 * stride / bitDepth) + pos.x];
         }
     }
 
@@ -98,7 +98,7 @@ namespace llassetgen {
             byte |= (static_cast<uint8_t>(in) & mask) << offsetInByte;
         } else {
             assert(bitDepth == sizeof(pixelType) * 8);
-            reinterpret_cast<pixelType*>(data)[pos.y * getWidth() + pos.x] = in;
+            reinterpret_cast<pixelType*>(data)[pos.y * (8 * stride / bitDepth) + pos.x] = in;
         }
     }
 
