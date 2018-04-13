@@ -126,14 +126,9 @@ namespace llassetgen {
 	void FntWriter::saveFnt(std::string filepath) {
 		font_common.base = max_y_bearing;
 
-		// check for correct file ending
-		if (filepath.substr(filepath.length() - 4) == ".fnt") {
-			filepath = filepath.substr(0, filepath.length() - 4);
-		}
-
 		// open file
 		std::ofstream fnt_file;
-		fnt_file.open(filepath + ".fnt");
+		fnt_file.open(filepath);
 
 		// write in plain text format
 		// TODO: XML and binary
