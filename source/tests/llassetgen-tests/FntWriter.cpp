@@ -10,33 +10,33 @@
 using namespace llassetgen;
 
 TEST(FntWriterTest, createFntFile) {
-	std::string test_source_path = "../../../source/tests/llassetgen-tests/testfiles/";
-	std::string test_destination_path = "../../";
+	std::string testSourcePath = "../../../source/tests/llassetgen-tests/testfiles/";
+	std::string testDestinationPath = "../../";
 
 	init();
 
 	FT_Face face;
-	std::string face_name = "OpenSans-Regular.ttf";
-	std::string font_file = test_source_path + face_name;
+	std::string faceName = "OpenSans-Regular.ttf";
+	std::string fontFile = testSourcePath + faceName;
 
-	FT_Error face_created = FT_New_Face(freetype, font_file.c_str(), 0, &face);
-	EXPECT_EQ(face_created, 0);
+	FT_Error faceCreated = FT_New_Face(freetype, fontFile.c_str(), 0, &face);
+	EXPECT_EQ(faceCreated, 0);
 
-	bool has_kerning = FT_HAS_KERNING(face);
-	EXPECT_EQ(has_kerning, true);
+	bool hasKerning = FT_HAS_KERNING(face);
+	EXPECT_EQ(hasKerning, true);
 
-	int font_size = 32;
-	float scaling_factor = 1.0f;
-	FntWriter writer = FntWriter(face, face_name, font_size, scaling_factor, false);
+	unsigned int fontSize = 32;
+	float scalingFactor = 1.0f;
+	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor, false);
 	
 	FT_UInt gIndex;
 	std::set<FT_ULong> charcodes;
-	FT_ULong last_charcode;
-	last_charcode = FT_Get_First_Char(face, &gIndex);
-	charcodes.insert(last_charcode);
+	FT_ULong lastCharcode;
+	lastCharcode = FT_Get_First_Char(face, &gIndex);
+	charcodes.insert(lastCharcode);
 	for (int i = 0; i < 50; i++) {
-		last_charcode = FT_Get_Next_Char(face, last_charcode, &gIndex);
-		charcodes.insert(last_charcode);
+		lastCharcode = FT_Get_Next_Char(face, lastCharcode, &gIndex);
+		charcodes.insert(lastCharcode);
 	}
 	writer.readFont(charcodes.begin(), charcodes.end());
 
@@ -55,40 +55,40 @@ TEST(FntWriterTest, createFntFile) {
 		offset += {1.0f, 1.0f};
 	}
 
-	int max_height = 20;
-	writer.setAtlasProperties({ 100, 200 }, max_height);
+	int maxHeight = 20;
+	writer.setAtlasProperties({ 100, 200 }, maxHeight);
 
-	writer.saveFnt(test_destination_path + "fnt.fnt");
+	writer.saveFnt(testDestinationPath + "fnt.fnt");
 }
 
 TEST(FntWriterTest, fntScaling) {
-	std::string test_source_path = "../../../source/tests/llassetgen-tests/testfiles/";
-	std::string test_destination_path = "../../";
+	std::string testSourcePath = "../../../source/tests/llassetgen-tests/testfiles/";
+	std::string testDestinationPath = "../../";
 
 	init();
 
 	FT_Face face;
-	std::string face_name = "OpenSans-Regular.ttf";
-	std::string font_file = test_source_path + face_name;
+	std::string faceName = "OpenSans-Regular.ttf";
+	std::string fontFile = testSourcePath + faceName;
 
-	FT_Error face_created = FT_New_Face(freetype, font_file.c_str(), 0, &face);
-	EXPECT_EQ(face_created, 0);
+	FT_Error faceCreated = FT_New_Face(freetype, fontFile.c_str(), 0, &face);
+	EXPECT_EQ(faceCreated, 0);
 
-	bool has_kerning = FT_HAS_KERNING(face);
-	EXPECT_EQ(has_kerning, true);
+	bool hasKerning = FT_HAS_KERNING(face);
+	EXPECT_EQ(hasKerning, true);
 
-	int font_size = 32;
-	float scaling_factor = 0.5f;
-	FntWriter writer = FntWriter(face, face_name, font_size, scaling_factor, true);
+	unsigned int fontSize = 32;
+	float scalingFactor = 0.5f;
+	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor, true);
 	
 	FT_UInt gIndex;
 	std::set<FT_ULong> charcodes;
-	FT_ULong last_charcode;
-	last_charcode = FT_Get_First_Char(face, &gIndex);
-	charcodes.insert(last_charcode);
+	FT_ULong lastCharcode;
+	lastCharcode = FT_Get_First_Char(face, &gIndex);
+	charcodes.insert(lastCharcode);
 	for (int i = 0; i < 50; i++) {
-		last_charcode = FT_Get_Next_Char(face, last_charcode, &gIndex);
-		charcodes.insert(last_charcode);
+		lastCharcode = FT_Get_Next_Char(face, lastCharcode, &gIndex);
+		charcodes.insert(lastCharcode);
 	}
 	writer.readFont(charcodes.begin(), charcodes.end());
 
@@ -107,8 +107,8 @@ TEST(FntWriterTest, fntScaling) {
 		offset += {1.0f, 1.0f};
 	}
 
-	int max_height = 20;
-	writer.setAtlasProperties({ 100, 200 }, max_height);
+	int maxHeight = 20;
+	writer.setAtlasProperties({ 100, 200 }, maxHeight);
 
-	writer.saveFnt(test_destination_path + "fnt_scaled.fnt");
+	writer.saveFnt(testDestinationPath + "fnt_scaled.fnt");
 }
