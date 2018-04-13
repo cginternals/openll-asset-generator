@@ -3,9 +3,9 @@
 #include <map>
 #include <ostream>
 
-#include <FontFinder.h>
 #include <helpstrings.h>
 #include <llassetgen/Atlas.h>
+#include <llassetgen/FontFinder.h>
 #include <llassetgen/FntWriter.h>
 
 using namespace llassetgen;
@@ -61,7 +61,7 @@ std::pair<std::string, std::string> outNames(const std::string &outPath) {
         pathWithoutExtension = outPath;
     }
     return std::make_pair(pathWithoutExtension + ".png", pathWithoutExtension + ".fnt");
-};
+}
 
 std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vector<unsigned int>& charCodes,
                                      bool includeAscii) {

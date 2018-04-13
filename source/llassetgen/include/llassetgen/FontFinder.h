@@ -11,7 +11,7 @@
 #include <set>
 
 namespace llassetgen {
-    class FontFinder {
+    class LLASSETGEN_API FontFinder {
        public:
         static FontFinder fromName(const std::string& fontName);
         static FontFinder fromPath(const std::string& fontPath);

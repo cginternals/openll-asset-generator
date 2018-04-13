@@ -2,10 +2,6 @@
 # External dependencies
 #
 
-if(UNIX)
-    find_package(fontconfig)
-endif()
-
 
 #
 # Executable name and options
@@ -27,12 +23,10 @@ set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(headers
     ${include_path}/CLI11.h
-    ${include_path}/helpstrings.h
-    ${include_path}/FontFinder.h)
+    ${include_path}/helpstrings.h)
 
 set(sources
-    ${source_path}/main.cpp
-    ${source_path}/FontFinder.cpp)
+    ${source_path}/main.cpp)
 
 #
 # Create executable
@@ -81,13 +75,6 @@ target_link_libraries(${target}
     ${DEFAULT_LIBRARIES}
     ${META_PROJECT_NAME}::llassetgen
 )
-
-if (UNIX)
-    target_link_libraries(${target}
-        PRIVATE
-        fontconfig
-    )
-endif ()
 
 
 #
