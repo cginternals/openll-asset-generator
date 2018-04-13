@@ -21,6 +21,7 @@ namespace llassetgen {
         Image renderGlyph(unsigned long glyph, size_t padding = 0);
         std::vector<Image> renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding = 0);
 
+        FT_Face fontFace;
        private:
         FontFinder() = default;
 
@@ -30,7 +31,6 @@ namespace llassetgen {
         static bool findFontPath(const std::string& fontName, std::string& fontPath);
 #endif
 
-        FT_Face fontFace;
 #ifdef _WIN32
         std::vector<FT_Byte> fontData;
 #endif
