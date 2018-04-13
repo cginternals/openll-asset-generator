@@ -339,6 +339,10 @@ class Window : public WindowQt {
         drWhite = value.toInt();
     }
 
+    virtual void paddingChanged(QString value) override {
+        padding = value.toInt();
+    }
+
     virtual void exportGlyphAtlas() override {
         std::cout << "TODO EXPORT: atlas is exported automatically when changes applied, but fnt-File is not exported. Use CLI-app for this feature." << std::endl;
         // TODO export dialog: ask user for path
@@ -373,7 +377,7 @@ class Window : public WindowQt {
     int fontSize = 8;
     int drBlack = -100;
     int drWhite = 100;
-    int padding = 0; //TODO GUI 
+    int padding = 0;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -382,6 +386,7 @@ class Window : public WindowQt {
     QString imagePath = "";
 
     void calculateDistanceField() {
+        return;
         auto outPath = imagePath.toStdString();
 
         try {
@@ -635,6 +640,14 @@ void setupGUI(QMainWindow* window) {
     drLayout->addWidget(new QLabel("]"));
 
     dtLayout->addRow("Dynamic Range:", drLayout);
+
+    auto* paddingEdit = new QLineEdit();
+    paddingEdit->setValidator(drv);
+    paddingEdit->setPlaceholderText("0");
+    paddingEdit->setMaximumWidth(38);
+    QObject::connect(paddingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(paddingChanged(QString)));
+    dtLayout->addRow("Padding:", paddingEdit);
+    
 
     // packing size (used for downsampling)
     auto* psComboBox = new QComboBox();

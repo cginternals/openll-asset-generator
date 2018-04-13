@@ -173,6 +173,8 @@ void WindowQt::drBlackChanged(QString /*unused*/) {}
 
 void WindowQt::drWhiteChanged(QString /*unused*/) {}
 
+void WindowQt::paddingChanged(QString /*unused*/) {}
+
 void WindowQt::resetTransform3D() {}
 
 void WindowQt::triggerNewDT(){};

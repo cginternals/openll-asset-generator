@@ -59,6 +59,7 @@ class WindowQt : public QWindow {
     virtual void fontSizeChanged(QString value);
     virtual void drBlackChanged(QString value);
     virtual void drWhiteChanged(QString value);
+    virtual void paddingChanged(QString value);
     virtual void resetTransform3D();
     virtual void triggerNewDT();
     virtual void superSamplingChanged(int index);
