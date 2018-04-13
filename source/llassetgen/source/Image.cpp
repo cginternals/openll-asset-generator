@@ -179,7 +179,7 @@ namespace llassetgen {
             for (size_t y = 0; y < ft_bitmap.rows; y++)
                 memcpy(&data[(min.y + y) * stride + min.x / 8],
                        &ft_bitmap.buffer[y * ft_bitmap.pitch],
-                       ft_bitmap.pitch);
+                       stride);
         } else {
             for (size_t y = 0; y < ft_bitmap.rows; y++) {
                 for (size_t x = 0; x < ft_bitmap.width; x++) {

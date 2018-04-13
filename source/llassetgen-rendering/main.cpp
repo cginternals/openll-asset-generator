@@ -386,7 +386,7 @@ class Window : public WindowQt {
     QString imagePath = "";
 
     void calculateDistanceField() {
-        return;
+
         auto outPath = imagePath.toStdString();
 
         try {
