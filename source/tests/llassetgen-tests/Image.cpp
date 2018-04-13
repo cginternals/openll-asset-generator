@@ -112,7 +112,7 @@ class DistanceTransformTest : public testing::Test {};
 
 TEST_F(DistanceTransformTest, DeadReckoning) {
     Image input(test_source_path + "Helvetica.png", 1),
-          output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
+        output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
     std::unique_ptr<DistanceTransform> dt(new DeadReckoning(input, output));
     dt->transform();
     output.exportPng<DistanceTransform::OutputType>(test_destination_path + "DeadReckoning.png", -20, 50);
@@ -121,7 +121,7 @@ TEST_F(DistanceTransformTest, DeadReckoning) {
 
 TEST_F(DistanceTransformTest, ParabolaEnvelope) {
     Image input(test_source_path + "Helvetica.png", 1),
-          output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
+        output(input.getWidth(), input.getHeight(), sizeof(DistanceTransform::OutputType) * 8);
     std::unique_ptr<DistanceTransform> dt(new ParabolaEnvelope(input, output));
     dt->transform();
     output.exportPng<DistanceTransform::OutputType>(test_destination_path + "ParabolaEnvelope.png", -20, 50);
