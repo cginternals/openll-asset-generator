@@ -2,8 +2,10 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include <llassetgen/Image.h>
+#include <llassetgen/Packing.h>
 
 #include <ft2build.h>
 #include <llassetgen/packing/Types.h>
@@ -13,14 +15,14 @@ namespace llassetgen {
 	struct Info {
 		std::string face;
 		int size;
-		bool is_bold;
-		bool is_italic;
+		bool isBold;
+		bool isItalic;
 		std::string charset;
-		bool use_unicode;
+		bool useUnicode;
 		/*
-		float stretch_h;
-		bool use_smoothing;
-		int supersampling_level;
+		float stretchH;
+		bool useSmoothing;
+		int supersamplingLevel;
 		struct padding {
 			float left;
 			float right;
@@ -31,21 +33,17 @@ namespace llassetgen {
 			float horiz;
 			float vert;
 		} spacing;
-		float outline_thickness;
+		float outlineThickness;
 		*/
 	};
 
 	struct Common {
-		int line_height;
+		int lineHeight;
 		int base;
-		PackingSizeType scale_w;
-		PackingSizeType scale_h;
+		PackingSizeType scaleW;
+		PackingSizeType scaleH;
 		int pages;
-		bool is_packed;
-		uint8_t alpha_chnl;
-		uint8_t red_chnl;
-		uint8_t green_chnl;
-		uint8_t blue_chnl;
+		bool isPacked;
 	};
 
 	struct CharInfo {
@@ -54,37 +52,37 @@ namespace llassetgen {
 		PackingSizeType y;
 		PackingSizeType width;
 		PackingSizeType height;
-		float x_offset;
-		float y_offset;
-		float x_advance;
+		float xOffset;
+		float yOffset;
+		float xAdvance;
 		int page;
 		uint8_t chnl;
 	};
 
 	struct KerningInfo {
-		int first_id;
-		int second_id;
+		int firstId;
+		int secondId;
 		float kerning;
 	};
 
 	class LLASSETGEN_API FntWriter {
 		public:
-			FntWriter(FT_Face face, std::string face_name, unsigned int font_size, float scaling_factor, bool scaled_glyph);
-			void readFont();
-			void setAtlasProperties(Vec2<PackingSizeType> size, int max_height);
+			FntWriter(FT_Face face, std::string faceName, unsigned int fontSize, float scalingFactor, bool scaledGlyph);
+			void readFont(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd);
+			void setAtlasProperties(Vec2<PackingSizeType> size, int maxHeight);
 			void saveFnt(std::string filepath);
-			void setFontInfo();
-			void setCharInfo(FT_UInt charcode, Rect<PackingSizeType> char_area, Vec2<float> offset);
-			void setKerningInfo();
+			void setCharInfo(FT_UInt charcode, Rect<PackingSizeType> charArea, Vec2<float> offset);
 		private:
+			void setFontInfo();
+			void setKerningInfo(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd);
 			FT_Face face;
-			std::string face_name;
-			Info font_info;
-			Common font_common;
-			std::vector<CharInfo> char_infos;
-			std::vector<KerningInfo> kerning_infos;
-			FT_Pos max_y_bearing; 
-			float scaling_factor;
-			bool scaled_glyph;
+			std::string faceName;
+			Info fontInfo;
+			Common fontCommon;
+			std::vector<CharInfo> charInfos;
+			std::vector<KerningInfo> kerningInfos;
+			FT_Pos maxYBearing; 
+			float scalingFactor;
+			bool scaledGlyph;
 	};
 }

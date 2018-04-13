@@ -28,7 +28,17 @@ TEST(FntWriterTest, createFntFile) {
 	int font_size = 32;
 	float scaling_factor = 1.0f;
 	FntWriter writer = FntWriter(face, face_name, font_size, scaling_factor, false);
-	writer.readFont();
+	
+	FT_UInt gIndex;
+	std::set<FT_ULong> charcodes;
+	FT_ULong last_charcode;
+	last_charcode = FT_Get_First_Char(face, &gIndex);
+	charcodes.insert(last_charcode);
+	for (int i = 0; i < 50; i++) {
+		last_charcode = FT_Get_Next_Char(face, last_charcode, &gIndex);
+		charcodes.insert(last_charcode);
+	}
+	writer.readFont(charcodes.begin(), charcodes.end());
 
 	FT_ULong charcode;
 	FT_UInt gindex;
@@ -70,7 +80,17 @@ TEST(FntWriterTest, fntScaling) {
 	int font_size = 32;
 	float scaling_factor = 0.5f;
 	FntWriter writer = FntWriter(face, face_name, font_size, scaling_factor, true);
-	writer.readFont();
+	
+	FT_UInt gIndex;
+	std::set<FT_ULong> charcodes;
+	FT_ULong last_charcode;
+	last_charcode = FT_Get_First_Char(face, &gIndex);
+	charcodes.insert(last_charcode);
+	for (int i = 0; i < 50; i++) {
+		last_charcode = FT_Get_Next_Char(face, last_charcode, &gIndex);
+		charcodes.insert(last_charcode);
+	}
+	writer.readFont(charcodes.begin(), charcodes.end());
 
 	FT_ULong charcode;
 	FT_UInt gindex;
