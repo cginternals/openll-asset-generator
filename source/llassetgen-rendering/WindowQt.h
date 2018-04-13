@@ -52,7 +52,7 @@ class WindowQt : public QWindow {
     virtual void fontColorGChanged(QString value);
     virtual void fontColorBChanged(QString value);
     virtual void dtAlgorithmChanged(int index);
-    virtual void glyphPresetChanged(int index);
+    virtual void packingAlgoChanged(int index);
     virtual void packingSizeChanged(int index);
     virtual void dtThresholdChanged(QString value);
     virtual void fontNameChanged(QString value);

@@ -82,8 +82,7 @@ class Window : public WindowQt {
         auto path = QApplication::applicationDirPath();
         imagePath = path + "/../../data/llassetgen-rendering/outputDT.png";
 
-        // TODO uncomment when bugs in master are fixed
-        // calculateDistanceField();
+        calculateDistanceField();
 
         cornerBuffer = globjects::Buffer::create();
         textureBuffer = globjects::Buffer::create();
@@ -280,19 +279,13 @@ class Window : public WindowQt {
 
     virtual void fontColorBChanged(QString value) override { applyColorChange(fontColor.b, value); }
 
-    virtual void dtAlgorithmChanged(int index) override {
-        std::cout << "change Algo" << std::endl;
-        dtAlgorithm = index;
-    }
+    virtual void dtAlgorithmChanged(int index) override { dtAlgorithm = index; }
+
+    virtual void packingAlgoChanged(int index) override { packingAlgorithm = index; }
 
     virtual void dtThresholdChanged(QString value) override {
         dtThreshold = value.toFloat();
         paint();
-    }
-
-    virtual void glyphPresetChanged(int index) override {
-        std::cout << "change glyph preset" << std::endl;
-        glyphPreset = index;
     }
 
     virtual void packingSizeChanged(int index) override {
@@ -308,8 +301,7 @@ class Window : public WindowQt {
     virtual void triggerNewDT() override {
         makeCurrent();
 
-        // TODO uncomment when bugs are fixed in master
-        // calculateDistanceField();
+        calculateDistanceField();
         loadDistanceField();
 
         doneCurrent();
@@ -375,7 +367,7 @@ class Window : public WindowQt {
     bool showDistanceField = false;
     float dtThreshold = 0.5;
     int dtAlgorithm = 0;
-    int glyphPreset = 0;
+    int packingAlgorithm = 0;
     int downSampling = 0;
     std::string fontName = "Arial";
     int fontSize = 1024;
@@ -390,6 +382,9 @@ class Window : public WindowQt {
     QString imagePath = "/../../data/llassetgen-rendering/outputDT.png";
 
     void calculateDistanceField() {
+        // TODO early return because some things are buggy, wait for fixes in master
+        return;
+
         auto outPath = imagePath.toStdString();
 
         try {
@@ -414,22 +409,43 @@ class Window : public WindowQt {
                 glyphImages.begin(), glyphImages.end(),
                 imageSizes.begin(), [padding = padding](const llassetgen::Image& img) { return img.getSize(); });
 
-            // TODO IF PACKING ALGO shelfPackAtlas maxRectsPackAtlas INDEX
-            llassetgen::Packing pack = llassetgen::maxRectsPackAtlas(imageSizes.begin(), imageSizes.end(), false);
+            llassetgen::Packing pack;
+            switch (packingAlgorithm) {
+                case 0: {
+                    pack = llassetgen::shelfPackAtlas(imageSizes.begin(), imageSizes.end(), false);
+                    break;
+                }
+                case 1: {
+                    pack = llassetgen::maxRectsPackAtlas(imageSizes.begin(), imageSizes.end(), false);
+                    break;
+                }
+            }
 
-            // TODO IF DIST ALGO shelfPackAtlas maxRectsPackAtlas INDEX
-            /// {"deadrec", [](Image& input, Image& output) { DeadReckoning(input, output).transform(); }},
-            /// {"parabola", [](Image& input, Image& output) { ParabolaEnvelope(input, output).transform(); }},
+            switch (dtAlgorithm) {
+                case 0: {
+                    llassetgen::Image atlas =
+                        llassetgen::distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), pack,
+                                                       [](llassetgen::Image& input, llassetgen::Image& output) {
+                                                           llassetgen::DeadReckoning(input, output).transform();
+                                                       });
+                    atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
 
-            llassetgen::Image atlas = llassetgen::distanceFieldAtlas(
-                glyphImages.begin(), glyphImages.end(), pack, [](llassetgen::Image& input, llassetgen::Image& output) {
-                    llassetgen::ParabolaEnvelope(input, output).transform();
-                });
-            atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
+                    break;
+                }
+                case 1: {
+                    llassetgen::Image atlas =
+                        llassetgen::distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), pack,
+                                                       [](llassetgen::Image& input, llassetgen::Image& output) {
+                                                           llassetgen::ParabolaEnvelope(input, output).transform();
+                                                       });
+                    atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
+
+                    break;
+                }
+            }
 
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << std::endl;
-            return;  // 2; //TODO
         }
     }
 
@@ -569,13 +585,13 @@ void setupGUI(QMainWindow* window) {
     QObject::connect(fontNameLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontNameChanged(QString)));
     acLayout->addRow("Font Name:", fontNameLE);
 
-    // glyph presets
-    auto* gpComboBox = new QComboBox();
+    // choose packing algorithm
+    auto* packComboBox = new QComboBox();
     // item order is important
-    gpComboBox->addItem("ASCII");
-    // gpComboBox->addItem("Other?"); //TODO more options?
-    QObject::connect(gpComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(glyphPresetChanged(int)));
-    acLayout->addRow("Glyph Preset:", gpComboBox);
+    packComboBox->addItem("Shelf");
+    packComboBox->addItem("Max Rects");
+    QObject::connect(packComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(packingAlgoChanged(int)));
+    acLayout->addRow("Packing:", packComboBox);
 
     // packing size (used for downsampling)
     auto* psComboBox = new QComboBox();

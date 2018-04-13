@@ -159,7 +159,7 @@ void WindowQt::fontColorBChanged(QString /*unused*/) {}
 
 void WindowQt::dtAlgorithmChanged(int /*unused*/) {}
 
-void WindowQt::glyphPresetChanged(int /*unused*/) {}
+void WindowQt::packingAlgoChanged(int /*unused*/) {}
 
 void WindowQt::packingSizeChanged(int /*unused*/) {}
 
