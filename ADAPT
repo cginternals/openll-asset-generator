@@ -5,9 +5,9 @@ To adapt this template to your own project, follow these steps:
 --------------------------------------------------------------------
 In the root directory adapt/change/do the following:
 
-[ ] Edit AUTHORS
+[√] Edit AUTHORS
 [√] Edit LICENSE
-[ ] Edit README.md
+[√] Edit README.md
 [√] Rename ./template-config.cmake -> <project>-config.cmake
 
 CMakeLists.txt:
