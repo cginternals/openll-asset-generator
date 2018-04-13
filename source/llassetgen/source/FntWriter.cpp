@@ -29,13 +29,13 @@ namespace llassetgen {
 	void FntWriter::setFontInfo() {
 		// collect font_info 
 		font_info.face = face->family_name + std::string(" ") + face->style_name;
-		font_info.is_bold == false;
-		font_info.is_italic == false;
+		font_info.is_bold = false;
+		font_info.is_italic = false;
 		if (face->style_flags == FT_STYLE_FLAG_ITALIC) {
-			font_info.is_italic == true;
+			font_info.is_italic = true;
 		}
 		if (face->style_flags == FT_STYLE_FLAG_BOLD) {
-			font_info.is_bold == true;
+			font_info.is_bold = true;
 		}
 		int encoding = int(face->charmap->encoding);
 		for (int i = 0; i < 4; ++i) {
