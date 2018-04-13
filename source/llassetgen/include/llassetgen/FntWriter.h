@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 #include <llassetgen/Image.h>
 #include <llassetgen/Packing.h>
@@ -66,13 +67,13 @@ namespace llassetgen {
 	class LLASSETGEN_API FntWriter {
 		public:
 			FntWriter(FT_Face face, std::string faceName, int fontSize, float scalingFactor, bool scaledGlyph);
-			void readFont();
+			void readFont(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd);
 			void setAtlasProperties(Vec2<PackingSizeType> size, int maxHeight);
 			void saveFnt(std::string filepath);
-			void setFontInfo();
 			void setCharInfo(FT_UInt charcode, Rect<uint32_t> charArea, Vec2<float> offset);
-			void setKerningInfo();
 		private:
+			void setFontInfo();
+			void setKerningInfo(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd);
 			FT_Face face;
 			std::string faceName;
 			Info fontInfo;

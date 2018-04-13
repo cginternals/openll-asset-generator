@@ -4,6 +4,7 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
+#include <set>
 
 #include <llassetgen/FntWriter.h>
 #include <llassetgen/Image.h>
@@ -77,15 +78,12 @@ namespace llassetgen {
 		charInfos.push_back(charInfo);
 	}
 
-	void FntWriter::setKerningInfo() {
-		FT_ULong  leftCharcode;
-		FT_UInt   leftGindex;
-		leftCharcode = FT_Get_First_Char(face, &leftGindex);
-		while (leftGindex != 0) {
-			FT_ULong  rightCharcode;
-			FT_UInt   rightGindex;
-			rightCharcode = FT_Get_First_Char(face, &rightGindex);
-			while (rightGindex != 0) {
+	void FntWriter::setKerningInfo(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd) {
+		std::set<FT_ULong>::iterator leftCharcode = charcodesBegin;
+		for (std::set<FT_ULong>::iterator leftCharcode = charcodesBegin; leftCharcode != charcodesEnd; leftCharcode++) {
+			for (std::set<FT_ULong>::iterator rightCharcode = charcodesBegin; rightCharcode != charcodesEnd; rightCharcode++) {
+				FT_UInt leftGindex = FT_Get_Char_Index(face, *leftCharcode);
+				FT_UInt rightGindex = FT_Get_Char_Index(face, *rightCharcode);
 				FT_Vector kerningVector;
 				FT_Get_Kerning(face, leftGindex, rightGindex, FT_KERNING_UNSCALED, &kerningVector);
 				if (kerningVector.x != 0) {
@@ -96,16 +94,13 @@ namespace llassetgen {
 					kerningInfo.kerning = float(kerningVector.x) / 64.f;
 					kerningInfos.push_back(kerningInfo);
 				}
-				rightCharcode = FT_Get_Next_Char(face, rightCharcode, &rightGindex);
 			}
-
-			leftCharcode = FT_Get_Next_Char(face, leftCharcode, &leftGindex);
 		}
 	}
 
-	void FntWriter::readFont() {
+	void FntWriter::readFont(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd) {
 		setFontInfo();
-		setKerningInfo();
+		setKerningInfo(charcodesBegin, charcodesEnd);
 	}
 
 	void FntWriter::setAtlasProperties(Vec2<PackingSizeType> size, int maxHeight) {
