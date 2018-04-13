@@ -38,7 +38,14 @@ namespace llassetgen {
         Vec2<T> position{0, 0};
         Vec2<T> size{0, 0};
 
+        Rect() = default;
         Rect(const Vec2<T>& _position, const Vec2<T>& _size);
+
+        bool contains(const Rect& other) const;
+        bool overlaps(const Rect& other) const;
+
+        bool operator==(const Rect& other) const;
+        bool operator!=(const Rect& other) const;
     };
 
     template <class T>
@@ -84,8 +91,38 @@ namespace llassetgen {
     Rect<T>::Rect(const Vec2<T>& _position, const Vec2<T>& _size) : position{_position}, size{_size} {}
 
     template <class T>
+    bool Rect<T>::operator==(const Rect& other) const {
+        return position == other.position && size == other.size;
+    }
+
+    template <class T>
+    bool Rect<T>::operator!=(const Rect& other) const {
+        return !(*this == other);
+    }
+
+    template <class T>
+    bool Rect<T>::contains(const Rect<T>& other) const {
+        auto thisMaxPoint = position + size;
+        auto otherMaxPoint = other.position + other.size;
+        return position.x <= other.position.x && position.y <= other.position.y && thisMaxPoint.x >= otherMaxPoint.x &&
+               thisMaxPoint.y >= otherMaxPoint.y;
+    }
+
+    template <class T>
+    bool Rect<T>::overlaps(const Rect<T>& other) const {
+        return position.x < other.position.x + other.size.x && position.x + size.x > other.position.x &&
+               position.y < other.position.y + other.size.y && position.y + size.y > other.position.y;
+    }
+
+    template <class T>
     std::ostream& operator<<(std::ostream& out, const Vec2<T>& vec) {
         out << '(' << vec.x << ',' << vec.y << ')';
+        return out;
+    }
+
+    template <class T>
+    std::ostream& operator<<(std::ostream& out, const Rect<T>& rect) {
+        out << "Rect(pos: " << rect.position << ", size: " << rect.size << ')';
         return out;
     }
 }

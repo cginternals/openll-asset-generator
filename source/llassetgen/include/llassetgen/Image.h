@@ -26,17 +26,21 @@ namespace llassetgen {
         LLASSETGEN_NO_EXPORT static void writeData(png_struct_def* png, uint8_t* data, size_t length);
         LLASSETGEN_NO_EXPORT static void flushData(png_struct_def* png);
 
+        LLASSETGEN_NO_EXPORT void fillPadding(size_t padding);
+
        public:
         ~Image();
         Image& operator=(const Image&) = delete;
         Image(const Image&) = delete;
         Image(Image&& src);
         Image(size_t width, size_t height, size_t _bitDepth);
+        Image(FT_Bitmap_ bitmap, size_t padding = 0);
         Image view(Vec2<size_t> _min, Vec2<size_t> _max, size_t padding = 0);
 
         size_t getWidth() const;
         size_t getHeight() const;
         size_t getBitDepth() const;
+        Vec2<size_t> getSize() const;
 
         bool isValid(Vec2<size_t> pos) const;
         template <typename pixelType>
@@ -47,6 +51,7 @@ namespace llassetgen {
         template <typename pixelType = uint8_t>
         void fillRect(Vec2<size_t> _min, Vec2<size_t> _max, pixelType in = 0) const;
         void clear() const;
+        void copyDataFrom(const Image& copy);
 
         template <typename pixelType>
         void centerDownsampling(const Image& src) const;
