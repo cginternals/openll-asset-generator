@@ -135,16 +135,6 @@ namespace llassetgen {
 		std::ofstream fnt_file;
 		fnt_file.open(filepath + ".fnt");
 
-		// cut off path from filename
-		size_t last_slash_pos = filepath.rfind('\\');
-		std::string filename;
-		if (last_slash_pos != std::string::npos) {
-			filename = filepath.substr(last_slash_pos + 1);
-		}
-		else {
-			filename = filepath;
-		}
-
 		// write in plain text format
 		// TODO: XML and binary
 
