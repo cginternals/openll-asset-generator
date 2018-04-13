@@ -80,7 +80,7 @@ class Window : public WindowQt {
 
         // get glyph atlas
         auto path = QApplication::applicationDirPath();
-        imagePath = path + "/../../data/llassetgen-rendering/outputDT.png";
+        imagePath = path + "/../../../../../data/llassetgen-rendering/outputDT.png";
 
         calculateDistanceField();
 
@@ -98,7 +98,7 @@ class Window : public WindowQt {
         */
 
         // openll-asset-generator/data/llassetgen-rendering
-        const std::string dataPath = path.toStdString() + "/../../data/llassetgen-rendering";
+        const std::string dataPath = path.toStdString() + "/../../../../../data/llassetgen-rendering";
 
         vertexShaderSource = globjects::Shader::sourceFromFile(dataPath + "/shader.vert");
         vertexShaderTemplate = globjects::Shader::applyGlobalReplacements(vertexShaderSource.get());
@@ -370,7 +370,7 @@ class Window : public WindowQt {
     int packingAlgorithm = 0;
     int downSampling = 0;
     std::string fontName = "Arial";
-    int fontSize = 1024;
+    int fontSize = 8;
     int drBlack = -100;
     int drWhite = 100;
     int padding = 0;  // TODO GUI input for this?
@@ -379,12 +379,9 @@ class Window : public WindowQt {
     bool isRotating = false;
     glm::vec2 lastMousePos = glm::vec2();
 
-    QString imagePath = "/../../data/llassetgen-rendering/outputDT.png";
+    QString imagePath = "../../../../../data/llassetgen-rendering/outputDT.png";
 
     void calculateDistanceField() {
-        // TODO early return because some things are buggy, wait for fixes in master
-        return;
-
         auto outPath = imagePath.toStdString();
 
         try {
@@ -407,7 +404,7 @@ class Window : public WindowQt {
 
             std::transform(
                 glyphImages.begin(), glyphImages.end(),
-                imageSizes.begin(), [padding = padding](const llassetgen::Image& img) { return img.getSize(); });
+                imageSizes.begin(), [](const llassetgen::Image& img) { return img.getSize(); });
 
             llassetgen::Packing pack;
             switch (packingAlgorithm) {
@@ -625,7 +622,7 @@ void setupGUI(QMainWindow* window) {
     auto* fsv = new QIntValidator();
     fsv->setBottom(1);
     fontSize->setValidator(fsv);
-    fontSize->setPlaceholderText("1024");
+    fontSize->setPlaceholderText("8");
     fontSize->setMaximumWidth(45);
     QObject::connect(fontSize, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
     dtLayout->addRow("Original Font Size:", fontSize);

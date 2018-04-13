@@ -4,6 +4,9 @@
 
 find_package(Freetype)
 find_package(PNG)
+if(UNIX)
+    find_package(fontconfig)
+endif()
 
 
 #
@@ -162,6 +165,13 @@ target_link_libraries(${target}
 
     INTERFACE
 )
+
+if (UNIX)
+    target_link_libraries(${target}
+            PRIVATE
+            fontconfig
+            )
+endif ()
 
 
 #

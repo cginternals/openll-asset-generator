@@ -29,6 +29,21 @@ namespace llassetgen {
             delete[] data;
     }
 
+    Image::Image(Image&& src) :min(src.min), max(src.max), stride(src.stride), bitDepth(src.bitDepth), data(src.data), isOwnerOfData(src.isOwnerOfData) {
+        src.isOwnerOfData = false;
+    }
+
+    Image& Image::operator=(Image&& other) noexcept {
+        min = other.min;
+        max = other.max;
+        stride = other.stride;
+        bitDepth = other.bitDepth;
+        data = other.data;
+        isOwnerOfData = other.isOwnerOfData;
+        other.isOwnerOfData = false;
+        return *this;
+    }
+
     Image::Image(Vec2<size_t> _min, Vec2<size_t> _max, size_t _stride, uint8_t _bitDepth, uint8_t* _data)
         : min(_min), max(_max), stride(_stride), bitDepth(_bitDepth), data(_data), isOwnerOfData(false) {}
 

@@ -30,6 +30,10 @@ namespace llassetgen {
 
        public:
         ~Image();
+        Image& operator=(const Image&) = delete;
+        Image(const Image&) = delete;
+        Image& operator=(Image&&) noexcept;
+        Image(Image&& src);
         Image(size_t width, size_t height, size_t _bitDepth);
         Image(FT_Bitmap_ bitmap, size_t padding = 0);
         Image view(Vec2<size_t> _min, Vec2<size_t> _max, size_t padding = 0);

@@ -2,8 +2,6 @@
 # External dependencies
 #
 
-# find_package(THIRDPARTY REQUIRED)
-
 
 #
 # Executable name and options
