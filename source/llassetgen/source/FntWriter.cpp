@@ -14,7 +14,7 @@
 #include FT_OUTLINE_H
 
 namespace llassetgen {
-    FntWriter::FntWriter(FT_Face _face, std::string _faceName, int _fontSize, float _scalingFactor, bool _scaledGlyph) {
+    FntWriter::FntWriter(FT_Face _face, std::string _faceName, unsigned int _fontSize, float _scalingFactor, bool _scaledGlyph) {
         faceName = _faceName;
         face = _face;
         fontInfo = Info();
@@ -58,7 +58,7 @@ namespace llassetgen {
         */
     }
 
-    void FntWriter::setCharInfo(FT_UInt gindex, Rect<uint32_t> charArea, Vec2<float> offset) {
+    void FntWriter::setCharInfo(FT_UInt gindex, Rect<PackingSizeType> charArea, Vec2<float> offset) {
         FT_Load_Glyph(face, gindex, FT_LOAD_DEFAULT);
 
         FT_Pos yBearing = face->glyph->metrics.vertBearingY;
