@@ -80,7 +80,7 @@ class Window : public WindowQt {
 
         // get glyph atlas
         auto path = QApplication::applicationDirPath();
-        imagePath = path + "/../../../../../data/llassetgen-rendering/outputDT.png";
+        imagePath = path + "/../../data/llassetgen-rendering/outputDT.png";
 
         calculateDistanceField();
 
@@ -98,7 +98,7 @@ class Window : public WindowQt {
         */
 
         // openll-asset-generator/data/llassetgen-rendering
-        const std::string dataPath = path.toStdString() + "/../../../../../data/llassetgen-rendering";
+        const std::string dataPath = path.toStdString() + "/../../data/llassetgen-rendering";
 
         vertexShaderSource = globjects::Shader::sourceFromFile(dataPath + "/shader.vert");
         vertexShaderTemplate = globjects::Shader::applyGlobalReplacements(vertexShaderSource.get());
@@ -340,7 +340,7 @@ class Window : public WindowQt {
     }
 
     virtual void exportGlyphAtlas() override {
-        std::cout << "EXPORT: atlas is exported automatically when changes applied. TODO" << std::endl;
+        std::cout << "TODO EXPORT: atlas is exported automatically when changes applied, but fnt-File is not exported. Use CLI-app for this feature." << std::endl;
         // TODO export dialog: ask user for path
     }
 
@@ -373,13 +373,13 @@ class Window : public WindowQt {
     int fontSize = 8;
     int drBlack = -100;
     int drWhite = 100;
-    int padding = 0;  // TODO GUI input for this?
+    int padding = 0; //TODO GUI 
 
     bool isPanning = false;
     bool isRotating = false;
     glm::vec2 lastMousePos = glm::vec2();
 
-    QString imagePath = "../../../../../data/llassetgen-rendering/outputDT.png";
+    QString imagePath = "";
 
     void calculateDistanceField() {
         auto outPath = imagePath.toStdString();
@@ -590,19 +590,15 @@ void setupGUI(QMainWindow* window) {
     QObject::connect(packComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(packingAlgoChanged(int)));
     acLayout->addRow("Packing:", packComboBox);
 
-    // packing size (used for downsampling)
-    auto* psComboBox = new QComboBox();
-    // item order is important
-    psComboBox->addItem("64");
-    psComboBox->addItem("128");
-    psComboBox->addItem("265");
-    psComboBox->addItem("512");
-    psComboBox->addItem("1024");
-    psComboBox->addItem("2048");
-    psComboBox->addItem("4096");
-    psComboBox->addItem("8192");
-    QObject::connect(psComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(packingSizeChanged(int)));
-    acLayout->addRow("Texture size:", psComboBox);
+    // original font size for distance field rendering
+    auto* fontSize = new QLineEdit();
+    auto* fsv = new QIntValidator();
+    fsv->setBottom(1);
+    fontSize->setValidator(fsv);
+    fontSize->setPlaceholderText("8");
+    fontSize->setMaximumWidth(45);
+    QObject::connect(fontSize, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
+    acLayout->addRow("Original Font Size:", fontSize);
 
     // DISTANCE TRANSFORM OPTIONS
 
@@ -616,16 +612,6 @@ void setupGUI(QMainWindow* window) {
     dtComboBox->addItem("Parabola Envelope");
     QObject::connect(dtComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(dtAlgorithmChanged(int)));
     dtLayout->addRow("Algorithm:", dtComboBox);
-
-    // original font size for distance field rendering
-    auto* fontSize = new QLineEdit();
-    auto* fsv = new QIntValidator();
-    fsv->setBottom(1);
-    fontSize->setValidator(fsv);
-    fontSize->setPlaceholderText("8");
-    fontSize->setMaximumWidth(45);
-    QObject::connect(fontSize, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
-    dtLayout->addRow("Original Font Size:", fontSize);
 
     // dynamic range for distance field rendering
     auto* drLayout = new QHBoxLayout();
@@ -649,6 +635,22 @@ void setupGUI(QMainWindow* window) {
     drLayout->addWidget(new QLabel("]"));
 
     dtLayout->addRow("Dynamic Range:", drLayout);
+
+    // packing size (used for downsampling)
+    auto* psComboBox = new QComboBox();
+    // item order is important
+    psComboBox->addItem("64");
+    psComboBox->addItem("128");
+    psComboBox->addItem("265");
+    psComboBox->addItem("512");
+    psComboBox->addItem("1024");
+    psComboBox->addItem("2048");
+    psComboBox->addItem("4096");
+    psComboBox->addItem("8192");
+    QObject::connect(psComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(packingSizeChanged(int)));
+    // TODO uncomment when downsampling is implemented in llassetgen
+    // maybe change from dropdown to float input
+    //dtLayout->addRow("Texture size:", psComboBox);
 
     // trigger distance field creation
     auto* triggerDTButton = new QPushButton("OK");
@@ -687,7 +689,7 @@ void setupGUI(QMainWindow* window) {
     // switch between viewing the rendered glyphs and the underlying distance field
     auto* switchRenderingButton = new QPushButton("Distance Field");
     switchRenderingButton->setCheckable(true);
-    switchRenderingButton->setMaximumWidth(90);
+    switchRenderingButton->setMaximumWidth(100);
     QObject::connect(switchRenderingButton, SIGNAL(toggled(bool)), glwindow, SLOT(toggleDistanceField(bool)));
     renderingLayout->addRow("Switch Rendering:", switchRenderingButton);
 
