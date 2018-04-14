@@ -87,17 +87,30 @@ int parseAtlas(int argc, char** argv) {
     // Example: llassetgen-cmd atlas -d parabola --ascii -f Verdana atlas.png
     CLI::App app{atlasHelp};
 
+    // positional arguments
+    std::string outPath;
+    app.add_option("outfile", outPath, aOutfileHelp)->required();
+
+    // algorithms
     std::string algorithm;
     CLI::Option* distfieldOpt = app.add_set("-d, --distfield", algorithm, algoNames(dtAlgos), distfieldHelp);
 
     std::string packing = "shelf";
     app.add_set("-k, --packing", packing, algoNames(packingAlgos), packingHelp, true);
 
+    // glyphs
     std::string glyphs;
     CLI::Option* glyphsOpt = app.add_option("-g, --glyph", glyphs, glyphHelp);
 
     std::vector<unsigned int> charCodes;
     app.add_option("-c, --charcode", charCodes, charcodeHelp);
+
+    bool includeAscii = false;
+    app.add_flag("--ascii", includeAscii, asciiHelp);
+
+    // font
+    unsigned int fontSize = 128;
+    app.add_option("-s, --fontsize", fontSize, fontsizeHelp, true);
 
     std::string fontName;
     CLI::Option* fontNameOpt = app.add_option("-f, --fontname", fontName, fontnameHelp);
@@ -108,28 +121,21 @@ int parseAtlas(int argc, char** argv) {
     // TODO: app.requires_one
     glyphsOpt->requires_one({fontPathOpt, fontNameOpt});
 
+    // other options
     unsigned int padding = 0;
     app.add_option("-p, --padding", padding, paddingHelp);
-
-    unsigned int fontSize = 128;
-    app.add_option("-s, --fontsize", fontSize, fontsizeHelp, true);
-
-    std::vector<int> dynamicRange = {-30, 20};
-    app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp, true)->requires(distfieldOpt)->expected(2);
-
-    bool includeAscii = false;
-    app.add_flag("--ascii", includeAscii, asciiHelp);
-
-    bool createFnt = false;
-    app.add_flag("--fnt", createFnt, fntHelp);
-
-    std::string outPath;
-    app.add_option("outfile", outPath, aOutfileHelp)->required();
 
     unsigned int downsamplingRatio = 1;
     app.add_option("-w, --downsampling", downsamplingRatio, downsamplingRatioHelp);
 
+    std::vector<int> dynamicRange = {-30, 20};
+    app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp, true)->requires(distfieldOpt)->expected(2);
+
+    bool createFnt = false;
+    app.add_flag("--fnt", createFnt, fntHelp);
+
     app.set_config("--config", "", configHelp);
+
 
     CLI11_PARSE(app, argc, argv);
 
