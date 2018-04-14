@@ -46,10 +46,10 @@ std::u32string UTF8toUCS4(const std::string& str) {
 #endif
 }
 
-std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, size_t padding = 0) {
+std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, unsigned int downsamplingRatio) {
     std::vector<Vec2<size_t>> imageSizes(images.size());
     std::transform(images.begin(), images.end(), imageSizes.begin(),
-                   [padding](const Image& img) { return img.getSize(); });
+                   [downsamplingRatio](const Image& img) { return img.getSize() / downsamplingRatio; });
     return imageSizes;
 }
 
@@ -126,7 +126,7 @@ int parseAtlas(int argc, char** argv) {
     std::string outPath;
     app.add_option("outfile", outPath, aOutfileHelp)->required();
 
-    int downsamplingRatio = 1;
+    unsigned int downsamplingRatio = 1;
     app.add_option("-w, --downsampling", downsamplingRatio, downsamplingRatioHelp);
 
     app.set_config("--config", "", configHelp);
@@ -147,7 +147,7 @@ int parseAtlas(int argc, char** argv) {
                                                      : FontFinder::fromName(fontName);
 
         std::vector<Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
-        std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages);
+        std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages, downsamplingRatio);
         Packing p = packingAlgos[packing](imageSizes.begin(), imageSizes.end(), false);
 
         if (distfieldOpt->count()) {

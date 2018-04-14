@@ -26,6 +26,8 @@ namespace llassetgen {
         Vec2& operator+=(const Vec2& other);
         Vec2 operator-(const Vec2& other) const;
         Vec2& operator-=(const Vec2& other);
+        Vec2 operator/(const T dividend) const;
+        Vec2& operator/=(const T dividend);
 
         Vec2 operator-() const;
 
@@ -69,6 +71,18 @@ namespace llassetgen {
     Vec2<T>& Vec2<T>::operator-=(const Vec2& other) {
         x -= other.x;
         y -= other.y;
+        return *this;
+    }
+
+    template<class T>
+    Vec2<T> Vec2<T>::operator/(const T dividend) const {
+        return {x / dividend, y / dividend};
+    }
+
+    template<class T>
+    Vec2<T>& Vec2<T>::operator/=(const T dividend) {
+        x /= dividend;
+        y /= dividend;
         return *this;
     }
 

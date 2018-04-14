@@ -33,8 +33,11 @@ namespace llassetgen {
 
         auto rectIt = packing.rects.begin();
         for (; imgBegin < imgEnd; rectIt++, imgBegin++) {
+            Image distField{imgBegin->getWidth(), imgBegin->getHeight(), DistanceTransform::bitDepth};
+            dtFunc(*imgBegin, distField);
+
             Image output = atlas.view(rectIt->position, rectIt->position + rectIt->size);
-            dtFunc(*imgBegin, output);
+            output.centerDownsampling<float>(distField);
         }
 
         return atlas;
