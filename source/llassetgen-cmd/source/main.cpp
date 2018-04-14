@@ -186,7 +186,7 @@ int parseDistField(int argc, char** argv) {
     app.add_set("-a, --algorithm", algorithm, algoNames(dtAlgos), algorithmHelp, true);
 
     std::string imgPath;
-    app.add_option("-i, --image", imgPath, imageHelp)->required()->check(CLI::ExistingFile);
+    app.add_option("image", imgPath, imageHelp)->required()->check(CLI::ExistingFile);
 
     std::string outPath;
     app.add_option("outfile", outPath, dOutfileHelp)->required();
