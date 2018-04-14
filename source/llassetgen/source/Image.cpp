@@ -458,6 +458,7 @@ namespace llassetgen {
 
     size_t Image::divisiblePadding(size_t size, size_t padding, size_t divisor) {
         size_t paddedSize = size + 2 * padding;
-        return paddedSize + (-paddedSize % divisor);
+        size_t moduloPadding = divisor - (paddedSize % divisor) % divisor;
+        return paddedSize + moduloPadding;
     }
 }
