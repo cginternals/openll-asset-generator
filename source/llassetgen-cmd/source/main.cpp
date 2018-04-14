@@ -219,7 +219,7 @@ int parseDistField(int argc, char** argv) {
 int main(int argc, char** argv) {
     llassetgen::init();
 
-    CLI::App app{"OpenLL Font Asset Generator"};
+    CLI::App app{appHelp};
     // pseudo-subcommands to generate a help message, the actual parsing happens in the subcommand functions
     CLI::App* atlas = app.add_subcommand("atlas", atlasHelp)->allow_extras();
     CLI::App* distfield = app.add_subcommand("distfield", dfHelp)->allow_extras();
