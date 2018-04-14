@@ -199,6 +199,11 @@ int parseDistField(int argc, char** argv) {
     CLI11_PARSE(app, argc, argv);
 
     Image input = Image(imgPath);
+    if (input.getBitDepth() != 1) {
+        std::cerr << "Error: only black/white images are supported. Please use an image with a bit depth of 1." << std::endl;
+        return 2;
+    }
+
     Image output = Image(input.getWidth(), input.getHeight(), DistanceTransform::bitDepth);
     dtAlgos[algorithm](input, output);
     output.exportPng<DistanceTransform::OutputType>(outPath, dynamicRange[1], dynamicRange[0]);
