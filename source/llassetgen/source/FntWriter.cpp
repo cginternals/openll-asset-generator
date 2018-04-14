@@ -79,7 +79,6 @@ namespace llassetgen {
 	}
 
 	void FntWriter::setKerningInfo(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd) {
-		std::set<FT_ULong>::iterator leftCharcode = charcodesBegin;
 		for (std::set<FT_ULong>::iterator leftCharcode = charcodesBegin; leftCharcode != charcodesEnd; leftCharcode++) {
 			for (std::set<FT_ULong>::iterator rightCharcode = charcodesBegin; rightCharcode != charcodesEnd; rightCharcode++) {
 				FT_UInt leftGindex = FT_Get_Char_Index(face, *leftCharcode);
