@@ -3,43 +3,18 @@
 #include <map>
 #include <ostream>
 
+#include <algorithms.h>
 #include <helpstrings.h>
+
 #include <llassetgen/Atlas.h>
 #include <llassetgen/FntWriter.h>
 #include <llassetgen/FontFinder.h>
 
 using namespace llassetgen;
 
-using VecIter = std::vector<Vec2<size_t>>::const_iterator;
-using ImageTransform = void (*)(Image&, Image&);
-
-std::map<std::string, ImageTransform> dtAlgos{
-    {"deadrec", [](Image& input, Image& output) { DeadReckoning(input, output).transform(); }},
-    {"parabola", [](Image& input, Image& output) { ParabolaEnvelope(input, output).transform(); }},
-};
-
-std::map<std::string, Packing (*)(VecIter, VecIter, bool)> packingAlgos{
-    {"shelf", shelfPackAtlas},
-    {"maxrects", maxRectsPackAtlas}
-};
-
-std::map<std::string, ImageTransform> downsamplingAlgos{
-    {"center", [](Image& input, Image& output) { input.centerDownsampling<DistanceTransform::OutputType>(output); }},
-    {"average", [](Image& input, Image& output) { input.averageDownsampling<DistanceTransform::OutputType>(output); }},
-    {"min", [](Image& input, Image& output) { input.minDownsampling<DistanceTransform::OutputType>(output); }}};
-
 // all printable ascii characters, except for space
 constexpr char ascii[] =
     "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-
-template <class Func>
-std::set<std::string> algoNames(std::map<std::string, Func> map) {
-    std::set<std::string> options;
-    for (const auto& algo : map) {
-        options.insert(algo.first);
-    }
-    return options;
-}
 
 std::u32string UTF8toUCS4(const std::string& str) {
 #if _MSC_VER >= 1900  // handle Visual Studio bug
