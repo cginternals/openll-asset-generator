@@ -25,7 +25,7 @@
 
 namespace llassetgen {
     Image::~Image() {
-        if(isOwnerOfData)
+        if (isOwnerOfData)
             delete[] data;
     }
 
@@ -55,21 +55,22 @@ namespace llassetgen {
           data(new uint8_t[stride * height]),
           isOwnerOfData(true) {}
 
-    Image::Image(FT_Bitmap bitmap, size_t padding)
-        : Image(bitmap.width + 2 * padding, bitmap.rows + 2 * padding, 1) {
-        if (padding > 0) {
-            Vec2<size_t> paddingVec{padding, padding};
-            Image&& paddedView = view(paddingVec, getSize() - paddingVec);
-            fillPadding(padding);
+    Image::Image(FT_Bitmap bitmap, size_t padding, size_t divisibleBy)
+        : Image(divisiblePadding(bitmap.width, padding, divisibleBy), divisiblePadding(bitmap.rows, padding, divisibleBy), 1) {
+        if (padding > 0 || bitmap.width % divisibleBy != 0 || bitmap.rows % divisibleBy != 0) {
+            Vec2<size_t> paddingVec{padding, padding},
+                         imgSize{bitmap.width, bitmap.rows};
+            Image&& paddedView = view(paddingVec, imgSize + paddingVec);
             paddedView.load(bitmap);
+            fillPadding({paddingVec, imgSize});
         } else {
             load(bitmap);
         }
     }
 
-    void Image::fillPadding(size_t padding) {
-        Vec2<size_t> innerMin {padding, padding},
-                     innerMax = getSize() - innerMin;
+    void Image::fillPadding(Rect<size_t> image) {
+        Vec2<size_t> innerMin = image.position,
+                     innerMax = image.position + image.size;
 
         fillRect({0, 0}, {innerMax.x, innerMin.y});
         fillRect({innerMax.x, 0}, {getWidth(), innerMax.y});
@@ -218,14 +219,17 @@ namespace llassetgen {
 
     void Image::load(const FT_Bitmap& ft_bitmap) {
         assert(getWidth() == ft_bitmap.width && getHeight() == ft_bitmap.rows && bitDepth == getFtBitdepth(ft_bitmap));
-        if (min.x == 0 && min.y == 0 && static_cast<size_t>(ft_bitmap.pitch) == stride) {
+        auto pitch = static_cast<size_t>(ft_bitmap.pitch);
+        if (min.x == 0 && min.y == 0 && pitch == stride) {
             memcpy(data, ft_bitmap.buffer, ft_bitmap.pitch * ft_bitmap.rows);
         } else if (min.x % 8 == 0) {
             assert(bitDepth == 1);
-            for (size_t y = 0; y < ft_bitmap.rows; y++)
+            size_t rowLength = std::min(pitch, stride);
+            for (size_t y = 0; y < ft_bitmap.rows; y++) {
                 memcpy(&data[(min.y + y) * stride + min.x / 8],
                        &ft_bitmap.buffer[y * ft_bitmap.pitch],
-                       ft_bitmap.pitch);
+                       rowLength);
+            }
         } else {
             for (size_t y = 0; y < ft_bitmap.rows; y++) {
                 for (size_t x = 0; x < ft_bitmap.width; x++) {
@@ -453,5 +457,11 @@ namespace llassetgen {
                 setPixel<uint8_t>(pos, src.getPixel<uint8_t>(pos));
             }
         }
+    }
+
+    size_t Image::divisiblePadding(size_t size, size_t padding, size_t divisor) {
+        size_t paddedSize = size + 2 * padding;
+        size_t moduloPadding = divisor - (paddedSize % divisor) % divisor;
+        return paddedSize + moduloPadding;
     }
 }
