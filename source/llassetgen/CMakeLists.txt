@@ -185,6 +185,7 @@ target_compile_definitions(${target}
 
 target_compile_options(${target}
     PRIVATE
+    ${OpenMP_CXX_FLAGS}
 
     PUBLIC
     ${DEFAULT_COMPILE_OPTIONS}
