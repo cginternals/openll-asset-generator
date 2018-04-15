@@ -14,8 +14,8 @@ namespace llassetgen {
             using IterType = typename IterTraits::value_type;
             using IterCategory = typename IterTraits::iterator_category;
             static_assert(std::is_assignable<Image, IterType>::value, "Input elements must be assignable to Image");
-            static_assert(std::is_base_of<std::input_iterator_tag, IterCategory>::value,
-                          "Input iterator must be an InputIterator");
+            static_assert(std::is_base_of<std::random_access_iterator_tag, IterCategory>::value,
+                          "Input iterator must be a RandomAccessIterator");
             return 0;
         }
     }
@@ -29,10 +29,10 @@ namespace llassetgen {
         Image atlas{packing.atlasSize.x, packing.atlasSize.y, bitDepth};
         atlas.clear();
 
-        auto rectIt = packing.rects.begin();
-        for (; imgBegin < imgEnd; rectIt++, imgBegin++) {
-            Image view = atlas.view(rectIt->position, rectIt->position + rectIt->size);
-            view.copyDataFrom(*imgBegin);
+        for (int i = 0; i < std::distance(imgBegin, imgEnd); i++) {
+            auto& rect = packing.rects[i];
+            Image view = atlas.view(rect.position, rect.position + rect.size);
+            view.copyDataFrom(imgBegin[i]);
         }
         return atlas;
     }
@@ -46,12 +46,12 @@ namespace llassetgen {
         Image atlas{packing.atlasSize.x, packing.atlasSize.y, DistanceTransform::bitDepth};
         atlas.fillRect({0, 0}, atlas.getSize(), DistanceTransform::backgroundVal);
 
-        auto rectIt = packing.rects.begin();
-        for (; imgBegin < imgEnd; rectIt++, imgBegin++) {
-            Image distField{imgBegin->getWidth(), imgBegin->getHeight(), DistanceTransform::bitDepth};
-            distanceTransform(*imgBegin, distField);
+        for (int i = 0; i < std::distance(imgBegin, imgEnd); i++) {
+            Image distField{imgBegin[i].getWidth(), imgBegin[i].getHeight(), DistanceTransform::bitDepth};
+            distanceTransform(imgBegin[i], distField);
 
-            Image output = atlas.view(rectIt->position, rectIt->position + rectIt->size);
+            auto& rect = packing.rects[i];
+            Image output = atlas.view(rect.position, rect.position + rect.size);
             downSampling(output, distField);
         }
 
