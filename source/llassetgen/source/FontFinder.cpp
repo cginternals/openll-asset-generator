@@ -30,15 +30,15 @@ namespace llassetgen {
         return FontFinder::fromPath(fontPath);
 #elif _WIN32
         FontFinder fontFinder;
-            if (!fontFinder.getFontData(fontName)) {
+        if (!fontFinder.getFontData(fontName)) {
             throw std::runtime_error("font not found");
-            }
+        }
 
-            FT_Error err = FT_New_Memory_Face(freetype, &fontFinder.fontData[0], fontFinder.fontData.size(), 0, &fontFinder.fontFace);
-            if (err) {
+        FT_Error err = FT_New_Memory_Face(freetype, &fontFinder.fontData[0], fontFinder.fontData.size(), 0, &fontFinder.fontFace);
+        if (err) {
             throw std::runtime_error("font could not be loaded");
-            }
-            return fontFinder;
+        }
+        return fontFinder;
 #endif
     }
 
@@ -78,21 +78,21 @@ namespace llassetgen {
 
         HDC deviceContext = CreateCompatibleDC(nullptr);
         if (deviceContext) {
-        SelectObject(deviceContext, font);
+            SelectObject(deviceContext, font);
 
-        const size_t size = GetFontData(deviceContext, 0, 0, nullptr, 0);
-        if (size > 0 && size != GDI_ERROR) {
-        auto buffer = new unsigned char[size];
-        if (GetFontData(deviceContext, 0, 0, buffer, size) == size) {
-        fontData.assign(buffer, buffer + size);
-        result = true;
-        }
-        delete[] buffer;
-        }
-        DeleteDC(deviceContext);
+            const size_t size = GetFontData(deviceContext, 0, 0, nullptr, 0);
+            if (size > 0 && size != GDI_ERROR) {
+                auto buffer = new unsigned char[size];
+                if (GetFontData(deviceContext, 0, 0, buffer, size) == size) {
+                    fontData.assign(buffer, buffer + size);
+                    result = true;
+                }
+                delete[] buffer;
+            }
+            DeleteDC(deviceContext);
         }
         return result;
-        }
+    }
 #endif
 
     void FontFinder::setFontSize(int size) {
