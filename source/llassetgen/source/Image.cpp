@@ -219,14 +219,17 @@ namespace llassetgen {
 
     void Image::load(const FT_Bitmap& ft_bitmap) {
         assert(getWidth() == ft_bitmap.width && getHeight() == ft_bitmap.rows && bitDepth == getFtBitdepth(ft_bitmap));
-        if (min.x == 0 && min.y == 0 && static_cast<size_t>(ft_bitmap.pitch) == stride) {
+        auto pitch = static_cast<size_t>(ft_bitmap.pitch);
+        if (min.x == 0 && min.y == 0 && pitch == stride) {
             memcpy(data, ft_bitmap.buffer, ft_bitmap.pitch * ft_bitmap.rows);
         } else if (min.x % 8 == 0) {
             assert(bitDepth == 1);
-            for (size_t y = 0; y < ft_bitmap.rows; y++)
+            size_t rowLength = std::min(pitch, stride);
+            for (size_t y = 0; y < ft_bitmap.rows; y++) {
                 memcpy(&data[(min.y + y) * stride + min.x / 8],
                        &ft_bitmap.buffer[y * ft_bitmap.pitch],
-                       stride);
+                       rowLength);
+            }
         } else {
             for (size_t y = 0; y < ft_bitmap.rows; y++) {
                 for (size_t x = 0; x < ft_bitmap.width; x++) {
