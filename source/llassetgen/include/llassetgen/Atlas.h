@@ -5,7 +5,7 @@
 #include <llassetgen/Packing.h>
 
 namespace llassetgen {
-    using DTFunc = void (*) (Image&, Image&);
+    using ImageTransform = void (*) (Image&, Image&);
 
     namespace internal {
         template <class Iter>
@@ -38,7 +38,7 @@ namespace llassetgen {
     }
 
     template <class ImageIter>
-    Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, DTFunc dtFunc) {
+    Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, ImageTransform distanceTransform, ImageTransform downSampling) {
         internal::checkImageIteratorType<ImageIter>();
         using DiffType = typename std::iterator_traits<ImageIter>::difference_type;
         assert(std::distance(imgBegin, imgEnd) == static_cast<DiffType>(packing.rects.size()));
@@ -48,8 +48,11 @@ namespace llassetgen {
 
         auto rectIt = packing.rects.begin();
         for (; imgBegin < imgEnd; rectIt++, imgBegin++) {
+            Image distField{imgBegin->getWidth(), imgBegin->getHeight(), DistanceTransform::bitDepth};
+            distanceTransform(*imgBegin, distField);
+
             Image output = atlas.view(rectIt->position, rectIt->position + rectIt->size);
-            dtFunc(*imgBegin, output);
+            downSampling(output, distField);
         }
 
         return atlas;
