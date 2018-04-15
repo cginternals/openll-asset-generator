@@ -29,6 +29,7 @@ addons:
       - clang-tidy-3.8
       - libfreetype6-dev
       - libpng-dev
+      - libomp-dev
 
 before_install:
   # libpng is already installed by default
