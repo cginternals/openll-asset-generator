@@ -3,7 +3,6 @@
 
 #include <gmock/gmock.h>
 #include <llassetgen/llassetgen.h>
-#include <llassetgen/packing/Types.h>
 
 #include <fstream>
 

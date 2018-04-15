@@ -5,8 +5,8 @@
 
 #include <helpstrings.h>
 #include <llassetgen/Atlas.h>
-#include <llassetgen/FontFinder.h>
 #include <llassetgen/FntWriter.h>
+#include <llassetgen/FontFinder.h>
 
 using namespace llassetgen;
 
@@ -24,16 +24,9 @@ std::map<std::string, Packing (*)(VecIter, VecIter, bool)> packingAlgos{
 };
 
 std::map<std::string, ImageTransform> downsamplingAlgos{
-    {"center", [](Image &input, Image &output) {
-        input.centerDownsampling<DistanceTransform::OutputType>(output);
-    }},
-    {"average", [](Image &input, Image &output) {
-        input.averageDownsampling<DistanceTransform::OutputType>(output);
-    }},
-    {"min", [](Image &input, Image &output) {
-        input.minDownsampling<DistanceTransform::OutputType>(output);
-    }}
-};
+    {"center", [](Image& input, Image& output) { input.centerDownsampling<DistanceTransform::OutputType>(output); }},
+    {"average", [](Image& input, Image& output) { input.averageDownsampling<DistanceTransform::OutputType>(output); }},
+    {"min", [](Image& input, Image& output) { input.minDownsampling<DistanceTransform::OutputType>(output); }}};
 
 // all printable ascii characters, except for space
 constexpr char ascii[] =
@@ -66,7 +59,7 @@ std::vector<Vec2<size_t>> sizes(const std::vector<Image>& images, unsigned int d
     return imageSizes;
 }
 
-std::pair<std::string, std::string> outNames(const std::string &outPath) {
+std::pair<std::string, std::string> outNames(const std::string& outPath) {
     std::string pathWithoutExtension;
     if (outPath.substr(outPath.length() - 4) == ".png") {
         pathWithoutExtension = outPath.substr(0, outPath.length() - 4);
@@ -222,7 +215,8 @@ int parseDistField(int argc, char** argv) {
 
     Image input = Image(imgPath);
     if (input.getBitDepth() != 1) {
-        std::cerr << "Error: only black/white images are supported. Please use an image with a bit depth of 1." << std::endl;
+        std::cerr << "Error: only black/white images are supported. Please use an image with a bit depth of 1."
+                  << std::endl;
         return 2;
     }
 

@@ -43,7 +43,6 @@ namespace llassetgen {
     }
 
 #if defined(__unix__) || defined(__APPLE__)
-
     bool FontFinder::findFontPath(const std::string &fontName, std::string &fontPath) {
         FcConfig *config = FcInitLoadConfigAndFonts();
         FcPattern *pat = FcNameParse(reinterpret_cast<const FcChar8 *>(fontName.c_str()));
