@@ -17,6 +17,7 @@ std::string
     configHelp{"Read options from a configuration file. Options passed as arguments will override the configuration file. You can find an example file in the 'config' directory"},
     fntHelp{"Generate a font file in the FNT format"},
     downsamplingRatioHelp{"Downsample the atlas by this factor."},
+    downsamplingHelp{"Use a different downsampling algorithm"},
 
     dfHelp{"Apply a distance transform to an image"},
     algorithmHelp{"Apply a different distance transform algorithm to the atlas"},

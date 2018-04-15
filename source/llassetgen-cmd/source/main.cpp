@@ -11,8 +11,9 @@
 using namespace llassetgen;
 
 using VecIter = std::vector<Vec2<size_t>>::const_iterator;
+using ImageTransform = void (*)(Image&, Image&);
 
-std::map<std::string, void (*)(Image&, Image&)> dtAlgos{
+std::map<std::string, ImageTransform> dtAlgos{
     {"deadrec", [](Image& input, Image& output) { DeadReckoning(input, output).transform(); }},
     {"parabola", [](Image& input, Image& output) { ParabolaEnvelope(input, output).transform(); }},
 };
@@ -20,6 +21,18 @@ std::map<std::string, void (*)(Image&, Image&)> dtAlgos{
 std::map<std::string, Packing (*)(VecIter, VecIter, bool)> packingAlgos{
     {"shelf", shelfPackAtlas},
     {"maxrects", maxRectsPackAtlas}
+};
+
+std::map<std::string, ImageTransform> downsamplingAlgos{
+    {"center", [](Image &input, Image &output) {
+        input.centerDownsampling<DistanceTransform::OutputType>(output);
+    }},
+    {"average", [](Image &input, Image &output) {
+        input.averageDownsampling<DistanceTransform::OutputType>(output);
+    }},
+    {"min", [](Image &input, Image &output) {
+        input.minDownsampling<DistanceTransform::OutputType>(output);
+    }}
 };
 
 // all printable ascii characters, except for space
@@ -128,6 +141,9 @@ int parseAtlas(int argc, char** argv) {
     unsigned int downsamplingRatio = 1;
     app.add_option("-w, --downsampling", downsamplingRatio, downsamplingRatioHelp);
 
+    std::string downsampling = "center";
+    app.add_set("--dsalgo", downsampling, algoNames(downsamplingAlgos), downsamplingHelp, true);
+
     std::vector<int> dynamicRange = {-30, 20};
     app.add_option("-r, --dynamicrange", dynamicRange, dynamicrangeHelp, true)->requires(distfieldOpt)->expected(2);
 
@@ -157,7 +173,7 @@ int parseAtlas(int argc, char** argv) {
         Packing p = packingAlgos[packing](imageSizes.begin(), imageSizes.end(), false);
 
         if (distfieldOpt->count()) {
-            Image atlas = distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), p, dtAlgos[algorithm]);
+            Image atlas = distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), p, dtAlgos[algorithm], downsamplingAlgos[downsampling]);
             atlas.exportPng<DistanceTransform::OutputType>(outPath, - dynamicRange[0], - dynamicRange[1]);
         } else {
             Image atlas = fontAtlas(glyphImages.begin(), glyphImages.end(), p);
