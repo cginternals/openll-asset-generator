@@ -8,6 +8,7 @@
 #endif
 
 #include <llassetgen/llassetgen.h>
+#include <llassetgen/llassetgen_api.h>
 #include <set>
 
 namespace llassetgen {
