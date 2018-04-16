@@ -149,7 +149,7 @@ namespace llassetgen {
     }
 
     void Image::clear() const {
-        if(isOwnerOfData) {
+        if (isOwnerOfData) {
             memset(data, 0, stride * getHeight());
         } else {
             fillRect(min, max, 0);
@@ -440,9 +440,7 @@ namespace llassetgen {
         out_file.close();
     }
 
-    Vec2<size_t> Image::getSize() const {
-        return {getWidth(), getHeight()};
-    }
+    Vec2<size_t> Image::getSize() const { return {getWidth(), getHeight()}; }
 
     void Image::copyDataFrom(const Image& src) {
         assert(getHeight() == src.getHeight() &&
@@ -451,7 +449,7 @@ namespace llassetgen {
 
         for (size_t y = 0; y < getHeight(); y++) {
             for (size_t x = 0; x < getWidth(); x++) {
-                Vec2<size_t> pos {x, y};
+                Vec2<size_t> pos{x, y};
                 setPixel<uint8_t>(pos, src.getPixel<uint8_t>(pos));
             }
         }

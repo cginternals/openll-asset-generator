@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "DistanceTransform.h"
+#include "FntWriter.h"
 #include "Packing.h"
 
 struct FT_LibraryRec_;
