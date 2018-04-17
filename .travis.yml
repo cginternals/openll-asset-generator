@@ -47,7 +47,8 @@ before_install:
       brew tap cginternals/homebrew-cginternals;
       brew update && brew install cppcheck freetype fontconfig qt5 glm glbinding cginternals/homebrew-cginternals/globjects;
       export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH;$(brew --prefix qt);$(brew --prefix glbinding);$(brew --prefix globjects)";
-    fi  - chmod +x ./configure
+    fi
+  - chmod +x ./configure
 
 before_script:
   - ./configure
