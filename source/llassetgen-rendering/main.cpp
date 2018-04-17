@@ -339,12 +339,12 @@ class Window : public WindowQt {
         drWhite = value.toInt();
     }
 
-    virtual void paddingChanged(QString value) override {
-        padding = value.toInt();
-    }
+    virtual void paddingChanged(QString value) override { padding = value.toInt(); }
 
     virtual void exportGlyphAtlas() override {
-        std::cout << "TODO EXPORT: atlas is exported automatically when changes applied, but fnt-File is not exported. Use CLI-app for this feature." << std::endl;
+        std::cout << "TODO EXPORT: atlas is exported automatically when changes applied, but fnt-File is not exported. "
+                     "Use CLI-app for this feature."
+                  << std::endl;
         // TODO export dialog: ask user for path
     }
 
@@ -386,7 +386,6 @@ class Window : public WindowQt {
     QString imagePath = "";
 
     void calculateDistanceField() {
-
         auto outPath = imagePath.toStdString();
 
         try {
@@ -404,15 +403,15 @@ class Window : public WindowQt {
             }
 
             // TODO: GUI element for this
-            unsigned int downsamplingRatio = 1;
+            unsigned int downsamplingRatio = 4;
 
-            std::vector<llassetgen::Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
+            std::vector<llassetgen::Image> glyphImages =
+                fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
 
             std::vector<llassetgen::Vec2<size_t>> imageSizes(glyphImages.size());
-
             std::transform(
-                glyphImages.begin(), glyphImages.end(),
-                imageSizes.begin(), [](const llassetgen::Image& img) { return img.getSize(); });
+                glyphImages.begin(), glyphImages.end(), imageSizes.begin(),
+                [downsamplingRatio](const llassetgen::Image& img) { return img.getSize() / downsamplingRatio; });
 
             llassetgen::Packing pack;
             switch (packingAlgorithm) {
@@ -428,27 +427,27 @@ class Window : public WindowQt {
 
             switch (dtAlgorithm) {
                 case 0: {
-                    llassetgen::Image atlas =
-                        llassetgen::distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), pack,
-                                                       [](llassetgen::Image& input, llassetgen::Image& output) {
-                                                           llassetgen::DeadReckoning(input, output).transform();
-                                                       },
-                                                       [](llassetgen::Image& input, llassetgen::Image& output) {
-                                                           input.averageDownsampling<llassetgen::DistanceTransform::OutputType>(output);
-                                                       });
+                    llassetgen::Image atlas = llassetgen::distanceFieldAtlas(
+                        glyphImages.begin(), glyphImages.end(), pack,
+                        [](llassetgen::Image& input, llassetgen::Image& output) {
+                            llassetgen::DeadReckoning(input, output).transform();
+                        },
+                        [](llassetgen::Image& input, llassetgen::Image& output) {
+                            input.averageDownsampling<llassetgen::DistanceTransform::OutputType>(output);
+                        });
                     atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
 
                     break;
                 }
                 case 1: {
-                    llassetgen::Image atlas =
-                        llassetgen::distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), pack,
-                                                       [](llassetgen::Image& input, llassetgen::Image& output) {
-                                                           llassetgen::ParabolaEnvelope(input, output).transform();
-                                                       },
-                                                       [](llassetgen::Image& input, llassetgen::Image& output) {
-                                                           input.averageDownsampling<llassetgen::DistanceTransform::OutputType>(output);
-                                                       });
+                    llassetgen::Image atlas = llassetgen::distanceFieldAtlas(
+                        glyphImages.begin(), glyphImages.end(), pack,
+                        [](llassetgen::Image& input, llassetgen::Image& output) {
+                            llassetgen::ParabolaEnvelope(input, output).transform();
+                        },
+                        [](llassetgen::Image& input, llassetgen::Image& output) {
+                            input.averageDownsampling<llassetgen::DistanceTransform::OutputType>(output);
+                        });
                     atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
 
                     break;
@@ -656,7 +655,6 @@ void setupGUI(QMainWindow* window) {
     paddingEdit->setMaximumWidth(38);
     QObject::connect(paddingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(paddingChanged(QString)));
     dtLayout->addRow("Padding:", paddingEdit);
-    
 
     // packing size (used for downsampling)
     auto* psComboBox = new QComboBox();
@@ -672,7 +670,7 @@ void setupGUI(QMainWindow* window) {
     QObject::connect(psComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(packingSizeChanged(int)));
     // TODO uncomment when downsampling is implemented in llassetgen
     // maybe change from dropdown to float input
-    //dtLayout->addRow("Texture size:", psComboBox);
+    // dtLayout->addRow("Texture size:", psComboBox);
 
     // trigger distance field creation
     auto* triggerDTButton = new QPushButton("OK");
