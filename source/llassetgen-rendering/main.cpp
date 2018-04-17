@@ -342,8 +342,8 @@ class Window : public WindowQt {
     virtual void paddingChanged(QString value) override { padding = value.toInt(); }
 
     virtual void exportGlyphAtlas() override {
-        std::cout << "TODO EXPORT: atlas and fnt-file is exported automatically when changes applied, but path for output is hard-coded. "
-                     "Use CLI-app for custom path."
+        std::cout << "TODO EXPORT: atlas and fnt-file is exported automatically when changes applied, but path for "
+                     "output is hard-coded. Use CLI-app for custom path."
                   << std::endl;
         // TODO export dialog: ask user for path
     }
@@ -455,15 +455,14 @@ class Window : public WindowQt {
                 }
             }
 
-
-            //export fnt file
-            llassetgen::FntWriter writer{ fontFinder.fontFace, fontName, fontSize, 1, false };
+            // export fnt file
+            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1, false};
             writer.setAtlasProperties(pack.atlasSize, fontSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
             auto gIt = glyphSet.begin();
             for (auto rectIt = pack.rects.begin(); rectIt < pack.rects.end(); gIt++, rectIt++) {
                 FT_UInt charIndex = FT_Get_Char_Index(fontFinder.fontFace, static_cast<FT_ULong>(*gIt));
-                writer.setCharInfo(charIndex, *rectIt, { 0, 0 });
+                writer.setCharInfo(charIndex, *rectIt, {0, 0});
             }
             writer.saveFnt(outFntPath);
 
