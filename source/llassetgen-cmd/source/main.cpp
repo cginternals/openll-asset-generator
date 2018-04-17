@@ -120,7 +120,6 @@ int parseAtlas(int argc, char** argv) {
 
     app.set_config("--config", "", configHelp);
 
-
     CLI11_PARSE(app, argc, argv);
 
     std::string fntPath;
@@ -141,8 +140,9 @@ int parseAtlas(int argc, char** argv) {
         Packing p = packingAlgos[packing](imageSizes.begin(), imageSizes.end(), false);
 
         if (distfieldOpt->count()) {
-            Image atlas = distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), p, dtAlgos[algorithm], downsamplingAlgos[downsampling]);
-            atlas.exportPng<DistanceTransform::OutputType>(outPath, - dynamicRange[0], - dynamicRange[1]);
+            Image atlas = distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), p, dtAlgos[algorithm],
+                                             downsamplingAlgos[downsampling]);
+            atlas.exportPng<DistanceTransform::OutputType>(outPath, -dynamicRange[0], -dynamicRange[1]);
         } else {
             Image atlas = fontAtlas(glyphImages.begin(), glyphImages.end(), p);
             atlas.exportPng<uint8_t>(outPath);
@@ -209,7 +209,8 @@ int main(int argc, char** argv) {
     CLI::App* atlas = app.add_subcommand("atlas", atlasHelp)->allow_extras();
     CLI::App* distfield = app.add_subcommand("distfield", dfHelp)->allow_extras();
 
-    atlas->set_help_flag();  // do not let the pseudo-subcommands parse the help flag, let the actual subcommands handle it
+    atlas->set_help_flag();  // do not let the pseudo-subcommands parse the help flag
+                             // let the actual subcommands handle it
     distfield->set_help_flag();
 
     CLI11_PARSE(app, argc, argv);
