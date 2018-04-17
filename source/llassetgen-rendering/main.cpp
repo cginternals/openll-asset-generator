@@ -80,7 +80,7 @@ class Window : public WindowQt {
 
         // get glyph atlas
         auto path = QApplication::applicationDirPath();
-        imagePath = path + "/../../data/llassetgen-rendering/outputDT.png";
+        outDirPath = path + "/../../data/llassetgen-rendering/";
 
         calculateDistanceField();
 
@@ -342,8 +342,8 @@ class Window : public WindowQt {
     virtual void paddingChanged(QString value) override { padding = value.toInt(); }
 
     virtual void exportGlyphAtlas() override {
-        std::cout << "TODO EXPORT: atlas is exported automatically when changes applied, but fnt-File is not exported. "
-                     "Use CLI-app for this feature."
+        std::cout << "TODO EXPORT: atlas and fnt-file is exported automatically when changes applied, but path for output is hard-coded. "
+                     "Use CLI-app for custom path."
                   << std::endl;
         // TODO export dialog: ask user for path
     }
@@ -374,7 +374,7 @@ class Window : public WindowQt {
     int packingAlgorithm = 0;
     int downSampling = 0;
     std::string fontName = "Verdana";
-    int fontSize = 512;
+    unsigned int fontSize = 512;
     int drBlack = -100;
     int drWhite = 100;
     int padding = 4;
@@ -383,10 +383,11 @@ class Window : public WindowQt {
     bool isRotating = false;
     glm::vec2 lastMousePos = glm::vec2();
 
-    QString imagePath = "";
+    QString outDirPath = "";
 
     void calculateDistanceField() {
-        auto outPath = imagePath.toStdString();
+        auto outImagePath = (outDirPath + "outputDT.png").toStdString();
+        auto outFntPath = (outDirPath + "outputFNT.png").toStdString();
 
         try {
             llassetgen::FontFinder fontFinder = llassetgen::FontFinder::fromName(fontName);
@@ -435,7 +436,7 @@ class Window : public WindowQt {
                         [](llassetgen::Image& input, llassetgen::Image& output) {
                             input.averageDownsampling<llassetgen::DistanceTransform::OutputType>(output);
                         });
-                    atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
+                    atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outImagePath, drWhite, drBlack);
 
                     break;
                 }
@@ -448,11 +449,23 @@ class Window : public WindowQt {
                         [](llassetgen::Image& input, llassetgen::Image& output) {
                             input.averageDownsampling<llassetgen::DistanceTransform::OutputType>(output);
                         });
-                    atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
+                    atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outImagePath, drWhite, drBlack);
 
                     break;
                 }
             }
+
+
+            //export fnt file
+            llassetgen::FntWriter writer{ fontFinder.fontFace, fontName, fontSize, 1, false };
+            writer.setAtlasProperties(pack.atlasSize, fontSize);
+            writer.readFont(glyphSet.begin(), glyphSet.end());
+            auto gIt = glyphSet.begin();
+            for (auto rectIt = pack.rects.begin(); rectIt < pack.rects.end(); gIt++, rectIt++) {
+                FT_UInt charIndex = FT_Get_Char_Index(fontFinder.fontFace, static_cast<FT_ULong>(*gIt));
+                writer.setCharInfo(charIndex, *rectIt, { 0, 0 });
+            }
+            writer.saveFnt(outFntPath);
 
         } catch (const std::exception& e) {
             std::cerr << "Error: " << e.what() << std::endl;
@@ -460,7 +473,7 @@ class Window : public WindowQt {
     }
 
     void loadDistanceField() {
-        auto* image = new QImage(imagePath);
+        auto* image = new QImage(outDirPath + "outputDT.png");
 
         if (image->isNull()) {
             std::cout << "Image NOT loaded successfully." << std::endl;
@@ -604,14 +617,14 @@ void setupGUI(QMainWindow* window) {
     acLayout->addRow("Packing:", packComboBox);
 
     // original font size for distance field rendering
-    auto* fontSize = new QLineEdit();
+    auto* fontSizeLE = new QLineEdit();
     auto* fsv = new QIntValidator();
     fsv->setBottom(1);
-    fontSize->setValidator(fsv);
-    fontSize->setPlaceholderText("512");
-    fontSize->setMaximumWidth(45);
-    QObject::connect(fontSize, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
-    acLayout->addRow("Original Font Size:", fontSize);
+    fontSizeLE->setValidator(fsv);
+    fontSizeLE->setPlaceholderText("512");
+    fontSizeLE->setMaximumWidth(45);
+    QObject::connect(fontSizeLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
+    acLayout->addRow("Original Font Size:", fontSizeLE);
 
     // DISTANCE TRANSFORM OPTIONS
 
