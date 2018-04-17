@@ -5,7 +5,8 @@
 #include "Atlas.h"
 #include "DistanceTransform.h"
 #include "FntWriter.h"
-#include "FontFinder.h"#include "Packing.h"
+#include "FontFinder.h"
+#include "Packing.h"
 
 struct FT_LibraryRec_;
 
