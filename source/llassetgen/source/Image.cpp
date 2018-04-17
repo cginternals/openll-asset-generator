@@ -55,6 +55,11 @@ namespace llassetgen {
           data(new uint8_t[stride * height]),
           isOwnerOfData(true) {}
 
+    /*
+     * Construct an Image with a bitmap as its content, with optional padding on all sides. Extra
+     * padding on the right and the bottom is added to ensure that the Image's height and width can be
+     * divided by `divisibleBy` without a remainder
+     */
     Image::Image(FT_Bitmap bitmap, size_t padding, size_t divisibleBy)
         : Image(divisiblePadding(bitmap.width, padding, divisibleBy), divisiblePadding(bitmap.rows, padding, divisibleBy), 1) {
         if (padding > 0 || bitmap.width % divisibleBy != 0 || bitmap.rows % divisibleBy != 0) {
