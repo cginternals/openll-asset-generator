@@ -9,7 +9,8 @@ std::vector<Vec2<size_t>> atlasTestSizes{{1, 1}, {34, 5}, {23, 79}, {16, 70}, {9
 template <class DTType>
 void createAtlas(std::vector<Image>& glyphs, Packing packing) {
     auto dtFunc = [](Image& in, Image& out) { DTType(in, out).transform(); };
-    Image atlas = distanceFieldAtlas(glyphs.begin(), glyphs.end(), packing, dtFunc);
+    auto downsampling = [](Image& in, Image& out) { in.centerDownsampling<DistanceTransform::OutputType>(out); };
+    Image atlas = distanceFieldAtlas(glyphs.begin(), glyphs.end(), packing, dtFunc, downsampling);
 
     std::string outPath = atlasTestDestinationPath + "dt_atlas.png";
     atlas.exportPng<DistanceTransform::OutputType>(outPath, -50, 50);
