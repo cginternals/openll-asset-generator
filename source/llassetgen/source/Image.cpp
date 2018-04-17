@@ -234,7 +234,8 @@ namespace llassetgen {
                 memcpy(&data[(min.y + y) * stride + min.x / 8],
                        &ft_bitmap.buffer[y * ft_bitmap.pitch],
                        rowLength);
-            }        } else {
+            }
+        } else {
             for (size_t y = 0; y < ft_bitmap.rows; y++) {
                 for (size_t x = 0; x < ft_bitmap.width; x++) {
                     setPixel<uint8_t>({x, y}, (ft_bitmap.buffer[y * ft_bitmap.pitch + x / 8] >> (7 - (x % 8))) & 1);

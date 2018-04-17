@@ -403,7 +403,10 @@ class Window : public WindowQt {
                 glyphSet.insert(static_cast<unsigned long>(*s++));
             }
 
-            std::vector<llassetgen::Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding);
+            // TODO: GUI element for this
+            unsigned int downsamplingRatio = 1;
+
+            std::vector<llassetgen::Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
 
             std::vector<llassetgen::Vec2<size_t>> imageSizes(glyphImages.size());
 
@@ -429,6 +432,9 @@ class Window : public WindowQt {
                         llassetgen::distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), pack,
                                                        [](llassetgen::Image& input, llassetgen::Image& output) {
                                                            llassetgen::DeadReckoning(input, output).transform();
+                                                       },
+                                                       [](llassetgen::Image& input, llassetgen::Image& output) {
+                                                           input.averageDownsampling<llassetgen::DistanceTransform::OutputType>(output);
                                                        });
                     atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
 
@@ -439,6 +445,9 @@ class Window : public WindowQt {
                         llassetgen::distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), pack,
                                                        [](llassetgen::Image& input, llassetgen::Image& output) {
                                                            llassetgen::ParabolaEnvelope(input, output).transform();
+                                                       },
+                                                       [](llassetgen::Image& input, llassetgen::Image& output) {
+                                                           input.averageDownsampling<llassetgen::DistanceTransform::OutputType>(output);
                                                        });
                     atlas.exportPng<llassetgen::DistanceTransform::OutputType>(outPath, drWhite, drBlack);
 
