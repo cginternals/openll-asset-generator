@@ -79,8 +79,7 @@ class Window : public WindowQt {
 #endif
 
         // get glyph atlas
-        auto path = QApplication::applicationDirPath();
-        outDirPath = path + "/../../data/llassetgen-rendering/";
+        outDirPath = "./data/llassetgen-rendering/";
 
         calculateDistanceField();
 
@@ -97,8 +96,7 @@ class Window : public WindowQt {
         vao->enable(0);
         */
 
-        // openll-asset-generator/data/llassetgen-rendering
-        const std::string dataPath = path.toStdString() + "/../../data/llassetgen-rendering";
+        const std::string dataPath = "./data/llassetgen-rendering";
 
         vertexShaderSource = globjects::Shader::sourceFromFile(dataPath + "/shader.vert");
         vertexShaderTemplate = globjects::Shader::applyGlobalReplacements(vertexShaderSource.get());
