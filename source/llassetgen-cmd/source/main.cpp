@@ -132,14 +132,14 @@ int parseAtlas(int argc, char** argv) {
     }
 
     try {
-        FontFinder fontFinder = fontPathOpt->count() ? FontFinder::fromPath(fontPath)
-                                                     : FontFinder::fromName(fontName);
+        FontFinder fontFinder = static_cast<bool>(*fontPathOpt) ? FontFinder::fromPath(fontPath)
+                                                               : FontFinder::fromName(fontName);
 
         std::vector<Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
         std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages, downsamplingRatio);
         Packing p = packingAlgos[packing](imageSizes.begin(), imageSizes.end(), false);
 
-        if (distfieldOpt->count()) {
+        if (static_cast<bool>(*distfieldOpt)) {
             Image atlas = distanceFieldAtlas(glyphImages.begin(), glyphImages.end(), p, dtAlgos[algorithm],
                                              downsamplingAlgos[downsampling]);
             atlas.exportPng<DistanceTransform::OutputType>(outPath, -dynamicRange[0], -dynamicRange[1]);
@@ -149,7 +149,7 @@ int parseAtlas(int argc, char** argv) {
         }
 
         if (createFnt) {
-            std::string faceName = fontNameOpt->count() ? fontName : "Unknown";
+            std::string faceName = static_cast<bool>(*fontNameOpt) ? fontName : "Unknown";
             FntWriter writer{fontFinder.fontFace, faceName, fontSize, 1, false};
             writer.setAtlasProperties(p.atlasSize, fontSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
