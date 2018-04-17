@@ -5,7 +5,7 @@
 #include <llassetgen/Packing.h>
 
 namespace llassetgen {
-    using ImageTransform = void (*) (Image&, Image&);
+    using ImageTransform = void (*)(Image&, Image&);
 
     namespace internal {
         template <class Iter>
@@ -38,8 +38,15 @@ namespace llassetgen {
         return atlas;
     }
 
+    /*
+     * Every Image corresponds to a Rect from the Packing. If a Rect's size is smaller than its Image's
+     * size, the Image will be downsampled in the returned atlas. The downsampling ratio is determined by
+     * dividing the Image's size by its Rect's size. Only integer ratios are allowed: if the division
+     * has a remainder, an error will occur.
+     */
     template <class ImageIter>
-    Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, ImageTransform distanceTransform, ImageTransform downSampling) {
+    Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, ImageTransform distanceTransform,
+                             ImageTransform downSampling) {
         internal::checkImageIteratorType<ImageIter>();
         using DiffType = typename std::iterator_traits<ImageIter>::difference_type;
         assert(std::distance(imgBegin, imgEnd) == static_cast<DiffType>(packing.rects.size()));

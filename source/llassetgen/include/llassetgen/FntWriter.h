@@ -8,6 +8,7 @@
 #include <llassetgen/Packing.h>
 
 #include <ft2build.h>
+#include <llassetgen/packing/Types.h>
 #include FT_FREETYPE_H
 
 namespace llassetgen {

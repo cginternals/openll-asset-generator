@@ -23,19 +23,24 @@ matrix:
 
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       - cmake3
       - cppcheck
       - clang-tidy-3.8
+      - gcc-5
+      - g++-5
       - libfreetype6-dev
       - libpng-dev
 
 before_install:
   # libpng is already installed by default
-  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype; fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype fontconfig; fi
   - chmod +x ./configure
 
 before_script:
+  - if [ $TRAVIS_OS_NAME == linux ]; then sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc && sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++; fi
   - ./configure
   - ./configure $CMAKE_CONFIGURATION
 

@@ -25,8 +25,9 @@ namespace llassetgen {
         LLASSETGEN_NO_EXPORT static void readData(png_struct_def* png, uint8_t* data, size_t length);
         LLASSETGEN_NO_EXPORT static void writeData(png_struct_def* png, uint8_t* data, size_t length);
         LLASSETGEN_NO_EXPORT static void flushData(png_struct_def* png);
+        LLASSETGEN_NO_EXPORT static size_t divisiblePadding(size_t size, size_t padding, size_t divisor);
 
-        LLASSETGEN_NO_EXPORT void fillPadding(size_t padding);
+        LLASSETGEN_NO_EXPORT void fillPadding(Rect<size_t> image);
 
        public:
         ~Image();
@@ -35,7 +36,7 @@ namespace llassetgen {
         Image& operator=(Image&&) noexcept;
         Image(Image&& src);
         Image(size_t width, size_t height, size_t _bitDepth);
-        Image(FT_Bitmap_ bitmap, size_t padding = 0);
+        Image(FT_Bitmap_ bitmap, size_t padding = 0, size_t divisibleBy = 1);
         Image view(Vec2<size_t> _min, Vec2<size_t> _max, size_t padding = 0);
 
         size_t getWidth() const;
