@@ -10,9 +10,8 @@
 
 #include <llassetgen/FontFinder.h>
 
-
 namespace llassetgen {
-    FontFinder FontFinder::fromPath(const std::string &fontPath) {
+    FontFinder FontFinder::fromPath(const std::string& fontPath) {
         FontFinder fontFinder{};
         FT_Error err = FT_New_Face(freetype, fontPath.c_str(), 0, &fontFinder.fontFace);
         if (err) {
@@ -21,7 +20,7 @@ namespace llassetgen {
         return fontFinder;
     }
 
-    FontFinder FontFinder::fromName(const std::string &fontName) {
+    FontFinder FontFinder::fromName(const std::string& fontName) {
 #if defined(__unix__) || defined(__APPLE__)
         std::string fontPath;
         if (!findFontPath(fontName, fontPath)) {
@@ -30,34 +29,36 @@ namespace llassetgen {
         return FontFinder::fromPath(fontPath);
 #elif _WIN32
         FontFinder fontFinder;
-            if (!fontFinder.getFontData(fontName)) {
-            throw std::runtime_error("font not found");
-            }
 
-            FT_Error err = FT_New_Memory_Face(freetype, &fontFinder.fontData[0], fontFinder.fontData.size(), 0, &fontFinder.fontFace);
-            if (err) {
+        if (!fontFinder.getFontData(fontName)) {
+            throw std::runtime_error("font not found");
+        }
+
+        FT_Error err =
+            FT_New_Memory_Face(freetype, &fontFinder.fontData[0], fontFinder.fontData.size(), 0, &fontFinder.fontFace);
+        if (err) {
             throw std::runtime_error("font could not be loaded");
-            }
-            return fontFinder;
+        }
+        return fontFinder;
 #endif
     }
 
 #if defined(__unix__) || defined(__APPLE__)
-    bool FontFinder::findFontPath(const std::string &fontName, std::string &fontPath) {
-        FcConfig *config = FcInitLoadConfigAndFonts();
-        FcPattern *pat = FcNameParse(reinterpret_cast<const FcChar8 *>(fontName.c_str()));
+    bool FontFinder::findFontPath(const std::string& fontName, std::string& fontPath) {
+        FcConfig* config = FcInitLoadConfigAndFonts();
+        FcPattern* pat = FcNameParse(reinterpret_cast<const FcChar8*>(fontName.c_str()));
         FcConfigSubstitute(config, pat, FcMatchPattern);
         FcDefaultSubstitute(pat);
 
         FcResult result;
-        FcPattern *font = FcFontMatch(config, pat, &result);
+        FcPattern* font = FcFontMatch(config, pat, &result);
 
         bool found = false;
         if (result == FcResultMatch) {
-            FcChar8 *file;
+            FcChar8* file;
             found = FcPatternGetString(font, FC_FILE, 0, &file) == FcResultMatch;
             if (found) {
-                fontPath.assign(reinterpret_cast<char *>(file));
+                fontPath.assign(reinterpret_cast<char*>(file));
             }
             FcPatternDestroy(font);
         }
@@ -78,21 +79,21 @@ namespace llassetgen {
 
         HDC deviceContext = CreateCompatibleDC(nullptr);
         if (deviceContext) {
-        SelectObject(deviceContext, font);
+            SelectObject(deviceContext, font);
 
-        const size_t size = GetFontData(deviceContext, 0, 0, nullptr, 0);
-        if (size > 0 && size != GDI_ERROR) {
-        auto buffer = new unsigned char[size];
-        if (GetFontData(deviceContext, 0, 0, buffer, size) == size) {
-        fontData.assign(buffer, buffer + size);
-        result = true;
-        }
-        delete[] buffer;
-        }
-        DeleteDC(deviceContext);
+            const size_t size = GetFontData(deviceContext, 0, 0, nullptr, 0);
+            if (size > 0 && size != GDI_ERROR) {
+                auto buffer = new unsigned char[size];
+                if (GetFontData(deviceContext, 0, 0, buffer, size) == size) {
+                    fontData.assign(buffer, buffer + size);
+                    result = true;
+                }
+                delete[] buffer;
+            }
+            DeleteDC(deviceContext);
         }
         return result;
-        }
+    }
 #endif
 
     void FontFinder::setFontSize(int size) {
@@ -109,14 +110,15 @@ namespace llassetgen {
         }
 
         FT_Error err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
-        FT_Bitmap &bitmap = fontFace->glyph->bitmap;
+        FT_Bitmap& bitmap = fontFace->glyph->bitmap;
         if (err || bitmap.buffer == nullptr) {
             throw std::runtime_error("glyph with code " + std::to_string(glyph) + " could not be rendered");
         }
         return {bitmap, padding, divisibleBy};
     }
 
-    std::vector<Image> FontFinder::renderGlyphs(const std::set<unsigned long> &glyphs, int size, size_t padding, size_t divisibleBy) {
+    std::vector<Image> FontFinder::renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding,
+                                                size_t divisibleBy) {
         setFontSize(size);
 
         std::vector<Image> v;

@@ -8,6 +8,8 @@
 #endif
 
 #include <llassetgen/llassetgen.h>
+#include <llassetgen/llassetgen_api.h>
+
 #include <set>
 
 namespace llassetgen {
@@ -18,8 +20,10 @@ namespace llassetgen {
 
         void setFontSize(int size);
         Image renderGlyph(unsigned long glyph, size_t padding, size_t divisibleBy);
-        std::vector<Image> renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding = 0, size_t divisibleBy = 1);
 
+        std::vector<Image> renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding = 0,
+                                        size_t divisibleBy = 1);
+      
         FT_Face fontFace;
 
        private:
