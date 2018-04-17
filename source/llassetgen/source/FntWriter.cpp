@@ -14,7 +14,8 @@
 #include FT_OUTLINE_H
 
 namespace llassetgen {
-    FntWriter::FntWriter(FT_Face _face, std::string _faceName, unsigned int _fontSize, float _scalingFactor, bool _scaledGlyph) {
+    FntWriter::FntWriter(FT_Face _face, std::string _faceName, unsigned int _fontSize, float _scalingFactor,
+                         bool _scaledGlyph) {
         faceName = _faceName;
         face = _face;
         fontInfo = Info();
@@ -80,7 +81,6 @@ namespace llassetgen {
 
     void FntWriter::setKerningInfo(std::set<FT_ULong>::iterator charcodesBegin,
                                    std::set<FT_ULong>::iterator charcodesEnd) {
-        std::set<FT_ULong>::iterator leftCharcode = charcodesBegin;
         for (std::set<FT_ULong>::iterator leftCharcode = charcodesBegin; leftCharcode != charcodesEnd; leftCharcode++) {
             for (std::set<FT_ULong>::iterator rightCharcode = charcodesBegin; rightCharcode != charcodesEnd;
                  rightCharcode++) {

@@ -2,8 +2,6 @@
 # External dependencies
 #
 
-# find_package(THIRDPARTY REQUIRED)
-
 
 #
 # Executable name and options
@@ -20,10 +18,16 @@ message(STATUS "Application ${target}")
 # Sources
 #
 
-set(sources
-    main.cpp
-)
+set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include")
+set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
+set(headers
+    ${include_path}/CLI11.h
+    ${include_path}/algorithms.h
+    ${include_path}/helpstrings.h)
+
+set(sources
+    ${source_path}/main.cpp)
 
 #
 # Create executable
@@ -32,6 +36,7 @@ set(sources
 # Build executable
 add_executable(${target}
     MACOSX_BUNDLE
+    ${headers}
     ${sources}
 )
 
@@ -58,6 +63,7 @@ target_include_directories(${target}
     PRIVATE
     ${DEFAULT_INCLUDE_DIRECTORIES}
     ${PROJECT_BINARY_DIR}/source/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 
@@ -109,6 +115,7 @@ target_link_libraries(${target}
 perform_health_checks(
     ${target}
     ${sources}
+    ${headers}
 )
 
 
