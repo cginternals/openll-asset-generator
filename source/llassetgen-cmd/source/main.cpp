@@ -65,8 +65,8 @@ std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vecto
 }
 
 void checkIfFontSet(CLI::Option* nameOpt, CLI::Option* pathOpt) {
-    if (!static_cast<bool>(nameOpt) && !static_cast<bool>(pathOpt)) {
-        throw std::runtime_error("No font specified");
+    if (!static_cast<bool>(*nameOpt) && !static_cast<bool>(*pathOpt)) {
+        throw std::runtime_error("no font specified");
     }
 }
 

@@ -15,7 +15,7 @@ namespace llassetgen {
         FontFinder fontFinder{};
         FT_Error err = FT_New_Face(freetype, fontPath.c_str(), 0, &fontFinder.fontFace);
         if (err) {
-            throw std::runtime_error("Font could not be loaded");
+            throw std::runtime_error("font could not be loaded");
         }
         return fontFinder;
     }
@@ -24,7 +24,7 @@ namespace llassetgen {
 #if defined(__unix__) || defined(__APPLE__)
         std::string fontPath;
         if (!findFontPath(fontName, fontPath)) {
-            throw std::runtime_error("Font not found");
+            throw std::runtime_error("font not found");
         }
         return FontFinder::fromPath(fontPath);
 #elif _WIN32
