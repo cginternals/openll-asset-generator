@@ -373,11 +373,11 @@ class Window : public WindowQt {
     int dtAlgorithm = 0;
     int packingAlgorithm = 0;
     int downSampling = 0;
-    std::string fontName = "Arial";
-    int fontSize = 8;
+    std::string fontName = "Verdana";
+    int fontSize = 512;
     int drBlack = -100;
     int drWhite = 100;
-    int padding = 0;
+    int padding = 4;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -591,7 +591,7 @@ void setupGUI(QMainWindow* window) {
 
     // typeface of font
     auto* fontNameLE = new QLineEdit();
-    fontNameLE->setPlaceholderText("Arial");
+    fontNameLE->setPlaceholderText("Verdana");
     fontNameLE->setMaximumWidth(45);
     QObject::connect(fontNameLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontNameChanged(QString)));
     acLayout->addRow("Font Name:", fontNameLE);
@@ -609,7 +609,7 @@ void setupGUI(QMainWindow* window) {
     auto* fsv = new QIntValidator();
     fsv->setBottom(1);
     fontSize->setValidator(fsv);
-    fontSize->setPlaceholderText("8");
+    fontSize->setPlaceholderText("512");
     fontSize->setMaximumWidth(45);
     QObject::connect(fontSize, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
     acLayout->addRow("Original Font Size:", fontSize);
@@ -652,7 +652,7 @@ void setupGUI(QMainWindow* window) {
 
     auto* paddingEdit = new QLineEdit();
     paddingEdit->setValidator(drv);
-    paddingEdit->setPlaceholderText("0");
+    paddingEdit->setPlaceholderText("4");
     paddingEdit->setMaximumWidth(38);
     QObject::connect(paddingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(paddingChanged(QString)));
     dtLayout->addRow("Padding:", paddingEdit);
