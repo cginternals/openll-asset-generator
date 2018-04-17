@@ -64,6 +64,12 @@ std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vecto
     return set;
 }
 
+void checkIfFontSet(CLI::Option* nameOpt, CLI::Option* pathOpt) {
+    if (!static_cast<bool>(nameOpt) && !static_cast<bool>(pathOpt)) {
+        throw std::runtime_error("No font specified");
+    }
+}
+
 int parseAtlas(int argc, char** argv) {
     // Example: llassetgen-cmd atlas -d parabola --ascii -f Verdana atlas.png
     CLI::App app{atlasHelp};
@@ -81,7 +87,7 @@ int parseAtlas(int argc, char** argv) {
 
     // glyphs
     std::string glyphs;
-    CLI::Option* glyphsOpt = app.add_option("-g, --glyph", glyphs, glyphHelp);
+    app.add_option("-g, --glyph", glyphs, glyphHelp);
 
     std::vector<unsigned int> charCodes;
     app.add_option("-c, --charcode", charCodes, charcodeHelp);
@@ -98,9 +104,6 @@ int parseAtlas(int argc, char** argv) {
 
     std::string fontPath;
     CLI::Option* fontPathOpt = app.add_option("--fontpath", fontPath, fontpathHelp)->check(CLI::ExistingFile);
-
-    // TODO: app.requires_one
-    glyphsOpt->requires_one({fontPathOpt, fontNameOpt});
 
     // other options
     unsigned int padding = 0;
@@ -132,6 +135,7 @@ int parseAtlas(int argc, char** argv) {
     }
 
     try {
+        checkIfFontSet(fontNameOpt, fontPathOpt);
         FontFinder fontFinder = static_cast<bool>(*fontPathOpt) ? FontFinder::fromPath(fontPath)
                                                                : FontFinder::fromName(fontName);
 
