@@ -70,7 +70,7 @@ void checkIfFontSet(CLI::Option* nameOpt, CLI::Option* pathOpt) {
     }
 }
 
-int parseAtlas(int argc, char** argv) {
+int parseAtlasArgs(int argc, char **argv) {
     // Example: llassetgen-cmd atlas -d parabola --ascii -f Verdana atlas.png
     CLI::App app{atlasHelp};
 
@@ -172,7 +172,7 @@ int parseAtlas(int argc, char** argv) {
     return 0;
 }
 
-int parseDistField(int argc, char** argv) {
+int parseDistfieldArgs(int argc, char **argv) {
     CLI::App app{dfHelp};
     // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
 
@@ -222,9 +222,9 @@ int main(int argc, char** argv) {
     ++argv;
 
     if (app.got_subcommand(atlas)) {
-        return parseAtlas(argc, argv);
+        return parseAtlasArgs(argc, argv);
     } else if (app.got_subcommand(distfield)) {
-        return parseDistField(argc, argv);
+        return parseDistfieldArgs(argc, argv);
     }
     return app.exit(CLI::CallForHelp());
 }
