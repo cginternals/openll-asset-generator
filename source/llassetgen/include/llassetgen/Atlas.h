@@ -5,7 +5,7 @@
 #include <llassetgen/Packing.h>
 
 namespace llassetgen {
-    using ImageTransform = void (*) (Image&, Image&);
+    using ImageTransform = void (*)(Image&, Image&);
 
     namespace internal {
         template <class Iter>
@@ -44,7 +44,8 @@ namespace llassetgen {
      * has a remainder, an error will occur.
      */
     template <class ImageIter>
-    Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, ImageTransform distanceTransform, ImageTransform downSampling) {
+    Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, ImageTransform distanceTransform,
+                             ImageTransform downSampling) {
         internal::checkImageIteratorType<ImageIter>();
         using DiffType = typename std::iterator_traits<ImageIter>::difference_type;
         assert(std::distance(imgBegin, imgEnd) == static_cast<DiffType>(packing.rects.size()));

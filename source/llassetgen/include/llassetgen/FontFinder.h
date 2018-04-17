@@ -4,7 +4,7 @@
 #include FT_FREETYPE_H
 #include <string>
 #ifdef _WIN32
-    #include <vector>
+#include <vector>
 #endif
 
 #include <llassetgen/llassetgen.h>
@@ -23,7 +23,7 @@ namespace llassetgen {
 
         std::vector<Image> renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding = 0,
                                         size_t divisibleBy = 1);
-      
+
         FT_Face fontFace;
 
        private:
