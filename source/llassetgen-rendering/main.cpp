@@ -5,6 +5,8 @@
 #include <ft2build.h>  // NOLINT include order required by freetype
 #include FT_FREETYPE_H
 
+#include <QtGlobal>
+
 #include <QApplication>
 #include <QBoxLayout>
 #include <QComboBox>
@@ -82,7 +84,12 @@ class Window : public WindowQt {
 
         std::string dataPath = "./data/llassetgen-rendering/";
 
+#if QT_VERSION >= 0x050400
         outDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+#else
+        outDirPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+#endif
+
         QDir dir(QDir::root());
         bool success = dir.mkpath(outDirPath);
         std::cout << "Created directory: " + outDirPath.toStdString() + ", success: " << success << std::endl;
