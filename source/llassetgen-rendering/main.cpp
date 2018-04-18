@@ -96,11 +96,11 @@ class Window : public WindowQt {
         vao->enable(0);
         */
 
-        vertexShaderSource = globjects::Shader::sourceFromFile(outDirPath + "shader.vert");
+        vertexShaderSource = globjects::Shader::sourceFromFile(outDirPath.toStdString() + "shader.vert");
         vertexShaderTemplate = globjects::Shader::applyGlobalReplacements(vertexShaderSource.get());
         vertexShader = globjects::Shader::create(GL_VERTEX_SHADER, vertexShaderTemplate.get());
 
-        fragmentShaderSource = globjects::Shader::sourceFromFile(outDirPath + "shader.frag");
+        fragmentShaderSource = globjects::Shader::sourceFromFile(outDirPath.toStdString() + "shader.frag");
         fragmentShaderTemplate = globjects::Shader::applyGlobalReplacements(fragmentShaderSource.get());
         fragmentShader = globjects::Shader::create(GL_FRAGMENT_SHADER, fragmentShaderTemplate.get());
 
