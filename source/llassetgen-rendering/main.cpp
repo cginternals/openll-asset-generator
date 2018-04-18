@@ -8,6 +8,7 @@
 #include <QApplication>
 #include <QBoxLayout>
 #include <QComboBox>
+#include <QDir>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -16,6 +17,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QResizeEvent>
+#include <QStandardPaths>
 #include <QValidator>
 
 #include <glm/glm.hpp>
@@ -78,9 +80,14 @@ class Window : public WindowQt {
         globjects::debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
 #endif
 
-        // get glyph atlas
-        outDirPath = "./data/llassetgen-rendering/";
+        std::string dataPath = "./data/llassetgen-rendering/";
 
+        outDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        QDir dir(QDir::root());
+        bool success = dir.mkpath(outDirPath);
+        std::cout << "Created directory: " + outDirPath.toStdString() + ", success: " << success << std::endl;
+
+        // get glyph atlas
         calculateDistanceField();
 
         cornerBuffer = globjects::Buffer::create();
@@ -96,11 +103,11 @@ class Window : public WindowQt {
         vao->enable(0);
         */
 
-        vertexShaderSource = globjects::Shader::sourceFromFile(outDirPath.toStdString() + "shader.vert");
+        vertexShaderSource = globjects::Shader::sourceFromFile(dataPath + "shader.vert");
         vertexShaderTemplate = globjects::Shader::applyGlobalReplacements(vertexShaderSource.get());
         vertexShader = globjects::Shader::create(GL_VERTEX_SHADER, vertexShaderTemplate.get());
 
-        fragmentShaderSource = globjects::Shader::sourceFromFile(outDirPath.toStdString() + "shader.frag");
+        fragmentShaderSource = globjects::Shader::sourceFromFile(dataPath + "shader.frag");
         fragmentShaderTemplate = globjects::Shader::applyGlobalReplacements(fragmentShaderSource.get());
         fragmentShader = globjects::Shader::create(GL_FRAGMENT_SHADER, fragmentShaderTemplate.get());
 
@@ -339,8 +346,8 @@ class Window : public WindowQt {
 
     virtual void exportGlyphAtlas() override {
         std::cout << "TODO EXPORT: atlas and fnt-file is exported automatically when changes applied, but path for "
-                     "output is hard-coded. Use CLI-app for custom path."
-                  << std::endl;
+                     "output is hard-coded:"
+                  << outDirPath.toStdString() <<  std::endl << "Use CLI-app for custom path." << std::endl;
         // TODO export dialog: ask user for path
     }
 
@@ -382,8 +389,8 @@ class Window : public WindowQt {
     QString outDirPath = "";
 
     void calculateDistanceField() {
-        auto outImagePath = (outDirPath + "outputDT.png").toStdString();
-        auto outFntPath = (outDirPath + "outputFNT.png").toStdString();
+        auto outImagePath = (outDirPath + "/outputDT.png").toStdString();
+        auto outFntPath = (outDirPath + "/outputFNT.fnt").toStdString();
 
         try {
             llassetgen::FontFinder fontFinder = llassetgen::FontFinder::fromName(fontName);
@@ -468,7 +475,7 @@ class Window : public WindowQt {
     }
 
     void loadDistanceField() {
-        auto* image = new QImage(outDirPath + "outputDT.png");
+        auto* image = new QImage(outDirPath + "/outputDT.png");
 
         if (image->isNull()) {
             std::cout << "Image NOT loaded successfully." << std::endl;
