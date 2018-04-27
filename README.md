@@ -6,7 +6,7 @@ Font Asset Generator based on OpenLL Specifications
 
 **ToDo**
 What's openll-asset-generator (*llassetgen*)?
---> open source, (which license?), cross-platform C++ generator for font assets, user can adapt different parameters and have a pre-render on the outcome
+--> cross-platform C++ generator for font assets, user can adapt different parameters and have a pre-render on the outcome
 
 **ToDo**
 What's a font asset?
