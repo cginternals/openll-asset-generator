@@ -30,7 +30,7 @@ We plan to provide the Font Asset Generator via homebrew package manager. Until 
 
 ### Prerequisites and Dependencies
 
-Necessary for the core library and the CLI application
+Necessary for the core library (*llassetgen*) and the CLI application (*llassetgen-cmd*)
 * [CMake](https://cmake.org/) 3.4 or higher for building from source
 * [Freetype](https://www.freetype.org/) to load and render fonts
 * [libpng](http://www.libpng.org/pub/png/libpng.html) to import and export PNGs images.
