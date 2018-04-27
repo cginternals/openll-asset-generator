@@ -46,7 +46,8 @@ set(headers
     ${include_path}/Image.h
     ${include_path}/DistanceTransform.h
     ${include_path}/FntWriter.h
-    ${include_path}/FontFinder.h    ${include_path}/Geometry.h
+    ${include_path}/FontFinder.h
+    ${include_path}/Geometry.h
     ${include_path}/Packing.h
 )
 
@@ -55,7 +56,8 @@ set(sources
     ${source_path}/Image.cpp
     ${source_path}/DistanceTransform.cpp
     ${source_path}/FntWriter.cpp
-    ${source_path}/FontFinder.cpp    ${source_path}/packing/internal/Common.cpp
+    ${source_path}/FontFinder.cpp
+    ${source_path}/packing/internal/Common.cpp
     ${source_path}/packing/internal/MaxRectsPacker.cpp
     ${source_path}/packing/internal/ShelfPacker.cpp
 )
