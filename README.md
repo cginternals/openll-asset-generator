@@ -78,7 +78,7 @@ Then, depending on the version of globjects you want to build, choose the approp
 
 The actual compilation can be done using CMake and your favorite compiler and IDE.
 
-## Examples
+## Usage
 
 **ToDo** Overview
 * how to link and use lib
@@ -87,7 +87,7 @@ The actual compilation can be done using CMake and your favorite compiler and ID
 * explaining parameters and their consequences (Distance Transform, Packing, etc...)
 * algorithms: link paper or explain how they work
 
-#### Miscellaneous
+### Miscellaneous
 
 <dl>
   <dt>Font Name</dt><dd>The font is loaded from the local machine using the given font name, e.g. Arial, Verdana</dd>
@@ -97,7 +97,7 @@ The actual compilation can be done using CMake and your favorite compiler and ID
   <dt>Dynamic Range</dt><dd>The Distance Transform calculates values, that need to be clamped in order to generate a PNG. Choose the min and max values.</dd>
 </dl>
 
-#### Packing
+### Packing
 
 Our implemented packing algorithms are based on the publication by Jukka Jylänki: *A thousand ways to pack the bin -- a practical approach to two-dimensional rectangle bin packing* (2010), except that for now, we don't use multiple bins (i.e. textures).
 
@@ -105,7 +105,7 @@ The *Shelf Bin Packing* (O(n log(n))) performs faster, but there are cases where
 
 Parameters: All glyph sizes, downsampled.
 
-#### Distance Transform
+### Distance Transform
 
 Algorithms: Dead-Reckoning, Parabola Envelope
 
@@ -115,5 +115,14 @@ ToDo: parameters for dynamic range are applied for the png to export, but it als
 
 Parameters: 
 
-#### Rendering
-using fragment-shader as in [OpenLL](http://openll.org/), subpixel sampling
+### Rendering
+application *llassetgen-rendering*
+using fragment-shader as in [OpenLL](http://openll.org/) (Super Sampling)
+
+<dl>
+  <dt>Super Sampling</dt><dd>Choose the type of Super Sampling.</dd>
+  <dt>Threshold</dt><dd>The default value is 0.5, since the Distance Transform considers 0.5 as the contour. Choosing a smaller value renders the glyphs bold; a larger value renders them thinner, until they completely disappear. A smaller value than 0.3 is clamped to 0.3, because such fragments are dicarded in fragment shader for performance reasons.</dd>
+  <dt>Switch Rendering</dt><dd>You can toggle between rendering the calculated distance field or rendering the resulting glyphs when using the calculated distance field.</dd>
+</dl>
+
+
