@@ -44,7 +44,7 @@ Additionally necessary to build the rendering application (*llassetgen-rendering
 
 ### Compile Instructions
 
-For compilation, a C++11 compliant compiler, e.g., GCC 4.8, Clang 5, MSVC 2015, is required.
+For compilation, a C++11 compliant compiler, e.g., GCC 4.8, Clang 3.9, AppleClang 8.1, MSVC 2015, is required.
 
 First, download the source code [as archive](https://github.com/hpicgs/openll-asset-generator/releases). or via git:
 ```shell
