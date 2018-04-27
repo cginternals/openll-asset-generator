@@ -83,9 +83,27 @@ The actual compilation can be done using CMake and your favorite compiler and ID
 **ToDo** Overview
 * how to link and use lib
 * using CLI
-* using rendering
+* using rendering / GUI (what's WIP)
 * explaining parameters and their consequences (Distance Transform, Packing, etc...)
 * algorithms: link paper or explain how they work
 
-### Rendering
+#### Packing
+
+Our implemented packing algorithms are based on the publication by Jukka Jylänki: *A thousand ways to pack the bin -- a practical approach to two-dimensional rectangle bin packing* (2010), except that for now, we don't use multiple bins (i.e. textures).
+
+The *Shelf Bin Packing* (O(n log(n))) performs faster, but there are cases where *Max Rects Packing* (O(n^5)) gives better results.
+
+Parameters: All glyph sizes, downsampled.
+
+#### Distance Transform
+
+Algorithms: Dead-Reckoning, Parabola Envelope
+
+Needs a result from Packing to know the glyph sizes
+
+ToDo: parameters for dynamic range are applied for the png to export, but it also influences the rendering outcome of the distance field
+
+Paramters: 
+
+#### Rendering
 using fragment-shader as in [OpenLL](http://openll.org/), subpixel sampling
