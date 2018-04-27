@@ -4,6 +4,23 @@ Font Asset Generator based on OpenLL Specifications
 [![GitHub contributors](https://img.shields.io/github/contributors/hpicgs/openll-asset-generator.svg)](https://GitHub.com/hpicgs/openll-asset-generator/graphs/contributors/)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/hpicgs/openll-asset-generator/blob/master/LICENSE)
 
+**ToDo**
+What's openll-asset-generator (*llassetgen*)?
+--> open source, (which license?), cross-platform C++ generator for font assets, user can adapt different parameters and have a pre-render on the outcome
+
+**ToDo**
+What's a font asset?
+--> stuff that is needed to render a font:
+* the glyph atlas, e.g. bitmap, distance field, vector, ... 
+* typesetting information such as position in glyph atlas, position on baseline (advance, height, ...), kerning
+
+**ToDo**
+Main Workflow with openll-asset-generator?
+* load vector font, generate high-resolution bitmap image containing the glyphs
+* pack all glyphs into an glyph atlas for lower space consumption
+* render distance field on every glyph. input: high resolution bitmap image. output: lower resolution distance field
+* export texture atlas (i.e. the glyph atlas as distance field) and font description file (i.e. information needed to use that atlas and to typeset the glyphs)
+
 ## Project Health
 
 | Service | System | Compiler | Status |
@@ -60,3 +77,15 @@ Then, depending on the version of globjects you want to build, choose the approp
 ```
 
 The actual compilation can be done using CMake and your favorite compiler and IDE.
+
+## Examples
+
+**ToDo** Overview
+* how to link and use lib
+* using CLI
+* using rendering
+* explaining parameters and their consequences (Distance Transform, Packing, etc...)
+* algorithms: link paper or explain how they work
+
+### Rendering
+using fragment-shader as in [OpenLL](http://openll.org/), subpixel sampling
