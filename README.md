@@ -16,7 +16,7 @@ Font Asset Generator based on OpenLL Specifications
 
 ### Windows
 
-The core library and its applications can be installed either by downloading an installer, e.g., the latest x64 installer for Microsoft Visual Studio 2017, or downloading and extracting one of the precompiled archives, e.g. runtime, examples, and dev. Alternatively, download the source code and commence building from source. See [releases](https://github.com/hpicgs/openll-asset-generator/releases/latest).
+The core library and its applications can be installed either by downloading an installer, e.g., the latest x64 installer for Microsoft Visual Studio 2017, or downloading and extracting one of the precompiled archives, e.g. runtime, examples, and dev. Alternatively, download the source code and commence building from source. See [latest release](https://github.com/hpicgs/openll-asset-generator/releases/latest).
 
 ### Ubuntu
 
@@ -36,7 +36,7 @@ Necessary for the core library and the CLI application
 * [libpng](http://www.libpng.org/pub/png/libpng.html) to import and export PNGs images.
 * [fontconfig](https://www.freedesktop.org/wiki/Software/fontconfig/) on Unix systems. 
 
-Additionally necessary to build the rendering application:
+Additionally necessary to build the rendering application (*llassetgen-rendering*):
 * [GLM](https://github.com/g-truc/glm) for OpenGL math and data structures
 * [glbinding](https://github.com/cginternals/glbinding) as OpenGL API binding
 * [globjects](https://github.com/cginternals/globjects) to wrap OpenGL API objects
@@ -52,7 +52,7 @@ First, download the source code [as archive](https://github.com/hpicgs/openll-as
 > cd openll-asset-generator
 ```
 
-Then, depending on the version of globjects you want to build, choose the appropriate tag or branch, e.g., for the 1.0.0 release:
+Then, depending on the version of globjects you want to build, choose the appropriate tag or branch, e.g., for the 1.0 release:
 
 ```shell
 > git fetch --tags
