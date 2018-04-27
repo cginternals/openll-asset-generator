@@ -11,7 +11,7 @@ What's openll-asset-generator (*llassetgen*)?
 **ToDo**
 What's a font asset?
 --> stuff that is needed to render a font:
-* the glyph atlas, e.g. bitmap, distance field, vector, ... 
+* the glyph atlas, e.g. bitmap, distance field, vector, ... --> We use distance field asset, so that the font can later be rendered independently from the resolution of the asset.
 * typesetting information such as position in glyph atlas, position on baseline (advance, height, ...), kerning
 
 **ToDo**
@@ -87,6 +87,16 @@ The actual compilation can be done using CMake and your favorite compiler and ID
 * explaining parameters and their consequences (Distance Transform, Packing, etc...)
 * algorithms: link paper or explain how they work
 
+#### Miscellaneous
+
+<dl>
+  <dt>Font Name</dt><dd>The font is loaded from the local machine using the given font name, e.g. Arial, Verdana</dd>
+  <dt>(Original) Font Size</dt><dd>This size is used to pre-render the glyphs before the Distance Transform is applied. A higher value results in smoother fonts (high resolution font), but the Distance Transform performs slower. We encourage larger font size, as the Distance Field is only generated once.</dd>
+  <dt>Padding</dt><dd>Space that is added around the glyphs. Gives more space for dynamic range of distance transformed glyphs. That means, the glyphs get 'larger' and thus need more space to not be cut off.</dd>
+  <dt>Downsampling</dt><dd>Distance Fields are meant to be downsampled. We offer different downsampling types and also different scaling factors.</dd>
+  <dt>Dynamic Range</dt><dd>The Distance Transform calculates values, that need to be clamped in order to generate a PNG. Choose the min and max values.</dd>
+</dl>
+
 #### Packing
 
 Our implemented packing algorithms are based on the publication by Jukka Jylänki: *A thousand ways to pack the bin -- a practical approach to two-dimensional rectangle bin packing* (2010), except that for now, we don't use multiple bins (i.e. textures).
@@ -101,9 +111,9 @@ Algorithms: Dead-Reckoning, Parabola Envelope
 
 Needs a result from Packing to know the glyph sizes
 
-ToDo: parameters for dynamic range are applied for the png to export, but it also influences the rendering outcome of the distance field
+ToDo: parameters for dynamic range are applied for the png to export, but it also influences the rendering outcome of the distance field???
 
-Paramters: 
+Parameters: 
 
 #### Rendering
 using fragment-shader as in [OpenLL](http://openll.org/), subpixel sampling
