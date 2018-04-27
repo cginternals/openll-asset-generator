@@ -14,6 +14,7 @@ uniform vec4 fontColor;
 uniform sampler2D glyphs;
 uniform bool showDistanceField;
 uniform uint superSampling;
+uniform float threshold;
 
 in vec4 color;
 in vec2 v_uv;
@@ -34,7 +35,7 @@ float aastep(float t, float value)
 
 float tex(float t, vec2 uv)
 {
-    return aastep(0.5, texture(glyphs, uv)[channel]);
+    return aastep(t, texture(glyphs, uv)[channel]);
 }
 
 float aastep1x3(float t, vec2 uv)
@@ -196,14 +197,14 @@ void main()
         float a;
         switch (superSampling)
         {
-        case SuperSamplingNone:     a =            tex(0.5, v_uv); break;
-        case SuperSampling1x3:      a =      aastep1x3(0.5, v_uv); break;
-        case SuperSampling2x4:      a =      aastep2x4(0.5, v_uv); break;
-        case SuperSampling2x2RGSS:  a =  aastep2x2RGSS(0.5, v_uv); break;
-        case SuperSamplingQuincunx: a = aastepQuincunx(0.5, v_uv); break;
-        case SuperSampling8Rooks:   a =   aastep8Rooks(0.5, v_uv); break;
-        case SuperSampling3x3:      a =      aastep3x3(0.5, v_uv); break;
-        case SuperSampling4x4:      a =      aastep4x4(0.5, v_uv); break;
+        case SuperSamplingNone:     a =            tex(threshold, v_uv); break;
+        case SuperSampling1x3:      a =      aastep1x3(threshold, v_uv); break;
+        case SuperSampling2x4:      a =      aastep2x4(threshold, v_uv); break;
+        case SuperSampling2x2RGSS:  a =  aastep2x2RGSS(threshold, v_uv); break;
+        case SuperSamplingQuincunx: a = aastepQuincunx(threshold, v_uv); break;
+        case SuperSampling8Rooks:   a =   aastep8Rooks(threshold, v_uv); break;
+        case SuperSampling3x3:      a =      aastep3x3(threshold, v_uv); break;
+        case SuperSampling4x4:      a =      aastep4x4(threshold, v_uv); break;
         }
 
         fragColor = vec4(fc.rgb, fc.a * a);

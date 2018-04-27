@@ -174,8 +174,6 @@ if (UNIX)
         fontconfig
     )
 endif ()
-
-
 #
 # Compile definitions
 #
