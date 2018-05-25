@@ -79,6 +79,32 @@ Then, depending on the version of globjects you want to build, choose the approp
 The actual compilation can be done using CMake and your favorite compiler and IDE.
 
 ## Usage
+The CLI application `llassetgen-cmd` provides two subcommands:
+- `distfield` applies a distance transform to an input image
+- `atlas` generates a font atlas, optionally applying a distance transform and creating a font file in the FNT format.
+
+The following examples introduce the basic parameters of `distfield` and `atlas`. To see a list of all the options, run `llassetgen-cmd distfield --help` or `llassetgen-cmd atlas --help`.
+
+### Examples
+Take the existing file `image.png` and apply a distance transform, then write the result to `distancefield.png`:
+```shell
+llassetgen-cmd distfield image.png distancefield.png
+```
+
+Create an atlas for the Arial font containing only the glyphs 'a', 'b' and 'c', and write it to `atlas.png`:
+```shell
+llassetgen-cmd atlas --fontname Arial --glyph abc atlas.png
+```
+
+Create an atlas containing all printable ASCII glyphs, with a font size of 256 pixels, then use the Parabola Envelope algorithm to apply a distance transform. Write the resulting distance field to `atlas.png` and generate an FNT file, which is written to `atlas.fnt`:
+```shell
+llassetgen-cmd atlas --ascii --fontsize 256 --distfield parabola --fontname Arial atlas.png --fnt
+```
+
+Since a distance field creates a "glow" around every glyph, add 20 pixels of padding around each glyph in the atlas to create the necessary space. To improve the final rendering quality of the font, apply a 4x downsampling to every glyph:
+```shell
+llassetgen-cmd atlas --padding 20 --downsampling 4 --ascii --distfield parabola --fontname Arial atlas.png
+```
 
 **ToDo** Overview
 * how to link and use lib
