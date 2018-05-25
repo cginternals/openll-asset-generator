@@ -139,11 +139,11 @@ Based on: [GREVERA, George J. The “dead reckoning” signed distance transform
 #### Algorithm: Parabola Envelope
 Based on: [FELZENSZWALB, Pedro; HUTTENLOCHER, Daniel. Distance transforms of sampled functions. Cornell University, 2004.](https://www.cs.cornell.edu/~dph/papers/dt.pdf)
 
-### Input
+#### Input
 Bitmap image containing (true = inside, false = outside).
 The necessary padding should already be included in the input.
 
-### Output
+#### Output
 Float image containing the signed distance to the closest edge, measured in pixels.
 The output can be rendered to a PNG file by assigning a dynamic range (black & white distance value),
 which also clamps all values above and below that range.
