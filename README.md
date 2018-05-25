@@ -4,22 +4,20 @@ Font Asset Generator based on OpenLL Specifications
 [![GitHub contributors](https://img.shields.io/github/contributors/hpicgs/openll-asset-generator.svg)](https://GitHub.com/hpicgs/openll-asset-generator/graphs/contributors/)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/hpicgs/openll-asset-generator/blob/master/LICENSE)
 
-**ToDo**
-What's openll-asset-generator (*llassetgen*)?
---> cross-platform C++ generator for font assets, user can adapt different parameters and have a pre-render on the outcome
+**What is openll-asset-generator?** (*llassetgen*)?
+openll-asset-generator, or in short *llassetgen*, is a cross-platform C++ generator for font assets. Font assets are needed for rendering fonts in various realtime-applications.
+With *llassetgen*, the user can adapt the parameters via CLI, GUI or can directly use the core lib. The GUI offers a pre-render using the generated font asset.
 
-**ToDo**
-What's a font asset?
---> stuff that is needed to render a font:
-* the glyph atlas, e.g. bitmap, distance field, vector, ... --> We use distance field asset, so that the font can later be rendered independently from the resolution of the asset.
-* typesetting information such as position in glyph atlas, position on baseline (advance, height, ...), kerning
+**What is a font asset?**
+A font asset consists of the data needed to render a font.
+* The glyph atlas is a visual representation of the characters supported by the font. It can be a bitmap, a signed distance field, vector graphics, etc. The *llassetgen* creates signed distance fields as documented by Chris Green of Valve in the SIGGRAPH 2007 paper [Improved Alpha-Tested Magniﬁcation for Vector Textures and Special Effects.](http://www.valvesoftware.com/publications/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf).
+* The font description file contains the typesetting information that is needed to position each glyph correctly: the position in the glyph atlas, the position on the baseline (*advance*, *height*, ...) and the kerning data.
 
-**ToDo**
-Main Workflow with openll-asset-generator?
-* load vector font, generate high-resolution bitmap image containing the glyphs
-* pack all glyphs into an glyph atlas for lower space consumption
-* render distance field on every glyph. input: high resolution bitmap image. output: lower resolution distance field
-* export texture atlas (i.e. the glyph atlas as distance field) and font description file (i.e. information needed to use that atlas and to typeset the glyphs)
+**Main Workflow**
+1. Load the font file as it is found on your machine. Then generate a high-resolution bitmap image containing the glyphs.
+2. Pack all glyphs into a glyph atlas for lower space consumption.
+3. Render the distance field of every glyph. Input: high resolution bitmap image. Output: lower resolution distance field.
+4. Export the texture atlas (i.e. the glyph atlas as distance field) and the font description file (i.e. information needed to use that atlas and to typeset the glyphs).
 
 ## Project Health
 
