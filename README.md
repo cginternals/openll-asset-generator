@@ -133,13 +133,20 @@ Parameters: All glyph sizes, downsampled.
 
 ### Distance Transform
 
-Algorithms: Dead-Reckoning, Parabola Envelope
+#### Algorithm: Dead-Reckoning
+Based on: [GREVERA, George J. The “dead reckoning” signed distance transform. Computer Vision and Image Understanding, 2004, 95. Jg., Nr. 3, S. 317-333.](http://perso.ensta-paristech.fr/~manzaner/Download/IAD/Grevera_04.pdf)
 
-Needs a result from Packing to know the glyph sizes
+#### Algorithm: Parabola Envelope
+Based on: [FELZENSZWALB, Pedro; HUTTENLOCHER, Daniel. Distance transforms of sampled functions. Cornell University, 2004.](https://www.cs.cornell.edu/~dph/papers/dt.pdf)
 
-ToDo: parameters for dynamic range are applied for the png to export, but it also influences the rendering outcome of the distance field???
+### Input
+Bitmap image containing (true = inside, false = outside).
+The necessary padding should already be included in the input.
 
-Parameters: 
+### Output
+Float image containing the signed distance to the closest edge, measured in pixels.
+The output can be rendered to a PNG file by assigning a dynamic range (black & white distance value),
+which also clamps all values above and below that range.
 
 ### Rendering
 application *llassetgen-rendering*
