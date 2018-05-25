@@ -99,7 +99,7 @@ The actual compilation can be done using CMake and your favorite compiler and ID
 
 ### Packing
 
-Our implemented packing algorithms are based on the publication by Jukka Jylänki: *A thousand ways to pack the bin -- a practical approach to two-dimensional rectangle bin packing* (2010), except that for now, we don't use multiple bins (i.e. textures).
+Our implemented packing algorithms are based on the publication by Jukka Jylänki: [A thousand ways to pack the bin -- a practical approach to two-dimensional rectangle bin packing (2010)](http://clb.demon.fi/files/RectangleBinPack.pdf), except that for now, we don't use multiple bins (i.e. textures).
 
 The *Shelf Bin Packing* (O(n log(n))) performs faster, but there are cases where *Max Rects Packing* (O(n^5)) gives better results.
 
