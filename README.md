@@ -149,8 +149,9 @@ The output can be rendered to a PNG file by assigning a dynamic range (black & w
 which also clamps all values above and below that range.
 
 ### Rendering
-application *llassetgen-rendering*
-using fragment-shader as in [OpenLL](http://openll.org/) (Super Sampling)
+Additionally to the CLI, you can use the application *llassetgen-rendering*. It offers a preview of the rendering using the calculated distance field. Using the GUI, you can change all parameters and see their direct influence on the final image.
+
+*llassetgen-rendering* uses the fragment-shader as in [OpenLL](http://openll.org/) for Super Sampling. Rendering parameters are:
 
 <dl>
   <dt>Super Sampling</dt><dd>Choose the type of Super Sampling.</dd>
