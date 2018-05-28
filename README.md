@@ -140,7 +140,7 @@ Based on: [GREVERA, George J. The “dead reckoning” signed distance transform
 Based on: [FELZENSZWALB, Pedro; HUTTENLOCHER, Daniel. Distance transforms of sampled functions. Cornell University, 2004.](https://www.cs.cornell.edu/~dph/papers/dt.pdf)
 
 #### Input
-Bitmap image containing (true = inside, false = outside).
+Bitmap image containing a mask which indicates where the charater is filled (true = inside, false = outside).
 The necessary padding should already be included in the input.
 
 #### Output
@@ -149,7 +149,7 @@ The output can be rendered to a PNG file by assigning a dynamic range (black & w
 which also clamps all values above and below that range.
 
 ### Rendering
-Additionally to the CLI, you can use the GUI-application *llassetgen-rendering*. It offers a preview of the rendering using the calculated distance field. Using the GUI, you can change all parameters and see their direct impact on the final image.
+Additionally to the CLI, you can use the application *llassetgen-rendering*. It offers a preview of the rendering using the calculated distance field. Using the GUI, you can change all parameters and see their direct influence on the final image.
 
 *llassetgen-rendering* uses the fragment-shader as in [OpenLL](http://openll.org/) for Super Sampling. Rendering parameters are:
 
