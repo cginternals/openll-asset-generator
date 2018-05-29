@@ -133,20 +133,20 @@ Parameters: All glyph sizes, downsampled.
 
 ### Distance Transform
 
+*llassetgen* offers two algorithms for the distance field creation:
+
 #### Algorithm: Dead-Reckoning
 Based on: [GREVERA, George J. The “dead reckoning” signed distance transform. Computer Vision and Image Understanding, 2004, 95. Jg., Nr. 3, S. 317-333.](http://perso.ensta-paristech.fr/~manzaner/Download/IAD/Grevera_04.pdf)
 
 #### Algorithm: Parabola Envelope
 Based on: [FELZENSZWALB, Pedro; HUTTENLOCHER, Daniel. Distance transforms of sampled functions. Cornell University, 2004.](https://www.cs.cornell.edu/~dph/papers/dt.pdf)
 
-#### Input
-Bitmap image containing a mask which indicates where the charater is filled (true = inside, false = outside).
-The necessary padding should already be included in the input.
+#### Parameters:
 
-#### Output
-Float image containing the signed distance to the closest edge, measured in pixels.
-The output can be rendered to a PNG file by assigning a dynamic range (black & white distance value),
-which also clamps all values above and below that range.
+<dl>
+  <dt>Input</dt><dd>Bitmap image containing a mask which indicates where the charater is filled (true = inside, false = outside). The necessary padding should already be included in the input.</dd>
+  <dt>Output</dt><dd>Float image containing the signed distance to the closest edge, measured in pixels. The output can be rendered to a PNG file by assigning a dynamic range (black & white distance value), which also clamps all values above and below that range.</dd>
+</dl>
 
 ### Rendering
 Additionally to the CLI, you can use the GUI-application *llassetgen-rendering*. It offers a preview of the rendering using the calculated distance field. Using the GUI, you can change all parameters and see their direct impact on the final image.
