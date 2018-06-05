@@ -79,13 +79,17 @@ Then, depending on the version of globjects you want to build, choose the approp
 The actual compilation can be done using CMake and your favorite compiler and IDE.
 
 ## Usage
+
+To see how to use our core lib, you can explore the following two applications that come with *llassetgen*: `llassetgen-cmd` and `llassetgen-rendering`. Further below you find details on the used algorithms and parameters.
+
+### CLI
 The CLI application `llassetgen-cmd` provides two subcommands:
 - `distfield` applies a distance transform to an input image
 - `atlas` generates a font atlas, optionally applying a distance transform and creating a font file in the FNT format.
 
 The following examples introduce the basic parameters of `distfield` and `atlas`. To see a list of all the options, run `llassetgen-cmd distfield --help` or `llassetgen-cmd atlas --help`.
 
-### Examples
+#### Examples
 Take the existing file `image.png` and apply a distance transform, then write the result to `distancefield.png`:
 ```shell
 llassetgen-cmd distfield image.png distancefield.png
@@ -106,14 +110,19 @@ Since a distance field creates a "glow" around every glyph, add 20 pixels of pad
 llassetgen-cmd atlas --padding 20 --downsampling 4 --ascii --distfield parabola --fontname Arial atlas.png
 ```
 
-**ToDo** Overview
-* how to link and use lib
-* using CLI
-* using rendering / GUI (what's WIP)
-* explaining parameters and their consequences (Distance Transform, Packing, etc...)
-* algorithms: link paper or explain how they work
+### Rendering
+Additionally to the CLI, you can use the GUI-application `llassetgen-rendering`. It offers a preview of the rendering using the calculated distance field. Using the GUI, you can change all parameters and see their direct impact on the final image.
 
-### Miscellaneous
+`llassetgen-rendering` uses the fragment-shader as in [OpenLL](http://openll.org/) for Super Sampling. Rendering parameters are:
+
+<dl>
+  <dt>Super Sampling</dt><dd>Choose the type of Super Sampling.</dd>
+  <dt>Threshold</dt><dd>The default value is 0.5, since the Distance Transform considers 0.5 as the contour. Choosing a smaller value renders the glyphs bold; a larger value renders them thinner, until they completely disappear. A smaller value than 0.3 is clamped to 0.3, because such fragments are dicarded in fragment shader for performance reasons.</dd>
+  <dt>Switch Rendering</dt><dd>You can toggle between rendering the calculated distance field or rendering the resulting glyphs when using the calculated distance field.</dd>
+</dl>
+
+
+## Details on Algorithms and Parameters
 
 <dl>
   <dt>Font Name</dt><dd>The font is loaded from the local machine using the given font name, e.g. Arial, Verdana</dd>
@@ -135,11 +144,9 @@ Parameters: All glyph sizes, downsampled.
 
 *llassetgen* offers two algorithms for the distance field creation:
 
-#### Algorithm: Dead-Reckoning
-Based on: [GREVERA, George J. The “dead reckoning” signed distance transform. Computer Vision and Image Understanding, 2004, 95. Jg., Nr. 3, S. 317-333.](http://perso.ensta-paristech.fr/~manzaner/Download/IAD/Grevera_04.pdf)
+The Algorithm "Dead-Reckoning" is based on: [GREVERA, George J. The “dead reckoning” signed distance transform. Computer Vision and Image Understanding, 2004, 95. Jg., Nr. 3, S. 317-333.](http://perso.ensta-paristech.fr/~manzaner/Download/IAD/Grevera_04.pdf)
 
-#### Algorithm: Parabola Envelope
-Based on: [FELZENSZWALB, Pedro; HUTTENLOCHER, Daniel. Distance transforms of sampled functions. Cornell University, 2004.](https://www.cs.cornell.edu/~dph/papers/dt.pdf)
+The Algorithm called "Parabola Envelope" is based on: [FELZENSZWALB, Pedro; HUTTENLOCHER, Daniel. Distance transforms of sampled functions. Cornell University, 2004.](https://www.cs.cornell.edu/~dph/papers/dt.pdf)
 
 #### Parameters:
 
@@ -147,16 +154,4 @@ Based on: [FELZENSZWALB, Pedro; HUTTENLOCHER, Daniel. Distance transforms of sam
   <dt>Input</dt><dd>Bitmap image containing a mask which indicates where the charater is filled (true = inside, false = outside). The necessary padding should already be included in the input.</dd>
   <dt>Output</dt><dd>Float image containing the signed distance to the closest edge, measured in pixels. The output can be rendered to a PNG file by assigning a dynamic range (black & white distance value), which also clamps all values above and below that range.</dd>
 </dl>
-
-### Rendering
-Additionally to the CLI, you can use the GUI-application *llassetgen-rendering*. It offers a preview of the rendering using the calculated distance field. Using the GUI, you can change all parameters and see their direct impact on the final image.
-
-*llassetgen-rendering* uses the fragment-shader as in [OpenLL](http://openll.org/) for Super Sampling. Rendering parameters are:
-
-<dl>
-  <dt>Super Sampling</dt><dd>Choose the type of Super Sampling.</dd>
-  <dt>Threshold</dt><dd>The default value is 0.5, since the Distance Transform considers 0.5 as the contour. Choosing a smaller value renders the glyphs bold; a larger value renders them thinner, until they completely disappear. A smaller value than 0.3 is clamped to 0.3, because such fragments are dicarded in fragment shader for performance reasons.</dd>
-  <dt>Switch Rendering</dt><dd>You can toggle between rendering the calculated distance field or rendering the resulting glyphs when using the calculated distance field.</dd>
-</dl>
-
 
