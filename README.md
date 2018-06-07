@@ -129,7 +129,7 @@ Additionally to the CLI, you can use the GUI-application `llassetgen-rendering`.
   <dt>(Original) Font Size</dt><dd>This size is used to pre-render the glyphs before the Distance Transform is applied. A higher value results in smoother fonts (high resolution font), but the Distance Transform performs slower. We encourage larger font size, as the Distance Field is only generated once.</dd>
   <dt>Padding</dt><dd>Space that is added around the glyphs. Gives more space for dynamic range of distance transformed glyphs. That means, the glyphs get 'larger' and thus need more space to not be cut off.</dd>
   <dt>Downsampling</dt><dd>Distance Fields are meant to be downsampled. We offer different downsampling types and also different scaling factors.</dd>
-  <dt>Dynamic Range</dt><dd>The Distance Transform calculates values, that need to be clamped in order to generate a PNG. Choose the min and max values.</dd>
+  <dt>Dynamic Range</dt><dd>The Distance Transform calculates values, that need to be clamped in order to generate a PNG. Choose the min (*black*) and max (*white*) values. A lower black value will make the distance fields wider; a lower white value will make the distance fields brighter. In most cases, the black value should be lower than the white value. However, swapping the black and white value will invert the colors of the atlas.</dd>
 </dl>
 
 ### Packing
