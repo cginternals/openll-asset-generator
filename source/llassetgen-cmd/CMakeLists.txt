@@ -24,7 +24,8 @@ set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 set(headers
     ${include_path}/CLI11.h
     ${include_path}/algorithms.h
-    ${include_path}/helpstrings.h)
+    ${include_path}/helpstrings.h
+    ${include_path}/presets.h)
 
 set(sources
     ${source_path}/main.cpp)
