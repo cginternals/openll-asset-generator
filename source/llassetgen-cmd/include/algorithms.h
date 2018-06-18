@@ -16,12 +16,14 @@ std::map<std::string, ImageTransform> dtAlgos{
 
 std::map<std::string, Packing (*)(VecIter, VecIter, bool)> packingAlgos{
     {"shelf", shelfPackAtlas},
-    {"maxrects", maxRectsPackAtlas}};
+    {"maxrects", maxRectsPackAtlas}
+};
 
 std::map<std::string, ImageTransform> downsamplingAlgos{
     {"center", [](Image& input, Image& output) { input.centerDownsampling<DistanceTransform::OutputType>(output); }},
     {"average", [](Image& input, Image& output) { input.averageDownsampling<DistanceTransform::OutputType>(output); }},
-    {"min", [](Image& input, Image& output) { input.minDownsampling<DistanceTransform::OutputType>(output); }}};
+    {"min", [](Image& input, Image& output) { input.minDownsampling<DistanceTransform::OutputType>(output); }}
+};
 
 template <class Func>
 std::set<std::string> algoNames(std::map<std::string, Func> map) {

@@ -1,6 +1,8 @@
 #pragma once
 
-std::string appHelp{"OpenLL Font Asset Generator\nRun 'llassetgen [SUBCOMMAND] --help' for more details\n"},
+std::string
+
+    appHelp{"OpenLL Font Asset Generator\nRun 'llassetgen [SUBCOMMAND] --help' for more details\n"},
     atlasHelp{"Create a font atlas, optionally applying a distance transform"},
     distfieldHelp{
         "Apply a distance transform algorithm to the atlas. If none is chosen, no distance transform will be applied"},
