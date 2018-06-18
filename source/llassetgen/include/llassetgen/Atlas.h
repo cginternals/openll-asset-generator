@@ -57,8 +57,8 @@ namespace llassetgen {
         const int max = std::distance(imgBegin, imgEnd);
 #pragma omp parallel for
         for (int i = 0; i < max; i++) {
-            auto & imgInput = imgBegin[i];
-            Image distField{ imgInput.getWidth(), imgInput.getHeight(), DistanceTransform::bitDepth};
+            auto& imgInput = imgBegin[i];
+            Image distField{imgInput.getWidth(), imgInput.getHeight(), DistanceTransform::bitDepth};
             distanceTransform(imgInput, distField);
 
             auto& rect = packing.rects[i];

@@ -30,7 +30,13 @@ namespace llassetgen {
         }
     }
 
-    Image::Image(Image&& src) :min(src.min), max(src.max), stride(src.stride), bitDepth(src.bitDepth), data(src.data), isOwnerOfData(src.isOwnerOfData) {
+    Image::Image(Image&& src)
+        : min(src.min),
+          max(src.max),
+          stride(src.stride),
+          bitDepth(src.bitDepth),
+          data(src.data),
+          isOwnerOfData(src.isOwnerOfData) {
         src.isOwnerOfData = false;
     }
 
@@ -62,7 +68,9 @@ namespace llassetgen {
      * divided by `divisibleBy` without a remainder
      */
     Image::Image(FT_Bitmap bitmap, size_t padding, size_t divisibleBy)
-        : Image(divisiblePadding(bitmap.width, padding, divisibleBy), divisiblePadding(bitmap.rows, padding, divisibleBy), 1) {
+        : Image(divisiblePadding(bitmap.width, padding, divisibleBy),
+                divisiblePadding(bitmap.rows, padding, divisibleBy),
+                1) {
         if (padding > 0 || bitmap.width % divisibleBy != 0 || bitmap.rows % divisibleBy != 0) {
             Vec2<size_t> paddingVec{padding, padding},
                          imgSize{bitmap.width, bitmap.rows};
@@ -89,7 +97,7 @@ namespace llassetgen {
         outerMin += min;
         outerMax += min;
         Vec2<size_t> paddingVec(padding, padding);
-        return { outerMin + paddingVec, outerMax - paddingVec, stride, bitDepth, data };
+        return {outerMin + paddingVec, outerMax - paddingVec, stride, bitDepth, data};
     }
 
     size_t Image::getWidth() const { return max.x - min.x; }
@@ -169,12 +177,13 @@ namespace llassetgen {
     template LLASSETGEN_API void Image::centerDownsampling<uint8_t>(const Image& src) const;
     template <typename pixelType>
     void Image::centerDownsampling(const Image& src) const {
-        assert(src.getWidth()%getWidth() == 0 && src.getHeight()%getHeight() == 0);
-        size_t x_scale = src.getWidth()/getWidth(),
-               y_scale = src.getHeight()/getHeight();
+        assert(src.getWidth() % getWidth() == 0 && src.getHeight() % getHeight() == 0);
+        size_t x_scale = src.getWidth() / getWidth(),
+               y_scale = src.getHeight() / getHeight();
         for (size_t y = 0; y < getHeight(); y++) {
             for (size_t x = 0; x < getWidth(); x++) {
-                setPixel<pixelType>({x, y}, src.getPixel<pixelType>({x*x_scale+x_scale/2, y*y_scale+y_scale/2}));
+                setPixel<pixelType>({x, y},
+                                    src.getPixel<pixelType>({x * x_scale + x_scale / 2, y * y_scale + y_scale / 2}));
             }
         }
     }
@@ -185,18 +194,18 @@ namespace llassetgen {
     template LLASSETGEN_API void Image::averageDownsampling<uint8_t>(const Image& src) const;
     template <typename pixelType>
     void Image::averageDownsampling(const Image& src) const {
-        assert(src.getWidth()%getWidth() == 0 && src.getHeight()%getHeight() == 0);
-        size_t x_scale = src.getWidth()/getWidth(),
-               y_scale = src.getHeight()/getHeight();
+        assert(src.getWidth() % getWidth() == 0 && src.getHeight() % getHeight() == 0);
+        size_t x_scale = src.getWidth() / getWidth(),
+               y_scale = src.getHeight() / getHeight();
         for (size_t y = 0; y < getHeight(); y++) {
             for (size_t x = 0; x < getWidth(); x++) {
                 pixelType value = 0;
                 for (size_t j = 0; j < y_scale; j++) {
                     for (size_t i = 0; i < x_scale; i++) {
-                        value += src.getPixel<pixelType>({x*x_scale+i, y*y_scale+j});
+                        value += src.getPixel<pixelType>({x * x_scale + i, y * y_scale + j});
                     }
                 }
-                setPixel<pixelType>({x, y}, value/(x_scale*y_scale));
+                setPixel<pixelType>({x, y}, value / (x_scale * y_scale));
             }
         }
     }
@@ -207,15 +216,15 @@ namespace llassetgen {
     template LLASSETGEN_API void Image::minDownsampling<uint8_t>(const Image& src) const;
     template <typename pixelType>
     void Image::minDownsampling(const Image& src) const {
-        assert(src.getWidth()%getWidth() == 0 && src.getHeight()%getHeight() == 0);
-        size_t x_scale = src.getWidth()/getWidth(),
-               y_scale = src.getHeight()/getHeight();
+        assert(src.getWidth() % getWidth() == 0 && src.getHeight() % getHeight() == 0);
+        size_t x_scale = src.getWidth() / getWidth(),
+               y_scale = src.getHeight() / getHeight();
         for (size_t y = 0; y < getHeight(); y++) {
             for (size_t x = 0; x < getWidth(); x++) {
                 pixelType value = std::numeric_limits<pixelType>::max();
                 for (size_t j = 0; j < y_scale; j++) {
                     for (size_t i = 0; i < x_scale; i++) {
-                        value = std::min(value, src.getPixel<pixelType>({x*x_scale+i, y*y_scale+j}));
+                        value = std::min(value, src.getPixel<pixelType>({x * x_scale + i, y * y_scale + j}));
                     }
                 }
                 setPixel<pixelType>({x, y}, value);
@@ -232,9 +241,7 @@ namespace llassetgen {
             assert(bitDepth == 1);
             size_t rowLength = std::min(pitch, stride);
             for (size_t y = 0; y < ft_bitmap.rows; y++) {
-                memcpy(&data[(min.y + y) * stride + min.x / 8],
-                       &ft_bitmap.buffer[y * ft_bitmap.pitch],
-                       rowLength);
+                memcpy(&data[(min.y + y) * stride + min.x / 8], &ft_bitmap.buffer[y * ft_bitmap.pitch], rowLength);
             }
         } else {
             for (size_t y = 0; y < ft_bitmap.rows; y++) {
@@ -334,8 +341,8 @@ namespace llassetgen {
             if (color_type == PNG_COLOR_TYPE_PALETTE) {
                 png_set_palette_to_rgb(png);
             } else if (color_type == PNG_COLOR_TYPE_RGB ||
-                color_type == PNG_COLOR_TYPE_RGBA ||
-                color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
+                       color_type == PNG_COLOR_TYPE_RGBA ||
+                       color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
                 png_set_rgb_to_gray_fixed(png, 1, -1, -1);
             }
             /* TODO: all color types:
