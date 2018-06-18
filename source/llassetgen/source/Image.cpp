@@ -25,8 +25,9 @@
 
 namespace llassetgen {
     Image::~Image() {
-        if (isOwnerOfData)
+        if (isOwnerOfData) {
             delete[] data;
+        }
     }
 
     Image::Image(Image&& src) :min(src.min), max(src.max), stride(src.stride), bitDepth(src.bitDepth), data(src.data), isOwnerOfData(src.isOwnerOfData) {
