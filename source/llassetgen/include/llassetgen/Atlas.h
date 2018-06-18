@@ -54,10 +54,12 @@ namespace llassetgen {
         Image atlas{packing.atlasSize.x, packing.atlasSize.y, DistanceTransform::bitDepth};
         atlas.fillRect({0, 0}, atlas.getSize(), DistanceTransform::backgroundVal);
 
+        const int max = std::distance(imgBegin, imgEnd);
 #pragma omp parallel for
-        for (int i = 0; i < std::distance(imgBegin, imgEnd); i++) {
-            Image distField{imgBegin[i].getWidth(), imgBegin[i].getHeight(), DistanceTransform::bitDepth};
-            distanceTransform(imgBegin[i], distField);
+        for (int i = 0; i < max; i++) {
+            auto & imgInput = imgBegin[i];
+            Image distField{ imgInput.getWidth(), imgInput.getHeight(), DistanceTransform::bitDepth};
+            distanceTransform(imgInput, distField);
 
             auto& rect = packing.rects[i];
             Image output = atlas.view(rect.position, rect.position + rect.size);
