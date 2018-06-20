@@ -99,22 +99,8 @@ namespace llassetgen {
     void FontFinder::setFontSize(int size) {
         FT_Error err = FT_Set_Pixel_Sizes(fontFace, 0, static_cast<FT_UInt>(size));
         if (err) {
-            throw std::runtime_error("could not set font size");
+            throw std::runtime_error("Could not set font size. FT_Error is " + std::to_string(err));
         }
-    }
-
-    Image FontFinder::renderGlyph(unsigned long glyph, size_t padding, size_t divisibleBy) {
-        FT_UInt charIndex = FT_Get_Char_Index(fontFace, static_cast<FT_ULong>(glyph));
-        if (charIndex == 0) {
-            std::cerr << "Warning: font does not contain glyph with code " << glyph << std::endl;
-        }
-
-        FT_Error err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
-        FT_Bitmap& bitmap = fontFace->glyph->bitmap;
-        if (err || bitmap.buffer == nullptr) {
-            throw std::runtime_error("glyph with code " + std::to_string(glyph) + " could not be rendered");
-        }
-        return {bitmap, padding, divisibleBy};
     }
 
     std::vector<Image> FontFinder::renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding,
@@ -124,7 +110,21 @@ namespace llassetgen {
         std::vector<Image> v;
         v.reserve(glyphs.size());
         for (const auto glyph : glyphs) {
-            Image img = renderGlyph(glyph, padding, divisibleBy);
+
+            FT_UInt charIndex = FT_Get_Char_Index(fontFace, static_cast<FT_ULong>(glyph));
+            if (charIndex == 0) {
+                std::cerr << "Warning: Font does not contain glyph with code " << glyph << ". Omitted." << std::endl;
+                continue;
+            }
+
+            FT_Error err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
+            FT_Bitmap& bitmap = fontFace->glyph->bitmap;
+            if (err || bitmap.buffer == nullptr) {
+                std::cerr << "Warning: Omitting glyph with code " + std::to_string(glyph) + " which could not be rendered." << std::endl;
+                continue;
+            }
+
+            Image img = { bitmap, padding, divisibleBy };
             v.push_back(std::move(img));
         }
         return v;

@@ -5,16 +5,13 @@
 
 #include <algorithms.h>
 #include <helpstrings.h>
+#include <presets.h>
 
 #include <llassetgen/Atlas.h>
 #include <llassetgen/FntWriter.h>
 #include <llassetgen/FontFinder.h>
 
 using namespace llassetgen;
-
-// all printable ascii characters, except for space
-constexpr char ascii[] =
-    "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
 std::u32string UTF8toUCS4(const std::string& str) {
 #if _MSC_VER >= 1900  // handle Visual Studio bug
@@ -45,7 +42,7 @@ std::pair<std::string, std::string> outNames(const std::string& outPath) {
 }
 
 std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vector<unsigned int>& charCodes,
-                                     bool includeAscii) {
+                                     const std::string& presetName) {
     std::set<unsigned long> set;
     for (const auto c : UTF8toUCS4(glyphs)) {
         set.insert(c);
@@ -55,11 +52,18 @@ std::set<unsigned long> makeGlyphSet(const std::string& glyphs, const std::vecto
         set.insert(c);
     }
 
-    if (includeAscii) {
+    if (presetName == "ascii") {
         const char* p = ascii;
         while (*p) {
             set.insert(static_cast<unsigned long>(*p++));
         }
+    } else if (presetName == "preset20180319") {
+        const char16_t* p = preset20180319;
+        while (*p) {
+            set.insert(static_cast<unsigned long>(*p++));
+        }
+    } else {
+        std::cerr << "Error: No preset found for given preset name." << std::endl;
     }
     return set;
 }
@@ -70,8 +74,8 @@ void checkIfFontSet(CLI::Option* nameOpt, CLI::Option* pathOpt) {
     }
 }
 
-int parseAtlasArgs(int argc, char **argv) {
-    // Example: llassetgen-cmd atlas -d parabola --ascii -f Verdana atlas.png
+int parseAtlasArgs(int argc, char** argv) {
+    // Example: llassetgen-cmd atlas -d parabola --preset preset20180319 -f Verdana atlas.png
     CLI::App app{atlasHelp};
 
     // positional arguments
@@ -89,11 +93,11 @@ int parseAtlasArgs(int argc, char **argv) {
     std::string glyphs;
     app.add_option("-g, --glyph", glyphs, glyphHelp);
 
+    std::string presetName;
+    /*CLI::Option* presetNameOpt = */ app.add_option("--preset", presetName, presetHelp);
+
     std::vector<unsigned int> charCodes;
     app.add_option("-c, --charcode", charCodes, charcodeHelp);
-
-    bool includeAscii = false;
-    app.add_flag("--ascii", includeAscii, asciiHelp);
 
     // font
     unsigned int fontSize = 128;
@@ -128,7 +132,7 @@ int parseAtlasArgs(int argc, char **argv) {
     std::string fntPath;
     std::tie(outPath, fntPath) = outNames(outPath);
 
-    std::set<unsigned long> glyphSet = makeGlyphSet(glyphs, charCodes, includeAscii);
+    std::set<unsigned long> glyphSet = makeGlyphSet(glyphs, charCodes, presetName);
     if (glyphSet.empty()) {
         std::cerr << "Error: at least one glyph required" << std::endl;
         return 2;
@@ -136,8 +140,8 @@ int parseAtlasArgs(int argc, char **argv) {
 
     try {
         checkIfFontSet(fontNameOpt, fontPathOpt);
-        FontFinder fontFinder = static_cast<bool>(*fontPathOpt) ? FontFinder::fromPath(fontPath)
-                                                               : FontFinder::fromName(fontName);
+        FontFinder fontFinder =
+            static_cast<bool>(*fontPathOpt) ? FontFinder::fromPath(fontPath) : FontFinder::fromName(fontName);
 
         std::vector<Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
         std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages, downsamplingRatio);
@@ -172,7 +176,7 @@ int parseAtlasArgs(int argc, char **argv) {
     return 0;
 }
 
-int parseDistfieldArgs(int argc, char **argv) {
+int parseDistfieldArgs(int argc, char** argv) {
     CLI::App app{dfHelp};
     // Example: llassetgen-cmd distfield -a deadrec -i input.png output.png
 
