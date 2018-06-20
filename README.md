@@ -9,6 +9,8 @@ Font Asset Generator based on OpenLL Specifications
 The openll-asset-generator, or in short *llassetgen*, is a cross-platform C++ generator for font assets. Font assets are needed for rendering fonts in various realtime-applications.
 With *llassetgen*, the user can adapt the parameters via CLI, GUI or can directly use the core lib. The GUI offers a pre-render using the generated font asset.
 
+On the `master`-branch you will find everything tested using CI (Appveyor, Travis). On the `develop`-branch you find more features and fixes, but they are not thoroughly tested due to dependency issues on the CI servers.
+
 **What is a font asset?**
 
 A font asset consists of the data needed to render a font.
@@ -47,13 +49,13 @@ We plan to provide the Font Asset Generator via homebrew package manager. Until 
 
 ### Prerequisites and Dependencies
 
-Necessary for the core library (*llassetgen*) and the CLI application (*llassetgen-cmd*)
+Necessary for the core library (*llassetgen*) and the CLI application (`llassetgen-cmd`)
 * [CMake](https://cmake.org/) 3.4 or higher for building from source
 * [Freetype](https://www.freetype.org/) to load and render fonts
 * [libpng](http://www.libpng.org/pub/png/libpng.html) to import and export PNGs images.
 * [fontconfig](https://www.freedesktop.org/wiki/Software/fontconfig/) on Unix systems. 
 
-Additionally necessary to build the rendering application (*llassetgen-rendering*):
+Additionally necessary to build the rendering application (`llassetgen-rendering`):
 * [GLM](https://github.com/g-truc/glm) for OpenGL math and data structures
 * [glbinding](https://github.com/cginternals/glbinding) as OpenGL API binding
 * [globjects](https://github.com/cginternals/globjects) to wrap OpenGL API objects
