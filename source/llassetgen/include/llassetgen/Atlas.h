@@ -18,11 +18,8 @@ namespace llassetgen {
                           "Input iterator must be a RandomAccessIterator");
             return 0;
         }
-    }
-
-    template <class ImageIter>
+    }    template <class ImageIter>
     Image fontAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, uint8_t bitDepth = 1) {
-        internal::checkImageIteratorType<ImageIter>();
         using DiffType = typename std::iterator_traits<ImageIter>::difference_type;
         assert(std::distance(imgBegin, imgEnd) == static_cast<DiffType>(packing.rects.size()));
 
@@ -69,3 +66,4 @@ namespace llassetgen {
         return atlas;
     }
 }
+

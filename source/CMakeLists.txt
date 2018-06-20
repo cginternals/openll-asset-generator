@@ -18,6 +18,7 @@ add_subdirectory(llassetgen)
 # Applications
 set(IDE_FOLDER "Applications")
 add_subdirectory(llassetgen-cmd)
+add_subdirectory(llassetgen-rendering)
 # add_subdirectory(llassetgen-server)
 # add_subdirectory(llassetgen-client)
 

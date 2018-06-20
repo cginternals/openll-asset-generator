@@ -2,13 +2,19 @@
 # External dependencies
 #
 
+find_package(glm REQUIRED)
+find_package(glbinding REQUIRED)
+find_package(globjects REQUIRED)
+
+find_package(Qt5 COMPONENTS Core Gui OpenGL Widgets REQUIRED)
+
 
 #
 # Executable name and options
 #
 
 # Target name
-set(target llassetgen-cmd)
+set(target llassetgen-rendering)
 
 # Exit here if required dependencies are not met
 message(STATUS "Application ${target}")
@@ -18,17 +24,17 @@ message(STATUS "Application ${target}")
 # Sources
 #
 
-set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
-
-set(headers
-    ${include_path}/CLI11.h
-    ${include_path}/algorithms.h
-    ${include_path}/helpstrings.h
-    ${include_path}/presets.h)
+set(CMAKE_AUTOMOC TRUE)
 
 set(sources
-    ${source_path}/main.cpp)
+    main.cpp
+    
+    WindowQt.cpp
+)
+
+set(headers
+    WindowQt.h
+)
 
 #
 # Create executable
@@ -36,8 +42,9 @@ set(sources
 
 # Build executable
 add_executable(${target}
-    ${headers}
+    MACOSX_BUNDLE
     ${sources}
+    ${headers}
 )
 
 # Create namespaced alias
@@ -63,7 +70,6 @@ target_include_directories(${target}
     PRIVATE
     ${DEFAULT_INCLUDE_DIRECTORIES}
     ${PROJECT_BINARY_DIR}/source/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 
@@ -75,6 +81,14 @@ target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LIBRARIES}
     ${META_PROJECT_NAME}::llassetgen
+    Qt5::Core
+    Qt5::OpenGL
+    Qt5::Gui
+    Qt5::Widgets
+    
+    PUBLIC
+    glbinding::glbinding
+    globjects::globjects
 )
 
 
@@ -95,7 +109,6 @@ target_compile_definitions(${target}
 target_compile_options(${target}
     PRIVATE
     ${DEFAULT_COMPILE_OPTIONS}
-    $<$<BOOL:${OpenMP_CXX_FOUND}>:${OpenMP_CXX_FLAGS}>
 )
 
 
@@ -106,7 +119,6 @@ target_compile_options(${target}
 target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LINKER_OPTIONS}
-    $<$<BOOL:${OpenMP_CXX_FOUND}>:${OpenMP_CXX_FLAGS}>
 )
 
 

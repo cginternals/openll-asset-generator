@@ -1,4 +1,6 @@
 language: cpp
+
+sudo: required
 dist: trusty
 
 os:
@@ -12,6 +14,8 @@ compiler:
 env:
   global:
     - CMAKE_OPTIONS="-DOPTION_BUILD_EXAMPLES=On"
+    - PATH="/usr/local/opt/qt/bin:/usr/local/opt/glbinding:/usr/local/opt/globjects:$PATH"
+    
   matrix:
     - CMAKE_CONFIGURATION=release BUILD_DIR=build
     - CMAKE_CONFIGURATION=debug BUILD_DIR=build-debug
@@ -35,8 +39,19 @@ addons:
       - libpng-dev
 
 before_install:
-  # libpng is already installed by default
-  - if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install cppcheck freetype fontconfig; fi
+  - |-
+    if [ $TRAVIS_OS_NAME == linux ]; then
+      sudo apt-add-repository ppa:cginternals/ppa -y;
+      sudo apt-add-repository ppa:cginternals/backports-ppa -y;
+      sudo apt-get update -qq;
+      sudo apt-get install -qq qt5-default libglm-dev libglbinding-dev libglobjects-dev;
+    fi  # libpng is already installed by default
+  - |-
+    if [ $TRAVIS_OS_NAME == osx ]; then
+      brew tap cginternals/homebrew-cginternals;
+      brew update && brew install cppcheck fontconfig freetype qt5 glm glbinding cginternals/homebrew-cginternals/globjects;
+      export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH;$(brew --prefix qt);$(brew --prefix glbinding);$(brew --prefix globjects)";
+    fi
   - chmod +x ./configure
 
 before_script:
