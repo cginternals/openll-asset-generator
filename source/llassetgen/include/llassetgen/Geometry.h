@@ -74,12 +74,12 @@ namespace llassetgen {
         return *this;
     }
 
-    template<class T>
+    template <class T>
     Vec2<T> Vec2<T>::operator/(const T dividend) const {
         return {x / dividend, y / dividend};
     }
 
-    template<class T>
+    template <class T>
     Vec2<T>& Vec2<T>::operator/=(const T dividend) {
         x /= dividend;
         y /= dividend;

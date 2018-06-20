@@ -7,7 +7,18 @@
 namespace llassetgen {
     using ImageTransform = void (*)(Image&, Image&);
 
-    template <class ImageIter>
+    namespace internal {
+        template <class Iter>
+        constexpr int checkImageIteratorType() {
+            using IterTraits = typename std::iterator_traits<Iter>;
+            using IterType = typename IterTraits::value_type;
+            using IterCategory = typename IterTraits::iterator_category;
+            static_assert(std::is_assignable<Image, IterType>::value, "Input elements must be assignable to Image");
+            static_assert(std::is_base_of<std::random_access_iterator_tag, IterCategory>::value,
+                          "Input iterator must be a RandomAccessIterator");
+            return 0;
+        }
+    }    template <class ImageIter>
     Image fontAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, uint8_t bitDepth = 1) {
         using DiffType = typename std::iterator_traits<ImageIter>::difference_type;
         assert(std::distance(imgBegin, imgEnd) == static_cast<DiffType>(packing.rects.size()));
@@ -15,10 +26,11 @@ namespace llassetgen {
         Image atlas{packing.atlasSize.x, packing.atlasSize.y, bitDepth};
         atlas.clear();
 
-        auto rectIt = packing.rects.begin();
-        for (; imgBegin < imgEnd; rectIt++, imgBegin++) {
-            Image view = atlas.view(rectIt->position, rectIt->position + rectIt->size);
-            view.copyDataFrom(*imgBegin);
+#pragma omp parallel for
+        for (int i = 0; i < std::distance(imgBegin, imgEnd); i++) {
+            auto& rect = packing.rects[i];
+            Image view = atlas.view(rect.position, rect.position + rect.size);
+            view.copyDataFrom(imgBegin[i]);
         }
         return atlas;
     }
@@ -32,18 +44,22 @@ namespace llassetgen {
     template <class ImageIter>
     Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, ImageTransform distanceTransform,
                              ImageTransform downSampling) {
+        internal::checkImageIteratorType<ImageIter>();
         using DiffType = typename std::iterator_traits<ImageIter>::difference_type;
         assert(std::distance(imgBegin, imgEnd) == static_cast<DiffType>(packing.rects.size()));
 
         Image atlas{packing.atlasSize.x, packing.atlasSize.y, DistanceTransform::bitDepth};
         atlas.fillRect({0, 0}, atlas.getSize(), DistanceTransform::backgroundVal);
 
-        auto rectIt = packing.rects.begin();
-        for (; imgBegin < imgEnd; rectIt++, imgBegin++) {
-            Image distField{imgBegin->getWidth(), imgBegin->getHeight(), DistanceTransform::bitDepth};
-            distanceTransform(*imgBegin, distField);
+        const int max = std::distance(imgBegin, imgEnd);
+#pragma omp parallel for
+        for (int i = 0; i < max; i++) {
+            auto& imgInput = imgBegin[i];
+            Image distField{imgInput.getWidth(), imgInput.getHeight(), DistanceTransform::bitDepth};
+            distanceTransform(imgInput, distField);
 
-            Image output = atlas.view(rectIt->position, rectIt->position + rectIt->size);
+            auto& rect = packing.rects[i];
+            Image output = atlas.view(rect.position, rect.position + rect.size);
             downSampling(output, distField);
         }
 
