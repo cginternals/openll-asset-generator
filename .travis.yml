@@ -39,6 +39,7 @@ addons:
       - libpng-dev
 
 before_install:
+  - export LD_LIBRARY_PATH=/usr/local/clang/lib:$LD_LIBRARY_PATH;
   - |-
     if [ $TRAVIS_OS_NAME == linux ]; then
       sudo apt-add-repository ppa:cginternals/ppa -y;
