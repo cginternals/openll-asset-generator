@@ -3,6 +3,8 @@
 #include <QScopedPointer>
 #include <QWindow>
 
+#include <glbinding/ProcAddress.h>
+
 class QSurfaceFormat;
 class QOpenGLContext;
 
@@ -80,4 +82,6 @@ class WindowQt : public QWindow {
     virtual void deinitializeGL();
     virtual void resizeGL(QResizeEvent* event);
     virtual void paintGL();
+
+    glbinding::ProcAddress getProcAddress(const char * name);
 };
