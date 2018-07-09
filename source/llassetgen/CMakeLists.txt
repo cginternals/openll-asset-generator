@@ -5,7 +5,7 @@
 find_package(Freetype)
 find_package(PNG)
 if(UNIX)
-    find_package(fontconfig)
+    find_package(FontConfig)
 endif()
 
 
