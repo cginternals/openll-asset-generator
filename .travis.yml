@@ -51,7 +51,7 @@ before_install:
     if [ $TRAVIS_OS_NAME == osx ]; then
       brew tap cginternals/homebrew-cginternals;
       brew update && brew install cppcheck fontconfig freetype qt5 glm glbinding cginternals/homebrew-cginternals/globjects cginternals/homebrew-cginternals/cpplocate;
-      export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH;$(brew --prefix qt);$(brew --prefix glbinding);$(brew --prefix globjects);$(brew --prefix cpplocate)";
+      export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH;$(brew --prefix qt);$(brew --prefix glm);$(brew --prefix glbinding);$(brew --prefix globjects);$(brew --prefix cpplocate)";
     fi
   - chmod +x ./configure
 
