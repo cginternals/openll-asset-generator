@@ -26,9 +26,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/mat4x4.hpp>
 
-#include <glbinding/ContextInfo.h>
+#include <cpplocate/cpplocate.h>
+
+#include <glbinding-aux/ContextInfo.h>
 #include <glbinding/Version.h>
 #include <glbinding/gl/gl.h>
+
+#include <glbinding-aux/types_to_string.h>
 
 #include <globjects/base/File.h>
 #include <globjects/globjects.h>
@@ -65,12 +69,14 @@ class Window : public WindowQt {
     virtual ~Window() {}
 
     virtual void initializeGL() override {
-        globjects::init();
+        globjects::init([this](const char * name) {
+            return getProcAddress(name);
+        });
 
         std::cout << std::endl
-                  << "OpenGL Version:  " << glbinding::ContextInfo::version() << std::endl
-                  << "OpenGL Vendor:   " << glbinding::ContextInfo::vendor() << std::endl
-                  << "OpenGL Renderer: " << glbinding::ContextInfo::renderer() << std::endl
+                  << "OpenGL Version:  " << glbinding::aux::ContextInfo::version() << std::endl
+                  << "OpenGL Vendor:   " << glbinding::aux::ContextInfo::vendor() << std::endl
+                  << "OpenGL Renderer: " << glbinding::aux::ContextInfo::renderer() << std::endl
                   << std::endl;
 
         globjects::DebugMessage::enable();
@@ -82,7 +88,10 @@ class Window : public WindowQt {
         globjects::debug() << "Using global OS X shader replacement '#version 140' -> '#version 150'" << std::endl;
 #endif
 
-        std::string dataPath = "./data/llassetgen-rendering/";
+        // "./data/llassetgen-rendering/"
+        std::string dataPath = cpplocate::locatePath("data/llassetgen-rendering", "/share/llassetgen", nullptr);
+        if (dataPath.empty()) dataPath = "./data/";
+        else                  dataPath = dataPath + "data/";
 
 #if QT_VERSION >= 0x050400
         outDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -110,11 +119,11 @@ class Window : public WindowQt {
         vao->enable(0);
         */
 
-        vertexShaderSource = globjects::Shader::sourceFromFile(dataPath + "shader.vert");
+        vertexShaderSource = globjects::Shader::sourceFromFile(dataPath + "llassetgen-rendering/shader.vert");
         vertexShaderTemplate = globjects::Shader::applyGlobalReplacements(vertexShaderSource.get());
         vertexShader = globjects::Shader::create(GL_VERTEX_SHADER, vertexShaderTemplate.get());
 
-        fragmentShaderSource = globjects::Shader::sourceFromFile(dataPath + "shader.frag");
+        fragmentShaderSource = globjects::Shader::sourceFromFile(dataPath + "llassetgen-rendering/shader.frag");
         fragmentShaderTemplate = globjects::Shader::applyGlobalReplacements(fragmentShaderSource.get());
         fragmentShader = globjects::Shader::create(GL_FRAGMENT_SHADER, fragmentShaderTemplate.get());
 
@@ -383,7 +392,13 @@ class Window : public WindowQt {
     int dtAlgorithm = 0;
     int packingAlgorithm = 0;
     int downSampling = 0;
+#ifdef SYSTEM_WINDOWS
     std::string fontName = "Verdana";
+#elif defined(SYSTEM_DARWIN)
+    std::string fontName = "Verdana";
+#else
+    std::string fontName = "Ubuntu";
+#endif
     unsigned int fontSize = 512;
     int drBlack = -100;
     int drWhite = 100;
@@ -458,6 +473,7 @@ class Window : public WindowQt {
                     pack = llassetgen::shelfPackAtlas(imageSizes.begin(), imageSizes.end(), false);
                     break;
                 }
+                default:
                 case 1: {
                     pack = llassetgen::maxRectsPackAtlas(imageSizes.begin(), imageSizes.end(), false);
                     break;
@@ -478,6 +494,7 @@ class Window : public WindowQt {
 
                     break;
                 }
+                default:
                 case 1: {
                     llassetgen::Image atlas = llassetgen::distanceFieldAtlas(
                         glyphImages.begin(), glyphImages.end(), pack,
@@ -549,7 +566,7 @@ void prepareColorInput(QLineEdit* input, const QString placeholder) {
     input->setValidator(colorValidator);
     input->setPlaceholderText(placeholder);
     input->setMaximumWidth(28);
-};
+}
 
 /* This function creates GUI elements and connects them to their correspondent functions using Qt signal-slot.
  * A QApplication offers a window, that must not be destroyed to make QApplication work properly.

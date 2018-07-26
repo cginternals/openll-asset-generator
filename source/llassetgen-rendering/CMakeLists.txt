@@ -5,6 +5,7 @@
 find_package(glm REQUIRED)
 find_package(glbinding REQUIRED)
 find_package(globjects REQUIRED)
+find_package(cpplocate REQUIRED)
 
 find_package(Qt5 COMPONENTS Core Gui OpenGL Widgets REQUIRED)
 
@@ -89,6 +90,7 @@ target_link_libraries(${target}
     PUBLIC
     glbinding::glbinding
     globjects::globjects
+    cpplocate::cpplocate
 )
 
 
