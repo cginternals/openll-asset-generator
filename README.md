@@ -147,9 +147,11 @@ Parameters: All glyph sizes, downsampled.
 
 *llassetgen* offers two algorithms for the distance field creation:
 
-The Algorithm "Dead-Reckoning" is based on: [GREVERA, George J. The “dead reckoning” signed distance transform. Computer Vision and Image Understanding, 2004, 95. Jg., Nr. 3, S. 317-333.](http://perso.ensta-paristech.fr/~manzaner/Download/IAD/Grevera_04.pdf)
+The Algorithm "Dead-Reckoning" is based on: [GREVERA, George J. The “dead reckoning” signed distance transform. Computer Vision and Image Understanding, 2004, 95. Jg., Nr. 3, S. 317-333.](http://perso.ensta-paristech.fr/~manzaner/Download/IAD/Grevera_04.pdf).
+There are 10 accesses per pixel over 4 passes.
 
-The Algorithm called "Parabola Envelope" is based on: [FELZENSZWALB, Pedro; HUTTENLOCHER, Daniel. Distance transforms of sampled functions. Cornell University, 2004.](https://www.cs.cornell.edu/~dph/papers/dt.pdf)
+The Algorithm called "Parabola Envelope" is based on: [FELZENSZWALB, Pedro; HUTTENLOCHER, Daniel. Distance transforms of sampled functions. Cornell University, 2004.](https://www.cs.cornell.edu/~dph/papers/dt.pdf).
+There are 4 accesses per pixel over 2 passes, thus this algorithm is considerably faster than the "Dead-Reckoning" while *not* resulting in a lower quality distance field.
 
 #### Parameters:
 
