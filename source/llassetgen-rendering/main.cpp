@@ -333,10 +333,10 @@ class Window : public WindowQt {
         double elaspedTimeMsOnlyCalculation = std::chrono::duration<double, std::milli>(t_mid - t_start).count();
         double elaspedTimeMsOnlyLoading = std::chrono::duration<double, std::milli>(t_end - t_mid).count();
 
-        std::cout << "full time: " << elaspedTimeMsFull << std::endl;
-        std::cout << "calculation time: " << elaspedTimeMsOnlyCalculation << std::endl;
-        std::cout << "loading time: " << elaspedTimeMsOnlyLoading << std::endl;
-        std::cout << "------------------------------" << std::endl;
+        std::cout << "full time (ms): " << elaspedTimeMsFull << std::endl;
+        std::cout << "calculation time (ms): " << elaspedTimeMsOnlyCalculation << std::endl;
+        std::cout << "loading time (ms): " << elaspedTimeMsOnlyLoading << std::endl;
+        std::cout << "----------------------------------" << std::endl;
 
         doneCurrent();
 
@@ -480,6 +480,8 @@ class Window : public WindowQt {
                 glyphSet.insert(static_cast<unsigned long>(*s++));
             }
 
+            std::cout << "Glyph Set Size: " << glyphSet.size() << std::endl;
+
             // TODO: GUI element for this
             unsigned int downsamplingRatio = 4;
 
@@ -566,6 +568,9 @@ class Window : public WindowQt {
         texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
         float imageW = image->width();
         float imageH = image->height();
+
+        std::cout << "Texture size: " << imageW << "x" << imageH << std::endl;
+
         texture->image2D(0, GL_RGBA8, imageW, imageH, 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
         // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
         // ignore this, since we use black&white image data here?
