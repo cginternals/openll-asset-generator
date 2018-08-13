@@ -16,7 +16,9 @@ if(OPTION_SELF_CONTAINED)
     # Install 3rd-party runtime dependencies into runtime-component
     # install(FILES ... COMPONENT runtime)
     
+    find_file(DLLS_CPPLOCATE cpplocate.dll)
     find_file(DLLS_GLBINDING glbinding.dll)
+    find_file(DLLS_GLBINDING_AUX glbinding-aux.dll)
     find_file(DLLS_GLOBJECTS globjects.dll)
     find_file(DLLS_LIBPNG libpng16.dll)
     find_file(DLLS_ZLIB zlib.dll)
@@ -36,7 +38,9 @@ if(OPTION_SELF_CONTAINED)
     endif()
 
     set(DLLS
+        ${DLLS_CPPLOCATE}
         ${DLLS_GLBINDING}
+        ${DLLS_GLBINDING_AUX}
         ${DLLS_GLOBJECTS}
         ${DLLS_LIBPNG}
         ${DLLS_ZLIB}
