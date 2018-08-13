@@ -324,12 +324,19 @@ class Window : public WindowQt {
         auto t_start = std::chrono::high_resolution_clock::now();
 
         calculateDistanceField();
+        auto t_mid = std::chrono::high_resolution_clock::now();
+        
         loadDistanceField();
 
         auto t_end = std::chrono::high_resolution_clock::now();
-        double elaspedTimeMs = std::chrono::duration<double, std::milli>(t_end - t_start).count();
+        double elaspedTimeMsFull = std::chrono::duration<double, std::milli>(t_end - t_start).count();
+        double elaspedTimeMsOnlyCalculation = std::chrono::duration<double, std::milli>(t_mid - t_start).count();
+        double elaspedTimeMsOnlyLoading = std::chrono::duration<double, std::milli>(t_end - t_mid).count();
 
-        std::cout << elaspedTimeMs << std::endl;
+        std::cout << "full time: " << elaspedTimeMsFull << std::endl;
+        std::cout << "calculation time: " << elaspedTimeMsOnlyCalculation << std::endl;
+        std::cout << "loading time: " << elaspedTimeMsOnlyLoading << std::endl;
+        std::cout << "------------------------------" << std::endl;
 
         doneCurrent();
 
