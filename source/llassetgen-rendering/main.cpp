@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <string>
 
@@ -320,8 +321,15 @@ class Window : public WindowQt {
     virtual void triggerNewDT() override {
         makeCurrent();
 
+        auto t_start = std::chrono::high_resolution_clock::now();
+
         calculateDistanceField();
         loadDistanceField();
+
+        auto t_end = std::chrono::high_resolution_clock::now();
+        double elaspedTimeMs = std::chrono::duration<double, std::milli>(t_end - t_start).count();
+
+        std::cout << elaspedTimeMs << std::endl;
 
         doneCurrent();
 
@@ -419,7 +427,14 @@ class Window : public WindowQt {
 
             std::set<unsigned long> glyphSet;
 
+            // all printable ascii characters, except for space
+
+            constexpr char ascii[] =
+                "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+            const char* s = ascii;
+
             // a custom preset using unicode
+            /*
             constexpr char16_t preset20180319[] = {
                 u'\x01',   u'\x03',   u'\x07',   u'\x11',   u' ',      u'!',      u'#',      u'$',      u'%',      u'&',
                 u'\x27',   u'(',      u')',      u'*',      u'+',      u',',      u'-',      u'.',      u'/',      u'0',
@@ -452,6 +467,8 @@ class Window : public WindowQt {
                 u'\uff0f', u'\ufffd' };
 
             const char16_t* s = preset20180319;
+            */
+
             while (*s) {
                 glyphSet.insert(static_cast<unsigned long>(*s++));
             }
