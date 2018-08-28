@@ -27,7 +27,7 @@ A font asset consists of the data needed to render a font.
 
 | Service | System | Compiler | Status |
 | :------ | ------ | -------- | -----: |
-| [Travis-CI](https://travis-ci.org/hpicgs/openll-asset-generator) | Ubuntu 14.04, macOS | GCC 4.8, Clang 3.9 <br> AppleClang 8.1 | [![Travis Build Status](https://img.shields.io/travis/hpicgs/openll-asset-generator.svg)](https://travis-ci.org/hpicgs/openll-asset-generator)|
+| [Travis-CI](https://travis-ci.org/cginternals/openll-asset-generator) | Ubuntu 14.04, macOS | GCC 4.8, Clang 3.9 <br> AppleClang 8.1 | [![Travis Build Status](https://img.shields.io/travis/cginternals/openll-asset-generator.svg)](https://travis-ci.org/cginternals/openll-asset-generator)|
 | [AppVeyor](https://ci.appveyor.com/project/anne-gropler/openll-asset-generator-5cjbt) | Windows | MSVC 2015<br>MSVC 2017 | [![AppVeyor Build Status](https://img.shields.io/appveyor/ci/anne-gropler/openll-asset-generator-5cjbt.svg)](https://ci.appveyor.com/project/anne-gropler/openll-asset-generator-5cjbt)|
 
 
@@ -35,7 +35,7 @@ A font asset consists of the data needed to render a font.
 
 ### Windows
 
-The core library and its applications can be installed either by downloading an installer, e.g., the latest x64 installer for Microsoft Visual Studio 2017, or downloading and extracting one of the precompiled archives, e.g. runtime, examples, and dev. Alternatively, download the source code and commence building from source. See [latest release](https://github.com/hpicgs/openll-asset-generator/releases/latest).
+The core library and its applications can be installed either by downloading an installer, e.g., the latest x64 installer for Microsoft Visual Studio 2017, or downloading and extracting one of the precompiled archives, e.g. runtime, examples, and dev. Alternatively, download the source code and commence building from source. See [latest release](https://github.com/cginternals/openll-asset-generator/releases/latest).
 
 ### Ubuntu
 
@@ -65,9 +65,9 @@ Additionally necessary to build the rendering application (`llassetgen-rendering
 
 For compilation, a C++11 compliant compiler, e.g., GCC 4.8, Clang 3.9, AppleClang 8.1, MSVC 2015, is required.
 
-First, download the source code [as archive](https://github.com/hpicgs/openll-asset-generator/releases). or via git:
+First, download the source code [as archive](https://github.com/cginternals/openll-asset-generator/releases). or via git:
 ```shell
-> git clone https://github.com/hpicgs/openll-asset-generator.git
+> git clone https://github.com/cginternals/openll-asset-generator.git
 > cd openll-asset-generator
 ```
 
