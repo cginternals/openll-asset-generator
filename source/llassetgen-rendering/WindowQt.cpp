@@ -178,7 +178,7 @@ void WindowQt::dtAlgorithmChanged(int /*unused*/) {}
 
 void WindowQt::packingAlgoChanged(int /*unused*/) {}
 
-void WindowQt::packingSizeChanged(int /*unused*/) {}
+void WindowQt::packingSizeChanged(QString /*unused*/) {}
 
 void WindowQt::dtThresholdChanged(QString /*unused*/) {}
 

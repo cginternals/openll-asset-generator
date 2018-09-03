@@ -308,9 +308,10 @@ class Window : public WindowQt {
         paint();
     }
 
-    virtual void packingSizeChanged(int index) override {
-        std::cout << "change downsampling" << std::endl;
-        downSampling = index;
+    virtual void packingSizeChanged(QString value) override {
+        int ds = value.toInt();
+        std::cout << "change downsampling to " << ds << std::endl;
+        downSampling = ds;
     }
 
     virtual void resetTransform3D() override {
@@ -406,7 +407,7 @@ class Window : public WindowQt {
     float dtThreshold = 0.5;
     int dtAlgorithm = 0;
     int packingAlgorithm = 0;
-    int downSampling = 0;
+    int downSampling = 4;
 #ifdef SYSTEM_WINDOWS
     std::string fontName = "Verdana";
 #elif defined(SYSTEM_DARWIN)
@@ -417,7 +418,7 @@ class Window : public WindowQt {
     unsigned int fontSize = 512;
     int drBlack = -100;
     int drWhite = 100;
-    int padding = 4;
+    int padding = 10;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -438,6 +439,8 @@ class Window : public WindowQt {
 
             constexpr char ascii[] =
                 "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+            constexpr char a[] =
+                "a";
             const char* s = ascii;
 
             // a custom preset using unicode
@@ -482,16 +485,14 @@ class Window : public WindowQt {
 
             std::cout << "Glyph Set Size: " << glyphSet.size() << std::endl;
 
-            // TODO: GUI element for this
-            unsigned int downsamplingRatio = 4;
-
             std::vector<llassetgen::Image> glyphImages =
-                fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
+                fontFinder.renderGlyphs(glyphSet, fontSize, padding, downSampling);
 
+            int dS = downSampling;
             std::vector<llassetgen::Vec2<size_t>> imageSizes(glyphImages.size());
             std::transform(
                 glyphImages.begin(), glyphImages.end(), imageSizes.begin(),
-                [downsamplingRatio](const llassetgen::Image& img) { return img.getSize() / downsamplingRatio; });
+                [dS](const llassetgen::Image& img) { return img.getSize() / dS; });
 
             llassetgen::Packing pack;
             switch (packingAlgorithm) {
@@ -747,26 +748,18 @@ void setupGUI(QMainWindow* window) {
 
     auto* paddingEdit = new QLineEdit();
     paddingEdit->setValidator(drv);
-    paddingEdit->setPlaceholderText("4");
+    paddingEdit->setPlaceholderText("10");
     paddingEdit->setMaximumWidth(38);
     QObject::connect(paddingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(paddingChanged(QString)));
     dtLayout->addRow("Padding:", paddingEdit);
 
     // packing size (used for downsampling)
-    auto* psComboBox = new QComboBox();
-    // item order is important
-    psComboBox->addItem("64");
-    psComboBox->addItem("128");
-    psComboBox->addItem("265");
-    psComboBox->addItem("512");
-    psComboBox->addItem("1024");
-    psComboBox->addItem("2048");
-    psComboBox->addItem("4096");
-    psComboBox->addItem("8192");
-    QObject::connect(psComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(packingSizeChanged(int)));
-    // TODO uncomment when downsampling is implemented in llassetgen
-    // maybe change from dropdown to float input
-    // dtLayout->addRow("Texture size:", psComboBox);
+    auto* downScalingEdit = new QLineEdit();
+    downScalingEdit->setValidator(drv);
+    downScalingEdit->setPlaceholderText("4");
+    downScalingEdit->setMaximumWidth(38);
+    QObject::connect(downScalingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(packingSizeChanged(QString)));
+    dtLayout->addRow("Downsampling factor:", downScalingEdit);
 
     // trigger distance field creation
     auto* triggerDTButton = new QPushButton("OK");
@@ -778,7 +771,7 @@ void setupGUI(QMainWindow* window) {
     auto* exportButton = new QPushButton("Export");
     exportButton->setMaximumWidth(90);
     QObject::connect(exportButton, SIGNAL(clicked()), glwindow, SLOT(exportGlyphAtlas()));
-    dtLayout->addRow("Export Atlas:", exportButton);
+    //dtLayout->addRow("Export Atlas:", exportButton);
 
     // RENDERING OPTIONS
 
