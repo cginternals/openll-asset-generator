@@ -545,7 +545,7 @@ class Window : public WindowQt {
             writer.readFont(glyphSet.begin(), glyphSet.end());
             auto gIt = glyphSet.begin();
             for (auto rectIt = pack.rects.begin(); rectIt < pack.rects.end(); gIt++, rectIt++) {
-                writer.setCharInfo(static_cast<FT_ULong>(*gIt), *rectIt, {0, 0});
+                writer.setCharInfo(static_cast<FT_ULong>(*gIt), *rectIt);
             }
             writer.saveFnt(outFntPath);
 

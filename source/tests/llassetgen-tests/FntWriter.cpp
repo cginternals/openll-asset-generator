@@ -48,7 +48,7 @@ TEST(FntWriterTest, createFntFile) {
 	charcode = FT_Get_First_Char(face, &gindex);
 	while (gindex != 0) {
 		charcode = FT_Get_Next_Char(face, charcode, &gindex);
-		writer.setCharInfo(gindex, Rect<PackingSizeType>(position, size), offset);
+		writer.setCharInfo(gindex, Rect<PackingSizeType>(position, size));
 		position += {1, 1};
 		size += {1, 1};
 		offset += {1.0f, 1.0f};
@@ -100,7 +100,7 @@ TEST(FntWriterTest, fntScaling) {
 	charcode = FT_Get_First_Char(face, &gindex);
 	while (gindex != 0) {
 		charcode = FT_Get_Next_Char(face, charcode, &gindex);
-		writer.setCharInfo(gindex, Rect<PackingSizeType>(position, size), offset);
+		writer.setCharInfo(gindex, Rect<PackingSizeType>(position, size));
 		position += {1, 1};
 		size += {1, 1};
 		offset += {1.0f, 1.0f};

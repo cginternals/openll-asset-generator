@@ -45,8 +45,10 @@ namespace llassetgen {
 
         fontInfo.useUnicode = (face->charmap->encoding == FT_ENCODING_UNICODE);
 
-        fontCommon.ascent = face->size->metrics.ascender;//face->ascender;
-        fontCommon.descent = face->size->metrics.descender; //face->descender;
+        //sizes are provided in 26.6 fixed-point format
+        fontCommon.lineHeight = float(face->size->metrics.height) / 64.f;
+        fontCommon.ascent = float(face->size->metrics.ascender) / 64.f;
+        fontCommon.descent = float(face->size->metrics.descender) / 64.f;
 
         // havent found any of the following information
         // irrelevant for distance fields --> ignore them
@@ -62,11 +64,12 @@ namespace llassetgen {
         */
     }
 
-    void FntWriter::setCharInfo(/*FT_UInt*/ FT_ULong charcode, Rect<PackingSizeType> charArea, Vec2<float> offset) {
+    void FntWriter::setCharInfo(FT_ULong charcode, Rect<PackingSizeType> charArea) {
         FT_UInt gindex = FT_Get_Char_Index(face, charcode);
         FT_Load_Glyph(face, gindex, FT_LOAD_DEFAULT);
 
-        FT_Pos yBearing = face->glyph->metrics.vertBearingY;
+        //bearing is provided in 26.6 fixed - point format
+        FT_Pos yBearing = float(face->glyph->metrics.horiBearingY) / 64.f;
         maxYBearing = std::max(yBearing, maxYBearing);
 
         CharInfo charInfo;
@@ -76,8 +79,8 @@ namespace llassetgen {
         charInfo.width = charArea.size.x;
         charInfo.height = charArea.size.y;
         charInfo.xAdvance = float(face->glyph->linearHoriAdvance) / 65536.f;
-        charInfo.xOffset = offset.x;
-        charInfo.yOffset = offset.y;
+        charInfo.xOffset = float(face->glyph->metrics.horiBearingX) / 64.f;
+        charInfo.yOffset = fontCommon.ascent - yBearing;
         charInfo.page = 1;
         charInfo.chnl = 15;
         charInfos.push_back(charInfo);
@@ -111,7 +114,6 @@ namespace llassetgen {
 
     void FntWriter::setAtlasProperties(Vec2<PackingSizeType> size) {
         // collect commonInfo
-        fontCommon.lineHeight = float(face->size->metrics.height) / 64.f; //maxHeight;
         fontCommon.scaleW = size.x;
         fontCommon.scaleH = size.y;
         fontCommon.pages = 1;

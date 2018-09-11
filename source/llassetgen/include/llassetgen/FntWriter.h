@@ -75,7 +75,7 @@ namespace llassetgen {
         void readFont(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd);
         void setAtlasProperties(Vec2<PackingSizeType> size);
         void saveFnt(std::string filepath);
-        void setCharInfo(FT_ULong charcode, Rect<PackingSizeType> charArea, Vec2<float> offset);
+        void setCharInfo(FT_ULong charcode, Rect<PackingSizeType> charArea);
 
        private:
         void setFontInfo();
