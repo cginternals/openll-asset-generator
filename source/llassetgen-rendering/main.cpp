@@ -286,6 +286,34 @@ class Window : public WindowQt {
         paint();
     }
 
+    int getDownSamplingFactor() {
+        return downSampling;
+    }
+
+    int getFontSize() {
+        return fontSize;
+    }
+
+    std::string getFontname() {
+        return fontName;
+    }
+
+    int getDrBlack() {
+        return drBlack;
+    }
+
+    int getDrWhite() {
+        return drWhite;
+    }
+
+    int getPadding() {
+        return padding;
+    }
+
+    float getDtThreshold() {
+        return dtThreshold;
+    }
+
    public slots:
     virtual void backgroundColorRChanged(QString value) override { applyColorChange(backgroundColor.r, value); }
 
@@ -409,18 +437,18 @@ class Window : public WindowQt {
     float dtThreshold = 0.5;
     int dtAlgorithm = 0;
     int packingAlgorithm = 0;
-    int downSampling = 1;
+    int downSampling = 2;
 #ifdef SYSTEM_WINDOWS
-    std::string fontName = "Open Sans";
+    std::string fontName = "Verdana";
 #elif defined(SYSTEM_DARWIN)
-    std::string fontName = "Open Sans";
+    std::string fontName = "Verdana";
 #else
     std::string fontName = "Ubuntu";
 #endif
-    unsigned int fontSize = 144;
-    int drBlack = -10;
-    int drWhite = 10;
-    int padding = 10;
+    unsigned int fontSize = 256;
+    int drBlack = -100;
+    int drWhite = 100;
+    int padding = 40;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -688,7 +716,7 @@ void setupGUI(QMainWindow* window) {
 
     // typeface of font
     auto* fontNameLE = new QLineEdit();
-    fontNameLE->setPlaceholderText("Open Sans");
+    fontNameLE->setPlaceholderText(QString::fromStdString(glwindow->getFontname()));
     fontNameLE->setMaximumWidth(45);
     QObject::connect(fontNameLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontNameChanged(QString)));
     acLayout->addRow("Font Name:", fontNameLE);
@@ -706,7 +734,7 @@ void setupGUI(QMainWindow* window) {
     auto* fsv = new QIntValidator();
     fsv->setBottom(1);
     fontSizeLE->setValidator(fsv);
-    fontSizeLE->setPlaceholderText("144");
+    fontSizeLE->setPlaceholderText(QString::number(glwindow->getFontSize()));
     fontSizeLE->setMaximumWidth(45);
     QObject::connect(fontSizeLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
     acLayout->addRow("Original Font Size:", fontSizeLE);
@@ -731,7 +759,7 @@ void setupGUI(QMainWindow* window) {
 
     auto* drBlack = new QLineEdit();
     drBlack->setValidator(drv);
-    drBlack->setPlaceholderText("-10");
+    drBlack->setPlaceholderText(QString::number(glwindow->getDrBlack()));
     drBlack->setMaximumWidth(38);
     QObject::connect(drBlack, SIGNAL(textEdited(QString)), glwindow, SLOT(drBlackChanged(QString)));
     drLayout->addWidget(new QLabel("["));
@@ -740,7 +768,7 @@ void setupGUI(QMainWindow* window) {
 
     auto* drWhite = new QLineEdit();
     drWhite->setValidator(drv);
-    drWhite->setPlaceholderText("10");
+    drWhite->setPlaceholderText(QString::number(glwindow->getDrWhite()));
     drWhite->setMaximumWidth(38);
     QObject::connect(drWhite, SIGNAL(textEdited(QString)), glwindow, SLOT(drWhiteChanged(QString)));
     drLayout->addWidget(drWhite);
@@ -750,7 +778,7 @@ void setupGUI(QMainWindow* window) {
 
     auto* paddingEdit = new QLineEdit();
     paddingEdit->setValidator(drv);
-    paddingEdit->setPlaceholderText("10");
+    paddingEdit->setPlaceholderText(QString::number(glwindow->getPadding()));
     paddingEdit->setMaximumWidth(38);
     QObject::connect(paddingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(paddingChanged(QString)));
     dtLayout->addRow("Padding:", paddingEdit);
@@ -758,7 +786,7 @@ void setupGUI(QMainWindow* window) {
     // packing size (used for downsampling)
     auto* downScalingEdit = new QLineEdit();
     downScalingEdit->setValidator(drv);
-    downScalingEdit->setPlaceholderText("1");
+    downScalingEdit->setPlaceholderText(QString::number(glwindow->getDownSamplingFactor()));
     downScalingEdit->setMaximumWidth(38);
     QObject::connect(downScalingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(packingSizeChanged(QString)));
     dtLayout->addRow("Downsampling factor:", downScalingEdit);
@@ -792,7 +820,7 @@ void setupGUI(QMainWindow* window) {
     auto* dtT = new QLineEdit();
     auto* dv = new QDoubleValidator(0.3, 1, 5);
     dtT->setValidator(dv);
-    dtT->setPlaceholderText("0.5");
+    dtT->setPlaceholderText(QString::number(glwindow->getDtThreshold()));
     dtT->setMaximumWidth(45);
     QObject::connect(dtT, SIGNAL(textEdited(QString)), glwindow, SLOT(dtThresholdChanged(QString)));
     renderingLayout->addRow("Threshold:", dtT);
