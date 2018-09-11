@@ -83,5 +83,5 @@ class WindowQt : public QWindow {
     virtual void resizeGL(QResizeEvent* event);
     virtual void paintGL();
 
-    glbinding::ProcAddress getProcAddress(const char * name);
+    glbinding::ProcAddress getProcAddress(const char* name);
 };

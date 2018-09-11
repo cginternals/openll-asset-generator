@@ -91,8 +91,12 @@ class Window : public WindowQt {
 
         // "./data/llassetgen-rendering/"
         std::string dataPath = cpplocate::locatePath("data/llassetgen-rendering", "/share/llassetgen", nullptr);
-        if (dataPath.empty()) dataPath = "./data/";
-        else                  dataPath = dataPath + "data/";
+        if (dataPath.empty()) {
+            dataPath = "./data/";
+        }
+        else {
+            dataPath = dataPath + "data/";
+        }
 
 #if QT_VERSION >= 0x050400
         outDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -286,33 +290,19 @@ class Window : public WindowQt {
         paint();
     }
 
-    int getDownSamplingFactor() {
-        return downSampling;
-    }
+    int getDownSamplingFactor() { return downSampling; }
 
-    int getFontSize() {
-        return fontSize;
-    }
+    int getFontSize() { return fontSize; }
 
-    std::string getFontname() {
-        return fontName;
-    }
+    std::string getFontname() { return fontName; }
 
-    int getDrBlack() {
-        return drBlack;
-    }
+    int getDrBlack() { return drBlack; }
 
-    int getDrWhite() {
-        return drWhite;
-    }
+    int getDrWhite() { return drWhite; }
 
-    int getPadding() {
-        return padding;
-    }
+    int getPadding() { return padding; }
 
-    float getDtThreshold() {
-        return dtThreshold;
-    }
+    float getDtThreshold() { return dtThreshold; }
 
    public slots:
     virtual void backgroundColorRChanged(QString value) override { applyColorChange(backgroundColor.r, value); }
@@ -396,8 +386,8 @@ class Window : public WindowQt {
 
     virtual void exportGlyphAtlas() override {
         std::cout << "TODO EXPORT: atlas and fnt-file is exported automatically when changes applied, but path for "
-                     "output is hard-coded:"
-                  << outDirPath.toStdString() <<  std::endl << "Use CLI-app for custom path." << std::endl;
+                     "output is hard-coded:" << outDirPath.toStdString()
+                  <<  std::endl << "Use CLI-app for custom path." << std::endl;
         // TODO export dialog: ask user for path
     }
 
@@ -556,7 +546,7 @@ class Window : public WindowQt {
             }
 
             // export fnt file
-            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1.f/downSampling};
+            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1.f / downSampling};
             writer.setAtlasProperties(pack.atlasSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
             auto gIt = glyphSet.begin();
@@ -789,7 +779,7 @@ void setupGUI(QMainWindow* window) {
     auto* exportButton = new QPushButton("Export");
     exportButton->setMaximumWidth(90);
     QObject::connect(exportButton, SIGNAL(clicked()), glwindow, SLOT(exportGlyphAtlas()));
-    //dtLayout->addRow("Export Atlas:", exportButton);
+    // dtLayout->addRow("Export Atlas:", exportButton);
 
     // RENDERING OPTIONS
 
