@@ -540,8 +540,8 @@ class Window : public WindowQt {
             }
 
             // export fnt file
-            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1.f/downSampling, true};
-            writer.setAtlasProperties(pack.atlasSize, fontSize);
+            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1.f/downSampling};
+            writer.setAtlasProperties(pack.atlasSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
             auto gIt = glyphSet.begin();
             for (auto rectIt = pack.rects.begin(); rectIt < pack.rects.end(); gIt++, rectIt++) {

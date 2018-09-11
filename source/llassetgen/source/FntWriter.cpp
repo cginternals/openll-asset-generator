@@ -14,8 +14,7 @@
 #include FT_OUTLINE_H
 
 namespace llassetgen {
-    FntWriter::FntWriter(FT_Face _face, std::string _faceName, unsigned int _fontSize, float _scalingFactor,
-                         bool _scaledGlyph) {
+    FntWriter::FntWriter(FT_Face _face, std::string _faceName, unsigned int _fontSize, float _scalingFactor) {
         faceName = _faceName;
         face = _face;
         fontInfo = Info();
@@ -25,7 +24,6 @@ namespace llassetgen {
         fontInfo.size = _fontSize;
         maxYBearing = 0;
         scalingFactor = _scalingFactor;
-        scaledGlyph = _scaledGlyph;
     }
 
     void FntWriter::setFontInfo() {
@@ -47,8 +45,8 @@ namespace llassetgen {
 
         fontInfo.useUnicode = (face->charmap->encoding == FT_ENCODING_UNICODE);
 
-        fontCommon.ascent = face->ascender;
-        fontCommon.descent = face->descender;
+        fontCommon.ascent = face->size->metrics.ascender;//face->ascender;
+        fontCommon.descent = face->size->metrics.descender; //face->descender;
 
         // havent found any of the following information
         // irrelevant for distance fields --> ignore them
@@ -111,9 +109,9 @@ namespace llassetgen {
         setKerningInfo(charcodesBegin, charcodesEnd);
     }
 
-    void FntWriter::setAtlasProperties(Vec2<PackingSizeType> size, int maxHeight) {
+    void FntWriter::setAtlasProperties(Vec2<PackingSizeType> size) {
         // collect commonInfo
-        fontCommon.lineHeight = maxHeight;
+        fontCommon.lineHeight = float(face->size->metrics.height) / 64.f; //maxHeight;
         fontCommon.scaleW = size.x;
         fontCommon.scaleH = size.y;
         fontCommon.pages = 1;
@@ -159,8 +157,8 @@ namespace llassetgen {
                 << "base=" << float(fontCommon.base) * scalingFactor << " "
                 << "ascent=" << float(fontCommon.ascent) * scalingFactor << " "
                 << "descent=" << float(fontCommon.descent) * scalingFactor << " "
-                << "scaleW=" << (scaledGlyph ? (float(fontCommon.scaleW) * scalingFactor) : fontCommon.scaleW) << " "
-                << "scaleH=" << (scaledGlyph ? (float(fontCommon.scaleH) * scalingFactor) : fontCommon.scaleH) << " "
+                << "scaleW=" << fontCommon.scaleW << " "
+                << "scaleH=" << fontCommon.scaleH << " "
                 << "pages=" << fontCommon.pages << " "
                 << "packed=" << int(fontCommon.isPacked) << std::endl;
 
@@ -180,8 +178,8 @@ namespace llassetgen {
                     << "id=" << charInfo.id << " "
                     << "x=" << charInfo.x << " "
                     << "y=" << charInfo.y << " "
-                    << "width=" << (scaledGlyph ? (float(charInfo.width) * scalingFactor) : charInfo.width) << " "
-                    << "height=" << (scaledGlyph ? (float(charInfo.height) * scalingFactor) : charInfo.height) << " "
+                    << "width=" << charInfo.width << " "
+                    << "height=" << charInfo.height << " "
                     << "xoffset=" << charInfo.xOffset * scalingFactor << " "
                     << "yoffset=" << charInfo.yOffset * scalingFactor << " "
                     << "xadvance=" << float(charInfo.xAdvance) * scalingFactor << " "
