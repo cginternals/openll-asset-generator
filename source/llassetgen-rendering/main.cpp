@@ -350,23 +350,11 @@ class Window : public WindowQt {
     virtual void triggerNewDT() override {
         makeCurrent();
 
-        auto t_start = std::chrono::high_resolution_clock::now();
-
-        calculateDistanceField();
-        auto t_mid = std::chrono::high_resolution_clock::now();
-        
-        loadDistanceField();
-
-        auto t_end = std::chrono::high_resolution_clock::now();
-        double elaspedTimeMsFull = std::chrono::duration<double, std::milli>(t_end - t_start).count();
-        double elaspedTimeMsOnlyCalculation = std::chrono::duration<double, std::milli>(t_mid - t_start).count();
-        double elaspedTimeMsOnlyLoading = std::chrono::duration<double, std::milli>(t_end - t_mid).count();
-
-        std::cout << "full time (ms): " << elaspedTimeMsFull << std::endl;
-        std::cout << "calculation time (ms): " << elaspedTimeMsOnlyCalculation << std::endl;
-        std::cout << "loading time (ms): " << elaspedTimeMsOnlyLoading << std::endl;
         std::cout << "----------------------------------" << std::endl;
 
+        calculateDistanceField();
+
+        loadDistanceField();
         exportGlyphAtlas();
 
         doneCurrent();
@@ -446,9 +434,9 @@ class Window : public WindowQt {
     std::string fontName = "Ubuntu";
 #endif
     unsigned int fontSize = 256;
-    int drBlack = -100;
-    int drWhite = 100;
-    int padding = 40;
+    int drBlack = -50;
+    int drWhite = 50;
+    int padding = 20;
 
     bool isPanning = false;
     bool isRotating = false;
