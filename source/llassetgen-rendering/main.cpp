@@ -339,6 +339,8 @@ class Window : public WindowQt {
         std::cout << "loading time (ms): " << elaspedTimeMsOnlyLoading << std::endl;
         std::cout << "----------------------------------" << std::endl;
 
+        exportGlyphAtlas();
+
         doneCurrent();
 
         paint();
@@ -407,17 +409,17 @@ class Window : public WindowQt {
     float dtThreshold = 0.5;
     int dtAlgorithm = 0;
     int packingAlgorithm = 0;
-    int downSampling = 4;
+    int downSampling = 1;
 #ifdef SYSTEM_WINDOWS
-    std::string fontName = "Verdana";
+    std::string fontName = "Open Sans";
 #elif defined(SYSTEM_DARWIN)
-    std::string fontName = "Verdana";
+    std::string fontName = "Open Sans";
 #else
     std::string fontName = "Ubuntu";
 #endif
-    unsigned int fontSize = 512;
-    int drBlack = -100;
-    int drWhite = 100;
+    unsigned int fontSize = 144;
+    int drBlack = -10;
+    int drWhite = 10;
     int padding = 10;
 
     bool isPanning = false;
@@ -538,13 +540,12 @@ class Window : public WindowQt {
             }
 
             // export fnt file
-            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1, false};
+            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1.f/downSampling, true};
             writer.setAtlasProperties(pack.atlasSize, fontSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
             auto gIt = glyphSet.begin();
             for (auto rectIt = pack.rects.begin(); rectIt < pack.rects.end(); gIt++, rectIt++) {
-                FT_UInt charIndex = FT_Get_Char_Index(fontFinder.fontFace, static_cast<FT_ULong>(*gIt));
-                writer.setCharInfo(charIndex, *rectIt, {0, 0});
+                writer.setCharInfo(static_cast<FT_ULong>(*gIt), *rectIt, {0, 0});
             }
             writer.saveFnt(outFntPath);
 
@@ -687,7 +688,7 @@ void setupGUI(QMainWindow* window) {
 
     // typeface of font
     auto* fontNameLE = new QLineEdit();
-    fontNameLE->setPlaceholderText("Verdana");
+    fontNameLE->setPlaceholderText("Open Sans");
     fontNameLE->setMaximumWidth(45);
     QObject::connect(fontNameLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontNameChanged(QString)));
     acLayout->addRow("Font Name:", fontNameLE);
@@ -705,7 +706,7 @@ void setupGUI(QMainWindow* window) {
     auto* fsv = new QIntValidator();
     fsv->setBottom(1);
     fontSizeLE->setValidator(fsv);
-    fontSizeLE->setPlaceholderText("512");
+    fontSizeLE->setPlaceholderText("144");
     fontSizeLE->setMaximumWidth(45);
     QObject::connect(fontSizeLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
     acLayout->addRow("Original Font Size:", fontSizeLE);
@@ -720,6 +721,7 @@ void setupGUI(QMainWindow* window) {
     // item order is important
     dtComboBox->addItem("Dead Reckoning");
     dtComboBox->addItem("Parabola Envelope");
+    dtComboBox->setCurrentIndex(1);
     QObject::connect(dtComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(dtAlgorithmChanged(int)));
     dtLayout->addRow("Algorithm:", dtComboBox);
 
@@ -729,7 +731,7 @@ void setupGUI(QMainWindow* window) {
 
     auto* drBlack = new QLineEdit();
     drBlack->setValidator(drv);
-    drBlack->setPlaceholderText("-100");
+    drBlack->setPlaceholderText("-10");
     drBlack->setMaximumWidth(38);
     QObject::connect(drBlack, SIGNAL(textEdited(QString)), glwindow, SLOT(drBlackChanged(QString)));
     drLayout->addWidget(new QLabel("["));
@@ -738,7 +740,7 @@ void setupGUI(QMainWindow* window) {
 
     auto* drWhite = new QLineEdit();
     drWhite->setValidator(drv);
-    drWhite->setPlaceholderText("100");
+    drWhite->setPlaceholderText("10");
     drWhite->setMaximumWidth(38);
     QObject::connect(drWhite, SIGNAL(textEdited(QString)), glwindow, SLOT(drWhiteChanged(QString)));
     drLayout->addWidget(drWhite);
@@ -756,7 +758,7 @@ void setupGUI(QMainWindow* window) {
     // packing size (used for downsampling)
     auto* downScalingEdit = new QLineEdit();
     downScalingEdit->setValidator(drv);
-    downScalingEdit->setPlaceholderText("4");
+    downScalingEdit->setPlaceholderText("1");
     downScalingEdit->setMaximumWidth(38);
     QObject::connect(downScalingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(packingSizeChanged(QString)));
     dtLayout->addRow("Downsampling factor:", downScalingEdit);

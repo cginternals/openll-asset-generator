@@ -47,26 +47,32 @@ namespace llassetgen {
 
         fontInfo.useUnicode = (face->charmap->encoding == FT_ENCODING_UNICODE);
 
+        fontCommon.ascent = face->ascender;
+        fontCommon.descent = face->descender;
+
         // havent found any of the following information
         // irrelevant for distance fields --> ignore them
         /*
         fontInfo.stretchH = 1.0f;
         fontInfo.useSmoothing = false;
         fontInfo.supersamplingLevel = 1;
-        fontInfo.padding = { 2.8f, 2.8f, 2.8f, 2.8f };
-        fontInfo.spacing = { 0, 0 };
+        */
+        fontInfo.padding = { 0.f, 0.f, 0.f, 0.f };
+        fontInfo.spacing = { 0.f, 0.f };
+        /*
         fontInfo.outlineThickness = 0;
         */
     }
 
-    void FntWriter::setCharInfo(FT_UInt gindex, Rect<PackingSizeType> charArea, Vec2<float> offset) {
+    void FntWriter::setCharInfo(/*FT_UInt*/ FT_ULong charcode, Rect<PackingSizeType> charArea, Vec2<float> offset) {
+        FT_UInt gindex = FT_Get_Char_Index(face, charcode);
         FT_Load_Glyph(face, gindex, FT_LOAD_DEFAULT);
 
         FT_Pos yBearing = face->glyph->metrics.vertBearingY;
         maxYBearing = std::max(yBearing, maxYBearing);
 
         CharInfo charInfo;
-        charInfo.id = gindex;
+        charInfo.id = charcode;
         charInfo.x = charArea.position.x;
         charInfo.y = charArea.position.y;
         charInfo.width = charArea.size.x;
@@ -90,8 +96,8 @@ namespace llassetgen {
                 FT_Get_Kerning(face, leftGindex, rightGindex, FT_KERNING_UNSCALED, &kerningVector);
                 if (kerningVector.x != 0) {
                     KerningInfo kerningInfo;
-                    kerningInfo.firstId = leftGindex;
-                    kerningInfo.secondId = rightGindex;
+                    kerningInfo.firstId = *leftCharcode;
+                    kerningInfo.secondId = *rightCharcode;
                     // kerning is provided in 26.6 fixed-point format
                     kerningInfo.kerning = float(kerningVector.x) / 64.f;
                     kerningInfos.push_back(kerningInfo);
@@ -133,13 +139,16 @@ namespace llassetgen {
                 << "charset=\"" << fontInfo.charset << "\" "
                 << "unicode="
                 << int(fontInfo.useUnicode)
-                /* << " "
+                << " "
+                /*
                 << "stretchH=" << fontInfo.stretchH << " "
                 << "smooth=" << int(fontInfo.useSmoothing) << " "
                 << "aa=" << fontInfo.supersamplingLevel << " "
-                << "padding=" << fontInfo.padding.up << "," << fontInfo.padding.right << "," << fontInfo.padding.down <<
-                "," << fontInfo.padding.left << " "
-                << "spacing=" << fontInfo.spacing.horiz << "," << fontInfo.spacing.vert << " "
+                */
+                << "padding=" << fontInfo.padding.up * scalingFactor << "," << fontInfo.padding.right * scalingFactor <<
+                "," << fontInfo.padding.down * scalingFactor << "," << fontInfo.padding.left * scalingFactor << " "
+                << "spacing=" << fontInfo.spacing.horiz * scalingFactor << "," << fontInfo.spacing.vert * scalingFactor << " "
+                /*    
                 << "outline=" << fontInfo.outlineThickness
                 */
                 << std::endl;
@@ -148,6 +157,8 @@ namespace llassetgen {
         fntFile << "common "
                 << "lineHeight=" << float(fontCommon.lineHeight) * scalingFactor << " "
                 << "base=" << float(fontCommon.base) * scalingFactor << " "
+                << "ascent=" << float(fontCommon.ascent) * scalingFactor << " "
+                << "descent=" << float(fontCommon.descent) * scalingFactor << " "
                 << "scaleW=" << (scaledGlyph ? (float(fontCommon.scaleW) * scalingFactor) : fontCommon.scaleW) << " "
                 << "scaleH=" << (scaledGlyph ? (float(fontCommon.scaleH) * scalingFactor) : fontCommon.scaleH) << " "
                 << "pages=" << fontCommon.pages << " "
@@ -171,8 +182,8 @@ namespace llassetgen {
                     << "y=" << charInfo.y << " "
                     << "width=" << (scaledGlyph ? (float(charInfo.width) * scalingFactor) : charInfo.width) << " "
                     << "height=" << (scaledGlyph ? (float(charInfo.height) * scalingFactor) : charInfo.height) << " "
-                    << "xoffset=" << charInfo.xOffset << " "
-                    << "yoffset=" << charInfo.yOffset << " "
+                    << "xoffset=" << charInfo.xOffset * scalingFactor << " "
+                    << "yoffset=" << charInfo.yOffset * scalingFactor << " "
                     << "xadvance=" << float(charInfo.xAdvance) * scalingFactor << " "
                     << "page=" << charInfo.page << " "
                     << "chnl=" << int(charInfo.chnl) << std::endl;

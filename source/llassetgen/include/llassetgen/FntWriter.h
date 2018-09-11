@@ -23,6 +23,7 @@ namespace llassetgen {
         float stretchH;
         bool useSmoothing;
         int supersamplingLevel;
+        */
         struct padding {
                 float left;
                 float right;
@@ -33,6 +34,7 @@ namespace llassetgen {
                 float horiz;
                 float vert;
         } spacing;
+        /*
         float outlineThickness;
         */
     };
@@ -44,6 +46,8 @@ namespace llassetgen {
         int scaleH;
         int pages;
         bool isPacked;
+        int ascent;
+        int descent;
     };
 
     struct CharInfo {
@@ -71,7 +75,7 @@ namespace llassetgen {
         void readFont(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd);
         void setAtlasProperties(Vec2<PackingSizeType> size, int maxHeight);
         void saveFnt(std::string filepath);
-        void setCharInfo(FT_UInt charcode, Rect<PackingSizeType> charArea, Vec2<float> offset);
+        void setCharInfo(FT_ULong charcode, Rect<PackingSizeType> charArea, Vec2<float> offset);
 
        private:
         void setFontInfo();
