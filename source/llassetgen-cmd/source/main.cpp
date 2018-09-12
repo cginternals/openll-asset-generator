@@ -158,13 +158,12 @@ int parseAtlasArgs(int argc, char** argv) {
 
         if (createFnt) {
             std::string faceName = static_cast<bool>(*fontNameOpt) ? fontName : "Unknown";
-            FntWriter writer{fontFinder.fontFace, faceName, fontSize, 1, false};
-            writer.setAtlasProperties(p.atlasSize, fontSize);
+            FntWriter writer{fontFinder.fontFace, faceName, fontSize, 1};
+            writer.setAtlasProperties(p.atlasSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
             auto gIt = glyphSet.begin();
             for (auto rectIt = p.rects.begin(); rectIt < p.rects.end(); gIt++, rectIt++) {
-                FT_UInt charIndex = FT_Get_Char_Index(fontFinder.fontFace, static_cast<FT_ULong>(*gIt));
-                writer.setCharInfo(charIndex, *rectIt, {0, 0});
+                writer.setCharInfo(static_cast<FT_ULong>(*gIt), *rectIt);
             }
             writer.saveFnt(fntPath);
         }

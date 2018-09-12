@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 #include <string>
 
@@ -90,8 +91,12 @@ class Window : public WindowQt {
 
         // "./data/llassetgen-rendering/"
         std::string dataPath = cpplocate::locatePath("data/llassetgen-rendering", "/share/llassetgen", nullptr);
-        if (dataPath.empty()) dataPath = "./data/";
-        else                  dataPath = dataPath + "data/";
+        if (dataPath.empty()) {
+            dataPath = "./data/";
+        }
+        else {
+            dataPath = dataPath + "data/";
+        }
 
 #if QT_VERSION >= 0x050400
         outDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -285,6 +290,20 @@ class Window : public WindowQt {
         paint();
     }
 
+    int getDownSamplingFactor() { return downSampling; }
+
+    int getFontSize() { return fontSize; }
+
+    std::string getFontname() { return fontName; }
+
+    int getDrBlack() { return drBlack; }
+
+    int getDrWhite() { return drWhite; }
+
+    int getPadding() { return padding; }
+
+    float getDtThreshold() { return dtThreshold; }
+
    public slots:
     virtual void backgroundColorRChanged(QString value) override { applyColorChange(backgroundColor.r, value); }
 
@@ -307,9 +326,10 @@ class Window : public WindowQt {
         paint();
     }
 
-    virtual void packingSizeChanged(int index) override {
-        std::cout << "change downsampling" << std::endl;
-        downSampling = index;
+    virtual void packingSizeChanged(QString value) override {
+        int ds = value.toInt();
+        std::cout << "change downsampling to " << ds << std::endl;
+        downSampling = ds;
     }
 
     virtual void resetTransform3D() override {
@@ -320,8 +340,12 @@ class Window : public WindowQt {
     virtual void triggerNewDT() override {
         makeCurrent();
 
+        std::cout << "----------------------------------" << std::endl;
+
         calculateDistanceField();
+
         loadDistanceField();
+        exportGlyphAtlas();
 
         doneCurrent();
 
@@ -362,8 +386,8 @@ class Window : public WindowQt {
 
     virtual void exportGlyphAtlas() override {
         std::cout << "TODO EXPORT: atlas and fnt-file is exported automatically when changes applied, but path for "
-                     "output is hard-coded:"
-                  << outDirPath.toStdString() <<  std::endl << "Use CLI-app for custom path." << std::endl;
+                     "output is hard-coded:" << outDirPath.toStdString()
+                  <<  std::endl << "Use CLI-app for custom path." << std::endl;
         // TODO export dialog: ask user for path
     }
 
@@ -391,7 +415,7 @@ class Window : public WindowQt {
     float dtThreshold = 0.5;
     int dtAlgorithm = 0;
     int packingAlgorithm = 0;
-    int downSampling = 0;
+    int downSampling = 2;
 #ifdef SYSTEM_WINDOWS
     std::string fontName = "Verdana";
 #elif defined(SYSTEM_DARWIN)
@@ -399,10 +423,10 @@ class Window : public WindowQt {
 #else
     std::string fontName = "Ubuntu";
 #endif
-    unsigned int fontSize = 512;
-    int drBlack = -100;
-    int drWhite = 100;
-    int padding = 4;
+    unsigned int fontSize = 256;
+    int drBlack = -50;
+    int drWhite = 50;
+    int padding = 20;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -419,7 +443,16 @@ class Window : public WindowQt {
 
             std::set<unsigned long> glyphSet;
 
+            // all printable ascii characters, except for space
+
+            constexpr char ascii[] =
+                "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+            constexpr char a[] =
+                "a";
+            const char* s = ascii;
+
             // a custom preset using unicode
+            /*
             constexpr char16_t preset20180319[] = {
                 u'\x01',   u'\x03',   u'\x07',   u'\x11',   u' ',      u'!',      u'#',      u'$',      u'%',      u'&',
                 u'\x27',   u'(',      u')',      u'*',      u'+',      u',',      u'-',      u'.',      u'/',      u'0',
@@ -452,20 +485,22 @@ class Window : public WindowQt {
                 u'\uff0f', u'\ufffd' };
 
             const char16_t* s = preset20180319;
+            */
+
             while (*s) {
                 glyphSet.insert(static_cast<unsigned long>(*s++));
             }
 
-            // TODO: GUI element for this
-            unsigned int downsamplingRatio = 4;
+            std::cout << "Glyph Set Size: " << glyphSet.size() << std::endl;
 
             std::vector<llassetgen::Image> glyphImages =
-                fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
+                fontFinder.renderGlyphs(glyphSet, fontSize, padding, downSampling);
 
+            int dS = downSampling;
             std::vector<llassetgen::Vec2<size_t>> imageSizes(glyphImages.size());
             std::transform(
                 glyphImages.begin(), glyphImages.end(), imageSizes.begin(),
-                [downsamplingRatio](const llassetgen::Image& img) { return img.getSize() / downsamplingRatio; });
+                [dS](const llassetgen::Image& img) { return img.getSize() / dS; });
 
             llassetgen::Packing pack;
             switch (packingAlgorithm) {
@@ -511,13 +546,12 @@ class Window : public WindowQt {
             }
 
             // export fnt file
-            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1, false};
-            writer.setAtlasProperties(pack.atlasSize, fontSize);
+            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1.f / downSampling};
+            writer.setAtlasProperties(pack.atlasSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
             auto gIt = glyphSet.begin();
             for (auto rectIt = pack.rects.begin(); rectIt < pack.rects.end(); gIt++, rectIt++) {
-                FT_UInt charIndex = FT_Get_Char_Index(fontFinder.fontFace, static_cast<FT_ULong>(*gIt));
-                writer.setCharInfo(charIndex, *rectIt, {0, 0});
+                writer.setCharInfo(static_cast<FT_ULong>(*gIt), *rectIt);
             }
             writer.saveFnt(outFntPath);
 
@@ -542,6 +576,9 @@ class Window : public WindowQt {
         texture = globjects::Texture::createDefault(GL_TEXTURE_2D);
         float imageW = image->width();
         float imageH = image->height();
+
+        std::cout << "Texture size: " << imageW << "x" << imageH << std::endl;
+
         texture->image2D(0, GL_RGBA8, imageW, imageH, 0, GL_BGRA, GL_UNSIGNED_BYTE, imageData);
         // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
         // ignore this, since we use black&white image data here?
@@ -657,7 +694,7 @@ void setupGUI(QMainWindow* window) {
 
     // typeface of font
     auto* fontNameLE = new QLineEdit();
-    fontNameLE->setPlaceholderText("Verdana");
+    fontNameLE->setPlaceholderText(QString::fromStdString(glwindow->getFontname()));
     fontNameLE->setMaximumWidth(45);
     QObject::connect(fontNameLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontNameChanged(QString)));
     acLayout->addRow("Font Name:", fontNameLE);
@@ -675,7 +712,7 @@ void setupGUI(QMainWindow* window) {
     auto* fsv = new QIntValidator();
     fsv->setBottom(1);
     fontSizeLE->setValidator(fsv);
-    fontSizeLE->setPlaceholderText("512");
+    fontSizeLE->setPlaceholderText(QString::number(glwindow->getFontSize()));
     fontSizeLE->setMaximumWidth(45);
     QObject::connect(fontSizeLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontSizeChanged(QString)));
     acLayout->addRow("Original Font Size:", fontSizeLE);
@@ -690,6 +727,7 @@ void setupGUI(QMainWindow* window) {
     // item order is important
     dtComboBox->addItem("Dead Reckoning");
     dtComboBox->addItem("Parabola Envelope");
+    dtComboBox->setCurrentIndex(1);
     QObject::connect(dtComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(dtAlgorithmChanged(int)));
     dtLayout->addRow("Algorithm:", dtComboBox);
 
@@ -699,7 +737,7 @@ void setupGUI(QMainWindow* window) {
 
     auto* drBlack = new QLineEdit();
     drBlack->setValidator(drv);
-    drBlack->setPlaceholderText("-100");
+    drBlack->setPlaceholderText(QString::number(glwindow->getDrBlack()));
     drBlack->setMaximumWidth(38);
     QObject::connect(drBlack, SIGNAL(textEdited(QString)), glwindow, SLOT(drBlackChanged(QString)));
     drLayout->addWidget(new QLabel("["));
@@ -708,7 +746,7 @@ void setupGUI(QMainWindow* window) {
 
     auto* drWhite = new QLineEdit();
     drWhite->setValidator(drv);
-    drWhite->setPlaceholderText("100");
+    drWhite->setPlaceholderText(QString::number(glwindow->getDrWhite()));
     drWhite->setMaximumWidth(38);
     QObject::connect(drWhite, SIGNAL(textEdited(QString)), glwindow, SLOT(drWhiteChanged(QString)));
     drLayout->addWidget(drWhite);
@@ -718,26 +756,18 @@ void setupGUI(QMainWindow* window) {
 
     auto* paddingEdit = new QLineEdit();
     paddingEdit->setValidator(drv);
-    paddingEdit->setPlaceholderText("4");
+    paddingEdit->setPlaceholderText(QString::number(glwindow->getPadding()));
     paddingEdit->setMaximumWidth(38);
     QObject::connect(paddingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(paddingChanged(QString)));
     dtLayout->addRow("Padding:", paddingEdit);
 
     // packing size (used for downsampling)
-    auto* psComboBox = new QComboBox();
-    // item order is important
-    psComboBox->addItem("64");
-    psComboBox->addItem("128");
-    psComboBox->addItem("265");
-    psComboBox->addItem("512");
-    psComboBox->addItem("1024");
-    psComboBox->addItem("2048");
-    psComboBox->addItem("4096");
-    psComboBox->addItem("8192");
-    QObject::connect(psComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(packingSizeChanged(int)));
-    // TODO uncomment when downsampling is implemented in llassetgen
-    // maybe change from dropdown to float input
-    // dtLayout->addRow("Texture size:", psComboBox);
+    auto* downScalingEdit = new QLineEdit();
+    downScalingEdit->setValidator(drv);
+    downScalingEdit->setPlaceholderText(QString::number(glwindow->getDownSamplingFactor()));
+    downScalingEdit->setMaximumWidth(38);
+    QObject::connect(downScalingEdit, SIGNAL(textEdited(QString)), glwindow, SLOT(packingSizeChanged(QString)));
+    dtLayout->addRow("Downsampling factor:", downScalingEdit);
 
     // trigger distance field creation
     auto* triggerDTButton = new QPushButton("OK");
@@ -749,7 +779,7 @@ void setupGUI(QMainWindow* window) {
     auto* exportButton = new QPushButton("Export");
     exportButton->setMaximumWidth(90);
     QObject::connect(exportButton, SIGNAL(clicked()), glwindow, SLOT(exportGlyphAtlas()));
-    dtLayout->addRow("Export Atlas:", exportButton);
+    // dtLayout->addRow("Export Atlas:", exportButton);
 
     // RENDERING OPTIONS
 
@@ -768,7 +798,7 @@ void setupGUI(QMainWindow* window) {
     auto* dtT = new QLineEdit();
     auto* dv = new QDoubleValidator(0.3, 1, 5);
     dtT->setValidator(dv);
-    dtT->setPlaceholderText("0.5");
+    dtT->setPlaceholderText(QString::number(glwindow->getDtThreshold()));
     dtT->setMaximumWidth(45);
     QObject::connect(dtT, SIGNAL(textEdited(QString)), glwindow, SLOT(dtThresholdChanged(QString)));
     renderingLayout->addRow("Threshold:", dtT);

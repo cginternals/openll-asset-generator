@@ -55,7 +55,7 @@ class WindowQt : public QWindow {
     virtual void fontColorBChanged(QString value);
     virtual void dtAlgorithmChanged(int index);
     virtual void packingAlgoChanged(int index);
-    virtual void packingSizeChanged(int index);
+    virtual void packingSizeChanged(QString value);
     virtual void dtThresholdChanged(QString value);
     virtual void fontNameChanged(QString value);
     virtual void fontSizeChanged(QString value);
@@ -83,5 +83,5 @@ class WindowQt : public QWindow {
     virtual void resizeGL(QResizeEvent* event);
     virtual void paintGL();
 
-    glbinding::ProcAddress getProcAddress(const char * name);
+    glbinding::ProcAddress getProcAddress(const char* name);
 };

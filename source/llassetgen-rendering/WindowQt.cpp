@@ -125,20 +125,18 @@ bool WindowQt::event(QEvent* event) {
     }
 }
 
-glbinding::ProcAddress WindowQt::getProcAddress(const char * name)
-{
-    if (name == nullptr)
-    {
+glbinding::ProcAddress WindowQt::getProcAddress(const char* name) {
+    if (name == nullptr) {
         return nullptr;
     }
 
     const auto symbol = std::string(name);
 
-    #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
     const auto qtSymbol = QByteArray::fromStdString(symbol);
-    #else
+#else
     const auto qtSymbol = QByteArray::fromRawData(symbol.c_str(), symbol.size());
-    #endif
+#endif
     return glcontext->getProcAddress(qtSymbol);
 }
 
@@ -178,7 +176,7 @@ void WindowQt::dtAlgorithmChanged(int /*unused*/) {}
 
 void WindowQt::packingAlgoChanged(int /*unused*/) {}
 
-void WindowQt::packingSizeChanged(int /*unused*/) {}
+void WindowQt::packingSizeChanged(QString /*unused*/) {}
 
 void WindowQt::dtThresholdChanged(QString /*unused*/) {}
 
@@ -194,10 +192,10 @@ void WindowQt::paddingChanged(QString /*unused*/) {}
 
 void WindowQt::resetTransform3D() {}
 
-void WindowQt::triggerNewDT(){}
+void WindowQt::triggerNewDT() {}
 
 void WindowQt::superSamplingChanged(int /*unused*/) {}
 
 void WindowQt::toggleDistanceField(bool /*unused*/) {}
 
-void WindowQt::exportGlyphAtlas(){}
+void WindowQt::exportGlyphAtlas() {}

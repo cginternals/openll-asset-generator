@@ -26,7 +26,7 @@ TEST(FntWriterTest, createFntFile) {
 
 	unsigned int fontSize = 32;
 	float scalingFactor = 1.0f;
-	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor, false);
+	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor);
 	
 	FT_UInt gIndex;
 	std::set<FT_ULong> charcodes;
@@ -48,14 +48,14 @@ TEST(FntWriterTest, createFntFile) {
 	charcode = FT_Get_First_Char(face, &gindex);
 	while (gindex != 0) {
 		charcode = FT_Get_Next_Char(face, charcode, &gindex);
-		writer.setCharInfo(gindex, Rect<PackingSizeType>(position, size), offset);
+		writer.setCharInfo(gindex, Rect<PackingSizeType>(position, size));
 		position += {1, 1};
 		size += {1, 1};
 		offset += {1.0f, 1.0f};
 	}
 
-	int maxHeight = 20;
-	writer.setAtlasProperties({ 100, 200 }, maxHeight);
+	//int maxHeight = 20;
+	writer.setAtlasProperties({ 100, 200 });
 
 	writer.saveFnt(testDestinationPath + "fnt.fnt");
 }
@@ -78,7 +78,7 @@ TEST(FntWriterTest, fntScaling) {
 
 	unsigned int fontSize = 32;
 	float scalingFactor = 0.5f;
-	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor, true);
+	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor);
 	
 	FT_UInt gIndex;
 	std::set<FT_ULong> charcodes;
@@ -100,14 +100,14 @@ TEST(FntWriterTest, fntScaling) {
 	charcode = FT_Get_First_Char(face, &gindex);
 	while (gindex != 0) {
 		charcode = FT_Get_Next_Char(face, charcode, &gindex);
-		writer.setCharInfo(gindex, Rect<PackingSizeType>(position, size), offset);
+		writer.setCharInfo(gindex, Rect<PackingSizeType>(position, size));
 		position += {1, 1};
 		size += {1, 1};
 		offset += {1.0f, 1.0f};
 	}
 
-	int maxHeight = 20;
-	writer.setAtlasProperties({ 100, 200 }, maxHeight);
+	//int maxHeight = 20;
+	writer.setAtlasProperties({ 100, 200 });
 
 	writer.saveFnt(testDestinationPath + "fnt_scaled.fnt");
 }
