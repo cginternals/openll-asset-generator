@@ -28,12 +28,14 @@ if(OPTION_SELF_CONTAINED)
     find_file(DLLS_MSVCRT msvcrt.dll)
     find_file(DLLS_MSVCP114 msvcp140.dll) 
     find_file(DLLS_VCRUNTIME vcruntime140.dll)
+    find_file(DLLS_WIN qwindows.dll)
 
 
     set(OPTION_DEPLOY_DEBUG_DLLS FALSE CACHE BOOL "if set, debug versions of certain dlls will be packaged")
     if (OPTION_DEPLOY_DEBUG_DLLS)
         find_file(DLLS_MSVCP114D msvcp114d.dll)
         find_file(DLLS_MSVCR114D msvcr114d.dll)
+        find_file(DLLS_WIND qwindowsd.dll)
     else()
     endif()
 
@@ -53,6 +55,12 @@ if(OPTION_SELF_CONTAINED)
         ${DLLS_VCRUNTIME}
     )
 
+    set(PLATFORMS
+        ${DLLS_WIN}
+        ${DLLS_WIND}
+    )
+
     install(FILES ${DLLS} DESTINATION ${INSTALL_BIN} COMPONENT runtime)
+    install(FILES ${PLATFORMS} DESTINATION ${INSTALL_BIN}/platforms COMPONENT runtime)
 
 endif()

@@ -9,6 +9,7 @@
 set(MODULE_NAMES
     llassetgen
     llassetgen-cmd
+    llassetgen-rendering
 )
 
 
