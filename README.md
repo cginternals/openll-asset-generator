@@ -49,11 +49,13 @@ We plan to provide the Font Asset Generator via homebrew package manager. Until 
 
 ### Prerequisites and Dependencies
 
+For an alternative setup that only requires bash and Docker, see [below](#docker) (CLI only).
+
 Necessary for the core library (*llassetgen*) and the CLI application (`llassetgen-cmd`)
 * [CMake](https://cmake.org/) 3.4 or higher for building from source
 * [Freetype](https://www.freetype.org/) to load and render fonts
 * [libpng](http://www.libpng.org/pub/png/libpng.html) to import and export PNGs images.
-* [fontconfig](https://www.freedesktop.org/wiki/Software/fontconfig/) on Unix systems. 
+* [fontconfig](https://www.freedesktop.org/wiki/Software/fontconfig/) on Unix systems.
 
 Additionally necessary to build the rendering application (`llassetgen-rendering`):
 * [GLM](https://github.com/g-truc/glm) 0.9.9.2 for OpenGL math and data structures
@@ -80,6 +82,22 @@ Then, depending on the version of globjects you want to build, choose the approp
 ```
 
 The actual compilation can be done using CMake and your favorite compiler and IDE.
+
+### Docker
+
+For a simplified cross-platform build and usage setup for the CLI, a `Dockerfile` and two convenience scripts are provided:
+
+#### Building
+```
+./build_docker.sh
+```
+
+### Running
+```
+./run_docker.sh <parameters>
+```
+The parameters are the same as described in the section below. The results are saved in the subfolder `output`.
+
 
 ## Usage
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Runs the asset generator in docker, passing on all arguments.
-# The results are copied into the 'output' (which is created if it doesn't exist)
+# The results are copied into the 'output' folder (which is created if it doesn't exist)
 #
 # Usage Example:
 # ./run_docker.sh --padding 20 --downsampling 4 --preset ascii --distfield parabola --fontname Arial --fnt
