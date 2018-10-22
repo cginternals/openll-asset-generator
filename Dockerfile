@@ -38,12 +38,20 @@ RUN cmake --build build --target llassetgen-cmd
 
 # second build stage with minimal dependencies for running the tool
 FROM ubuntu:18.04
-COPY --from=builder /usr/src/llassetgen/build/llassetgen-cmd .
-COPY --from=builder /usr/src/llassetgen/build/libllassetgen.so.1 .
-COPY llassetgen-cmd.sh .
+
+# circumvent EULA prompt for ttf-mscorefonts-installer
+RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 RUN apt-get update && apt-get install -y \
     libgomp1 \
     libfreetype6 \
     libfontconfig1 \
+    fontconfig \
+    fonts-roboto \
+    fonts-open-sans \
+    ttf-mscorefonts-installer \
 && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/src/llassetgen/build/llassetgen-cmd .
+COPY --from=builder /usr/src/llassetgen/build/libllassetgen.so.1 .
+
 CMD ["./llassetgen-cmd"]
