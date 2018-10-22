@@ -42,6 +42,7 @@ FROM ubuntu:18.04
 # circumvent EULA prompt for ttf-mscorefonts-installer
 RUN echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | debconf-set-selections
 RUN apt-get update && apt-get install -y \
+    curl \
     libgomp1 \
     libfreetype6 \
     libfontconfig1 \
@@ -50,6 +51,19 @@ RUN apt-get update && apt-get install -y \
     fonts-open-sans \
     ttf-mscorefonts-installer \
 && rm -rf /var/lib/apt/lists/*
+
+# install Google Fonts
+# WORKDIR /root
+# RUN mkdir .fonts
+# # TODO!: https://github.com/google/fonts/archive/master.zip is smaller (950MB vs 1200MB)
+# RUN git clone --depth 1 git://github.com/google/fonts.git .fonts/google-fonts
+# RUN fc-cache -fv
+# WORKDIR /
+
+# TODO: cleanup
+RUN apt-get update && \
+      apt-get -y install sudo
+RUN curl https://raw.githubusercontent.com/qrpike/Web-Font-Load/master/install.sh | bash
 
 COPY --from=builder /usr/src/llassetgen/build/llassetgen-cmd .
 COPY --from=builder /usr/src/llassetgen/build/libllassetgen.so.1 .
