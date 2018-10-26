@@ -58,11 +58,9 @@ void WindowQt::exposeEvent(QExposeEvent* /*unused*/) { paint(); }
 void WindowQt::initialize() {
     makeCurrent();
 
-    initializeGL();
+    initialized = initializeGL();
 
     doneCurrent();
-
-    initialized = true;
 }
 
 void WindowQt::resize(QResizeEvent* event) {
@@ -150,7 +148,7 @@ void WindowQt::mouseReleaseEvent(QMouseEvent* /*event*/) {}
 
 void WindowQt::wheelEvent(QWheelEvent* /*event*/) {}
 
-void WindowQt::initializeGL() {}
+bool WindowQt::initializeGL() { return false; }
 
 void WindowQt::deinitializeGL() {}
 

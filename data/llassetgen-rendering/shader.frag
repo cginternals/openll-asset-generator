@@ -42,9 +42,9 @@ float aastep1x3(float t, vec2 uv)
 {
     float y = dFdy(uv.y) * 1.0 / 3.0;
 
-    float v = tex(t, uv + vec2(0,-y))
-            + tex(t, uv + vec2(0, 0))
-            + tex(t, uv + vec2(0,+y));
+    float v = tex(t, uv + vec2(0.0,  -y))
+            + tex(t, uv + vec2(0.0, 0.0))
+            + tex(t, uv + vec2(0.0,  +y));
 
     return v / 3.0;
 }
@@ -70,7 +70,7 @@ float aastepQuincunx(float t, vec2 uv)
     float x = dFdx(uv.x) / 2.0;
     float y = dFdy(uv.y) / 2.0;
 
-    float v = tex(t, uv) * 4
+    float v = tex(t, uv) * 4.0
             + tex(t, uv + vec2(-x,+y))
             + tex(t, uv + vec2(-x,-y))
             + tex(t, uv + vec2(+x,+y))
@@ -126,17 +126,17 @@ float aastep3x3(float t, vec2 uv)
     float x = dFdx(uv.x) * 1.0 / 3.0;
     float y = dFdy(uv.y) * 1.0 / 3.0;
 
-    float v = tex(t, uv + vec2(-x,-y))
-            + tex(t, uv + vec2(-x, 0))
-            + tex(t, uv + vec2(-x,+y))
+    float v = tex(t, uv + vec2(-x,  -y))
+            + tex(t, uv + vec2(-x, 0.0))
+            + tex(t, uv + vec2(-x,  +y))
 
-            + tex(t, uv + vec2( 0,-y))
-            + tex(t, uv + vec2( 0, 0))
-            + tex(t, uv + vec2( 0,+y))
+            + tex(t, uv + vec2( 0.0,  -y))
+            + tex(t, uv + vec2( 0.0, 0.0))
+            + tex(t, uv + vec2( 0.0,  +y))
 
-            + tex(t, uv + vec2(+x,-y))
-            + tex(t, uv + vec2(+x, 0))
-            + tex(t, uv + vec2(+x,+y));
+            + tex(t, uv + vec2(+x,  -y))
+            + tex(t, uv + vec2(+x, 0.0))
+            + tex(t, uv + vec2(+x,  +y));
 
     return v / 9.0;
 }
@@ -175,7 +175,7 @@ float aastep4x4(float t, vec2 uv)
 
 void main()
 {
-    fragColor = vec4(1.0,0.0,0.0,1.0); //debugging color
+    fragColor = vec4(1.0, 0.0, 0.0, 1.0); //debugging color
 
     float s = texture(glyphs, v_uv).r;
     
