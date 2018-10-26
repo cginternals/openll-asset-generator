@@ -22,7 +22,6 @@ RUN apt-get install -y \
 
 WORKDIR /usr/src/llassetgen
 
-# ENV CXX=g++
 ENV PATH="/usr/local/opt/qt/bin:/usr/local/opt/glbinding:/usr/local/opt/globjects:$PATH"
 
 COPY . .
@@ -50,19 +49,10 @@ RUN apt-get update && apt-get install -y \
     fonts-roboto \
     fonts-open-sans \
     ttf-mscorefonts-installer \
+    sudo \
 && rm -rf /var/lib/apt/lists/*
 
-# install Google Fonts
-# WORKDIR /root
-# RUN mkdir .fonts
-# # TODO!: https://github.com/google/fonts/archive/master.zip is smaller (950MB vs 1200MB)
-# RUN git clone --depth 1 git://github.com/google/fonts.git .fonts/google-fonts
-# RUN fc-cache -fv
-# WORKDIR /
-
-# TODO: cleanup
-RUN apt-get update && \
-      apt-get -y install sudo
+# install all Google Fonts
 RUN curl https://raw.githubusercontent.com/qrpike/Web-Font-Load/master/install.sh | bash
 
 COPY --from=builder /usr/src/llassetgen/build/llassetgen-cmd .
