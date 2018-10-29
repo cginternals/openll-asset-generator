@@ -72,7 +72,7 @@ class Window : public WindowQt {
     virtual bool initializeGL() override {
         globjects::init([this](const char * name) {
             return getProcAddress(name);
-        }, globjects::Texture::BindlessImplementation::Legacy);
+        });
 
         std::cout << std::endl
                   << "OpenGL Version:  " << glbinding::aux::ContextInfo::version() << std::endl
