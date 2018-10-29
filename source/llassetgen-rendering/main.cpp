@@ -296,7 +296,7 @@ class Window : public WindowQt {
 
     int getFontSize() { return fontSize; }
 
-    std::string getFontname() { return fontName; }
+    QString getFontname() { return fontName; }
 
     int getDrBlack() { return drBlack; }
 
@@ -366,7 +366,7 @@ class Window : public WindowQt {
 
     virtual void fontNameChanged(QString value) override {
         std::cout << "fontNameChanged: " + value.toStdString() << std::endl;
-        fontName = value.toStdString();
+        fontName = value;
     }
 
     virtual void fontSizeChanged(QString value) override {
@@ -419,11 +419,11 @@ class Window : public WindowQt {
     int packingAlgorithm = 0;
     int downSampling = 2;
 #ifdef SYSTEM_WINDOWS
-    std::string fontName = "Verdana";
+    QString fontName = "Verdana";
 #elif defined(SYSTEM_DARWIN)
-    std::string fontName = "Verdana";
+    QString fontName = "Verdana";
 #else
-    std::string fontName = "Ubuntu";
+    QString fontName = "Ubuntu";
 #endif
     unsigned int fontSize = 256;
     int drBlack = -50;
@@ -437,11 +437,11 @@ class Window : public WindowQt {
     QString outDirPath = "";
 
     void calculateDistanceField() {
-        auto outImagePath = (outDirPath + "/outputDT.png").toStdString();
-        auto outFntPath = (outDirPath + "/outputFNT.fnt").toStdString();
+        auto outImagePath = (outDirPath +"/" + fontName + ".png").toStdString();
+        auto outFntPath = (outDirPath + "/" + fontName + ".fnt").toStdString();
 
         try {
-            llassetgen::FontFinder fontFinder = llassetgen::FontFinder::fromName(fontName);
+            llassetgen::FontFinder fontFinder = llassetgen::FontFinder::fromName(fontName.toStdString());
 
             std::set<unsigned long> glyphSet;
 
@@ -548,7 +548,7 @@ class Window : public WindowQt {
             }
 
             // export fnt file
-            llassetgen::FntWriter writer{fontFinder.fontFace, fontName, fontSize, 1.f / downSampling};
+            llassetgen::FntWriter writer{fontFinder.fontFace, fontName.toStdString(), fontSize, 1.f / downSampling};
             writer.setAtlasProperties(pack.atlasSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
             auto gIt = glyphSet.begin();
@@ -563,7 +563,7 @@ class Window : public WindowQt {
     }
 
     void loadDistanceField() {
-        auto* image = new QImage(outDirPath + "/outputDT.png");
+        auto* image = new QImage(outDirPath + "/" + fontName + ".png");
 
         if (image->isNull()) {
             std::cout << "Image NOT loaded successfully." << std::endl;
@@ -696,7 +696,7 @@ void setupGUI(QMainWindow* window) {
 
     // typeface of font
     auto* fontNameLE = new QLineEdit();
-    fontNameLE->setPlaceholderText(QString::fromStdString(glwindow->getFontname()));
+    fontNameLE->setPlaceholderText(glwindow->getFontname());
     fontNameLE->setMaximumWidth(45);
     QObject::connect(fontNameLE, SIGNAL(textEdited(QString)), glwindow, SLOT(fontNameChanged(QString)));
     acLayout->addRow("Font Name:", fontNameLE);
