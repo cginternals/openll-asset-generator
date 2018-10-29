@@ -585,6 +585,10 @@ class Window : public WindowQt {
         // TODO: Willy told me that green and blue channels are swapped, that's why GL_BGRA is used here; we also might
         // ignore this, since we use black&white image data here?
 
+        // GL_LINEAR seems to be default, but just in case.
+        texture->setParameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        texture->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
         float quadW = 1.f;
         float quadH = quadW * imageH / imageW;
 
