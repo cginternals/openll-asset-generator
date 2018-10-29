@@ -334,7 +334,7 @@ class Window : public WindowQt {
     }
 
     virtual void resetTransform3D() override {
-        transform3D = glm::mat4(1.0);  // set identity
+        transform3D = glm::mat4(1.0f);  // set identity
         paint();
     }
 
