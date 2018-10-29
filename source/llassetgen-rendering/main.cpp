@@ -197,7 +197,6 @@ class Window : public WindowQt {
         program->setUniform("showDistanceField", showDistanceField);
         program->setUniform("superSampling", superSampling);
         program->setUniform("threshold", dtThreshold);
-        vao->bind();
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         program->release();
 
