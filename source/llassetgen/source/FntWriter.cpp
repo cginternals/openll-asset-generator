@@ -47,7 +47,8 @@ namespace llassetgen {
 
         //sizes are provided in 26.6 fixed-point format
         fontCommon.lineHeight = float(face->size->metrics.height) / 64.f;
-        fontCommon.ascent = float(face->size->metrics.ascender) / 64.f;
+        // base is defined as "the distance from the ascent to the baseline"
+        fontCommon.base = float(face->size->metrics.ascender) / 64.f;
         fontCommon.descent = float(face->size->metrics.descender) / 64.f;
 
         // havent found any of the following information
@@ -80,7 +81,7 @@ namespace llassetgen {
         charInfo.height = charArea.size.y;
         charInfo.xAdvance = float(face->glyph->linearHoriAdvance) / 65536.f;
         charInfo.xOffset = float(face->glyph->metrics.horiBearingX) / 64.f;
-        charInfo.yOffset = fontCommon.ascent - yBearing;
+        charInfo.yOffset = yBearing;
         charInfo.page = 1;
         charInfo.chnl = 15;
         charInfos.push_back(charInfo);
@@ -121,7 +122,9 @@ namespace llassetgen {
     }
 
     void FntWriter::saveFnt(std::string filepath) {
-        fontCommon.base = maxYBearing;
+        // ascent is defined as "The distance from the baseline to the highest or upper grid coordinate used to
+        // place an outline point." So set the maximum bearing over all glyphs as the overall ascent.
+        fontCommon.ascent = maxYBearing;
 
         // open file
         std::ofstream fntFile;
@@ -168,7 +171,7 @@ namespace llassetgen {
         for (int i = 0; i < fontCommon.pages; i++) {
             fntFile << "page "
                     << "id=" << i << " "
-                    << "file=\"" << faceName << "\"" << std::endl;
+                    << "file=\"" << faceName << ".png" << "\"" << std::endl;
         }
 
         // write char count
@@ -183,7 +186,7 @@ namespace llassetgen {
                     << "width=" << charInfo.width << " "
                     << "height=" << charInfo.height << " "
                     << "xoffset=" << charInfo.xOffset * scalingFactor << " "
-                    << "yoffset=" << charInfo.yOffset * scalingFactor << " "
+                    << "yoffset=" << (fontCommon.ascent - charInfo.yOffset) * scalingFactor << " "
                     << "xadvance=" << float(charInfo.xAdvance) * scalingFactor << " "
                     << "page=" << charInfo.page << " "
                     << "chnl=" << int(charInfo.chnl) << std::endl;
