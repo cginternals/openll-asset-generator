@@ -6,6 +6,9 @@
 #include <QResizeEvent>
 #include <QSurfaceFormat>
 
+
+WindowQt* WindowQt::s_getProcAddressHelper = nullptr;
+
 QSurfaceFormat defaultFormat() {
     QSurfaceFormat format;
     format.setProfile(QSurfaceFormat::CoreProfile);
@@ -19,6 +22,11 @@ WindowQt::WindowQt() : WindowQt(defaultFormat()) {}
 
 WindowQt::WindowQt(const QSurfaceFormat& format)
     : glcontext(new QOpenGLContext), updatePending(false), initialized(false) {
+
+    if (!s_getProcAddressHelper) {
+        s_getProcAddressHelper = this;
+    }
+
     QSurfaceFormat f(format);
     f.setRenderableType(QSurfaceFormat::OpenGL);
 
@@ -124,7 +132,7 @@ bool WindowQt::event(QEvent* event) {
 }
 
 glbinding::ProcAddress WindowQt::getProcAddress(const char* name) {
-    if (name == nullptr) {
+    if (!s_getProcAddressHelper || name == nullptr) {
         return nullptr;
     }
 
@@ -135,7 +143,7 @@ glbinding::ProcAddress WindowQt::getProcAddress(const char* name) {
 #else
     const auto qtSymbol = QByteArray::fromRawData(symbol.c_str(), symbol.size());
 #endif
-    return glcontext->getProcAddress(qtSymbol);
+    return s_getProcAddressHelper->glcontext->getProcAddress(qtSymbol);
 }
 
 void WindowQt::paintGL() { updateGL(); }
