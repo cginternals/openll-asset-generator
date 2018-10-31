@@ -70,9 +70,7 @@ class Window : public WindowQt {
     virtual ~Window() {}
 
     virtual bool initializeGL() override {
-        globjects::init([this](const char * name) {
-            return getProcAddress(name);
-        }, globjects::Texture::BindlessImplementation::Legacy);
+        globjects::init(getProcAddress);
 
         std::cout << std::endl
                   << "OpenGL Version:  " << glbinding::aux::ContextInfo::version() << std::endl
@@ -197,7 +195,6 @@ class Window : public WindowQt {
         program->setUniform("showDistanceField", showDistanceField);
         program->setUniform("superSampling", superSampling);
         program->setUniform("threshold", dtThreshold);
-        vao->bind();
         vao->drawArrays(GL_TRIANGLE_STRIP, 0, 4);
         program->release();
 
@@ -335,7 +332,7 @@ class Window : public WindowQt {
     }
 
     virtual void resetTransform3D() override {
-        transform3D = glm::mat4(1.0);  // set identity
+        transform3D = glm::mat4(1.f);  // set identity
         paint();
     }
 
@@ -410,7 +407,7 @@ class Window : public WindowQt {
     glm::vec4 backgroundColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
     glm::vec4 fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     int samplerIndex = 0;
-    glm::mat4 transform3D = glm::mat4(1.0);
+    glm::mat4 transform3D = glm::mat4(1.f);
     glm::mat4 projection = glm::perspective(45.f, 1.f, 0.0001f, 100.f);
     unsigned int superSampling = 0;
     bool showDistanceField = false;

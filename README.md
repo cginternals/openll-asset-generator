@@ -56,7 +56,7 @@ Necessary for the core library (*llassetgen*) and the CLI application (`llassetg
 * [fontconfig](https://www.freedesktop.org/wiki/Software/fontconfig/) on Unix systems. 
 
 Additionally necessary to build the rendering application (`llassetgen-rendering`):
-* [GLM](https://github.com/g-truc/glm) for OpenGL math and data structures
+* [GLM](https://github.com/g-truc/glm) 0.9.9.2 for OpenGL math and data structures
 * [cpplocate](https://github.com/cginternals/cpplocate) to find run-time rendering shaders
 * [glbinding](https://github.com/cginternals/glbinding) as OpenGL API binding
 * [globjects](https://github.com/cginternals/globjects) to wrap OpenGL API objects
