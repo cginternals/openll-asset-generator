@@ -433,7 +433,7 @@ class Window : public WindowQt {
     QString outDirPath = "";
 
     void calculateDistanceField() {
-        auto outImagePath = (outDirPath +"/" + fontName + ".png").toStdString();
+        auto outImagePath = (outDirPath + "/" + fontName + ".png").toStdString();
         auto outFntPath = (outDirPath + "/" + fontName + ".fnt").toStdString();
 
         try {
@@ -441,12 +441,11 @@ class Window : public WindowQt {
 
             std::set<unsigned long> glyphSet;
 
-            // all printable ascii characters, except for space
-
+            // all printable ascii characters
             constexpr char ascii[] =
-                "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-            constexpr char a[] =
-                "a";
+                " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+            constexpr char a[] = "a";
+
             const char* s = ascii;
 
             // a custom preset using unicode
@@ -547,9 +546,16 @@ class Window : public WindowQt {
             llassetgen::FntWriter writer{fontFinder.fontFace, fontName.toStdString(), fontSize, 1.f / downSampling};
             writer.setAtlasProperties(pack.atlasSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
-            auto gIt = glyphSet.begin();
-            for (auto rectIt = pack.rects.begin(); rectIt < pack.rects.end(); gIt++, rectIt++) {
-                writer.setCharInfo(static_cast<FT_ULong>(*gIt), *rectIt);
+
+            std::set<FT_ULong> charsWithoutRect = fontFinder.nonDepictableChars;
+            bool charIsDepictable = true;
+            auto rectIt = pack.rects.begin();
+
+            for (auto gIt = glyphSet.begin(); gIt != glyphSet.end(); gIt++) {
+                charIsDepictable = writer.setCharInfo(static_cast<FT_ULong>(*gIt), *rectIt, charsWithoutRect);
+                if (charIsDepictable){
+                    ++rectIt;
+                }
             }
             writer.saveFnt(outFntPath);
 

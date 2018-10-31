@@ -22,7 +22,7 @@ namespace llassetgen {
 
         std::vector<Image> renderGlyphs(const std::set<unsigned long>& glyphs, int size, size_t padding = 0,
                                         size_t divisibleBy = 1);
-
+        std::set<FT_ULong> nonDepictableChars;
         FT_Face fontFace;
 
        private:

@@ -3,9 +3,9 @@
 // If you want to add another preset, you have to adapt llassetgen-cmd::main::makeGlyphSet() to recognize the new preset
 // and its encoding.
 
-// all printable ascii characters, except for space
+// all printable ascii characters
 constexpr char ascii[] =
-    "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
 // a custom preset using unicode, that also contains characters that are potentially unrenderable by a lot of fontfaces.
 constexpr char16_t preset20180319[] = {
