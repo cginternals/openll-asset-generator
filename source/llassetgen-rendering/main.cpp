@@ -333,7 +333,7 @@ class Window : public WindowQt {
     }
 
     virtual void resetTransform3D() override {
-        transform3D = glm::mat4();  // set identity
+        transform3D = glm::mat4(1.f);  // set identity
         paint();
     }
 
@@ -408,7 +408,7 @@ class Window : public WindowQt {
     glm::vec4 backgroundColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
     glm::vec4 fontColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     int samplerIndex = 0;
-    glm::mat4 transform3D = glm::mat4();
+    glm::mat4 transform3D = glm::mat4(1.f);
     glm::mat4 projection = glm::perspective(45.f, 1.f, 0.0001f, 100.f);
     unsigned int superSampling = 0;
     bool showDistanceField = false;
