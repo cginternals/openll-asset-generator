@@ -131,7 +131,6 @@ namespace llassetgen {
                 nonDepictableChars.insert(static_cast<FT_ULong>(glyph));
             } else {
                 Image img = {bitmap, padding, divisibleBy};
-                auto a = bitmap.buffer;
                 v.push_back(std::move(img));
             }
         }
