@@ -543,7 +543,7 @@ class Window : public WindowQt {
             }
 
             // export fnt file
-            llassetgen::FntWriter writer{fontFinder.fontFace, fontName.toStdString(), fontSize, 1.f / downSampling};
+            llassetgen::FntWriter writer{ fontFinder.fontFace, fontName.toStdString(), fontSize, 1.f / downSampling, (float)padding };
             writer.setAtlasProperties(pack.atlasSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
 

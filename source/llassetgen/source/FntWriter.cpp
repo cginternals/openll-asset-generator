@@ -14,7 +14,7 @@
 #include FT_OUTLINE_H
 
 namespace llassetgen {
-    FntWriter::FntWriter(FT_Face _face, std::string _faceName, unsigned int _fontSize, float _scalingFactor) {
+    FntWriter::FntWriter(FT_Face _face, std::string _faceName, unsigned int _fontSize, float _scalingFactor, float _padding) {
         faceName = _faceName;
         face = _face;
         fontInfo = Info();
@@ -24,6 +24,7 @@ namespace llassetgen {
         fontInfo.size = _fontSize;
         maxYBearing = 0;
         scalingFactor = _scalingFactor;
+        padding = _padding;
     }
 
     void FntWriter::setFontInfo() {
@@ -58,7 +59,7 @@ namespace llassetgen {
         fontInfo.useSmoothing = false;
         fontInfo.supersamplingLevel = 1;
         */
-        fontInfo.padding = { 0.f, 0.f, 0.f, 0.f };
+        fontInfo.padding = { padding, padding, padding, padding };
         fontInfo.spacing = { 0.f, 0.f };
         /*
         fontInfo.outlineThickness = 0;
@@ -148,7 +149,7 @@ namespace llassetgen {
                 FT_UInt leftGindex = FT_Get_Char_Index(face, *leftCharcode);
                 FT_UInt rightGindex = FT_Get_Char_Index(face, *rightCharcode);
                 FT_Vector kerningVector;
-                FT_Get_Kerning(face, leftGindex, rightGindex, FT_KERNING_UNSCALED, &kerningVector);
+                FT_Get_Kerning(face, leftGindex, rightGindex, FT_KERNING_UNFITTED, &kerningVector);
                 if (kerningVector.x != 0) {
                     KerningInfo kerningInfo;
                     kerningInfo.firstId = *leftCharcode;
@@ -189,7 +190,7 @@ namespace llassetgen {
         // write info block
         fntFile << "info "
                 << "face=\"" << fontInfo.face << "\" "
-                << "size=" << fontInfo.size << " "
+                << "size=" << fontInfo.size * scalingFactor << " "
                 << "bold=" << int(fontInfo.isBold) << " "
                 << "italic=" << int(fontInfo.isItalic) << " "
                 << "charset=\"" << fontInfo.charset << "\" "
