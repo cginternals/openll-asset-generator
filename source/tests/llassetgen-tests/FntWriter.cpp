@@ -26,7 +26,8 @@ TEST(FntWriterTest, createFntFile) {
 
 	unsigned int fontSize = 32;
 	float scalingFactor = 1.0f;
-	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor);
+	float padding = 0;
+	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor, padding);
 	
 	FT_UInt gIndex;
 	std::set<FT_ULong> charcodes;
@@ -78,7 +79,8 @@ TEST(FntWriterTest, fntScaling) {
 
 	unsigned int fontSize = 32;
 	float scalingFactor = 0.5f;
-	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor);
+	float padding = 0;
+	FntWriter writer = FntWriter(face, faceName, fontSize, scalingFactor, padding);
 	
 	FT_UInt gIndex;
 	std::set<FT_ULong> charcodes;
