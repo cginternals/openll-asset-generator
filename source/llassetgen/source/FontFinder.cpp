@@ -113,19 +113,26 @@ namespace llassetgen {
 
             FT_UInt charIndex = FT_Get_Char_Index(fontFace, static_cast<FT_ULong>(glyph));
             if (charIndex == 0) {
-                std::cerr << "Warning: Font does not contain glyph with code " << glyph << ". Omitted." << std::endl;
+                std::cerr << "Omitting glyph with code " << glyph << ", because the Font does not contain that glyph." << std::endl;
                 continue;
             }
 
             FT_Error err = FT_Load_Glyph(fontFace, charIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_MONO);
-            FT_Bitmap& bitmap = fontFace->glyph->bitmap;
-            if (err || bitmap.buffer == nullptr) {
-                std::cerr << "Warning: Omitting glyph with code " + std::to_string(glyph) + " which could not be rendered." << std::endl;
+            if (err) {
+                std::cerr << "Omitting glyph with code  " << glyph << "because of Error : " << err << std::endl;
                 continue;
             }
 
-            Image img = { bitmap, padding, divisibleBy };
-            v.push_back(std::move(img));
+            FT_Bitmap& bitmap = fontFace->glyph->bitmap;
+            if (bitmap.buffer == nullptr) {
+                // standard behaviour for space char
+                std::cerr << "Note: Glyph with code " << glyph << " is not depictable, but will appear in the fnt-File."
+                          << std::endl;
+                nonDepictableChars.insert(static_cast<FT_ULong>(glyph));
+            } else {
+                Image img = {bitmap, padding, divisibleBy};
+                v.push_back(std::move(img));
+            }
         }
         return v;
     }
