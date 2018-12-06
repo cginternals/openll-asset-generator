@@ -412,10 +412,10 @@ class Window : public WindowQt {
     bool showDistanceField = false;
     float dtThreshold = 0.5;
     int dtAlgorithm = 0;
-    int packingAlgorithm = 0;
+    int packingAlgorithm = 1;
     int downSampling = 2;
 #ifdef SYSTEM_WINDOWS
-    QString fontName = "Verdana";
+    QString fontName = "Open Sans";
 #elif defined(SYSTEM_DARWIN)
     QString fontName = "Verdana";
 #else
@@ -424,7 +424,7 @@ class Window : public WindowQt {
     unsigned int fontSize = 256;
     int drBlack = -50;
     int drWhite = 50;
-    int padding = 20;
+    int padding = 16;
 
     bool isPanning = false;
     bool isRotating = false;
@@ -444,9 +444,11 @@ class Window : public WindowQt {
             // all printable ascii characters
             constexpr char ascii[] =
                 " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+            constexpr char test[] =
+                " \'ABV^g|";
             constexpr char a[] = "a";
 
-            const char* s = ascii;
+            const char* s = test; //ascii
 
             // a custom preset using unicode
             /*
@@ -712,6 +714,7 @@ void setupGUI(QMainWindow* window) {
     // item order is important
     packComboBox->addItem("Shelf");
     packComboBox->addItem("Max Rects");
+    packComboBox->setCurrentIndex(1);
     QObject::connect(packComboBox, SIGNAL(currentIndexChanged(int)), glwindow, SLOT(packingAlgoChanged(int)));
     acLayout->addRow("Packing:", packComboBox);
 

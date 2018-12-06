@@ -86,9 +86,9 @@ namespace llassetgen {
             charAreaWidth = charArea.size.x;
             charAreaHeight = charArea.size.y;
         } else {
-            // for example, the space char, is not depictable (thus, is not contained in the glyph texture), but
+            // for example, the space char is not depictable (thus, is not contained in the glyph texture), but
             // actually has a width in typesetting (called xAdvance).
-            // The position in the texture atlas (at the pixel's color at that position) has no meaning, has the
+            // The position in the texture atlas (at the pixel's color at that position) has no meaning, as the
             // width and height of that glyph in the texture is zero.
             charAreaPosX = 0;
             charAreaPosY = 0;
@@ -214,8 +214,8 @@ namespace llassetgen {
         fntFile << "common "
                 << "lineHeight=" << float(fontCommon.lineHeight) * scalingFactor << " "
                 << "base=" << float(fontCommon.base) * scalingFactor << " "
-                << "ascent=" << float(fontCommon.ascent) * scalingFactor << " "
-                << "descent=" << float(fontCommon.descent) * scalingFactor << " "
+                << "ascent=" << float(fontCommon.ascent + fontInfo.padding.up) * scalingFactor << " "
+                << "descent=" << float(fontCommon.descent + fontInfo.padding.up + fontInfo.padding.down) * scalingFactor << " "
                 << "scaleW=" << fontCommon.scaleW << " "
                 << "scaleH=" << fontCommon.scaleH << " "
                 << "pages=" << fontCommon.pages << " "
@@ -239,8 +239,8 @@ namespace llassetgen {
                     << "y=" << charInfo.y << " "
                     << "width=" << charInfo.width << " "
                     << "height=" << charInfo.height << " "
-                    << "xoffset=" << charInfo.xOffset * scalingFactor << " "
-                    << "yoffset=" << (fontCommon.ascent - charInfo.yOffset) * scalingFactor << " "
+                    << "xoffset=" << (charInfo.xOffset - fontInfo.padding.left) * scalingFactor << " "
+                    << "yoffset=" << (fontCommon.ascent - (charInfo.yOffset - fontInfo.padding.up)) * scalingFactor << " "
                     << "xadvance=" << float(charInfo.xAdvance) * scalingFactor << " "
                     << "page=" << charInfo.page << " "
                     << "chnl=" << int(charInfo.chnl) << std::endl;
