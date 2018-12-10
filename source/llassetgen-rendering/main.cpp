@@ -445,10 +445,10 @@ class Window : public WindowQt {
             constexpr char ascii[] =
                 " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
             constexpr char test[] =
-                " \'ABV^g|";
+                " \'ABV^g|xMm";
             constexpr char a[] = "a";
 
-            const char* s = test; //ascii
+            const char* s = ascii;
 
             // a custom preset using unicode
             /*

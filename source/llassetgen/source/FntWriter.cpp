@@ -52,7 +52,7 @@ namespace llassetgen {
         fontCommon.base = float(face->size->metrics.ascender) / 64.f;
         fontCommon.descent = float(face->size->metrics.descender) / 64.f;
 
-        // havent found any of the following information
+        // haven't found any of the following information
         // irrelevant for distance fields --> ignore them
         /*
         fontInfo.stretchH = 1.0f;
@@ -214,8 +214,8 @@ namespace llassetgen {
         fntFile << "common "
                 << "lineHeight=" << float(fontCommon.lineHeight) * scalingFactor << " "
                 << "base=" << float(fontCommon.base) * scalingFactor << " "
-                << "ascent=" << float(fontCommon.ascent + fontInfo.padding.up) * scalingFactor << " "
-                << "descent=" << float(fontCommon.descent + fontInfo.padding.up + fontInfo.padding.down) * scalingFactor << " "
+                << "ascent=" << float(fontCommon.ascent) * scalingFactor << " "
+                << "descent=" << float(fontCommon.descent) * scalingFactor << " "
                 << "scaleW=" << fontCommon.scaleW << " "
                 << "scaleH=" << fontCommon.scaleH << " "
                 << "pages=" << fontCommon.pages << " "
@@ -239,8 +239,8 @@ namespace llassetgen {
                     << "y=" << charInfo.y << " "
                     << "width=" << charInfo.width << " "
                     << "height=" << charInfo.height << " "
-                    << "xoffset=" << (charInfo.xOffset - fontInfo.padding.left) * scalingFactor << " "
-                    << "yoffset=" << (fontCommon.ascent - (charInfo.yOffset - fontInfo.padding.up)) * scalingFactor << " "
+                    << "xoffset=" << (charInfo.xOffset) * scalingFactor << " "
+                    << "yoffset=" << (fontCommon.base - charInfo.yOffset) * scalingFactor << " "
                     << "xadvance=" << float(charInfo.xAdvance) * scalingFactor << " "
                     << "page=" << charInfo.page << " "
                     << "chnl=" << int(charInfo.chnl) << std::endl;
