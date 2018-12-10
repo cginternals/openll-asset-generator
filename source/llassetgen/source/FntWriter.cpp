@@ -239,7 +239,7 @@ namespace llassetgen {
                     << "y=" << charInfo.y << " "
                     << "width=" << charInfo.width << " "
                     << "height=" << charInfo.height << " "
-                    << "xoffset=" << (charInfo.xOffset) * scalingFactor << " "
+                    << "xoffset=" << charInfo.xOffset * scalingFactor << " "
                     << "yoffset=" << (fontCommon.base - charInfo.yOffset) * scalingFactor << " "
                     << "xadvance=" << float(charInfo.xAdvance) * scalingFactor << " "
                     << "page=" << charInfo.page << " "
