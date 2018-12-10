@@ -326,8 +326,14 @@ class Window : public WindowQt {
 
     virtual void packingSizeChanged(QString value) override {
         int ds = value.toInt();
-        std::cout << "change downsampling to " << ds << std::endl;
-        downSampling = ds;
+
+        if (ds > 0) {
+            downSampling = ds;
+            std::cout << "change downsampling to " << ds << std::endl;
+        }
+        else {
+            std::cout << "Did not change downsampling to " << ds << " (but secretly, I love divison by zero!)" << std::endl;
+        }
     }
 
     virtual void resetTransform3D() override {
