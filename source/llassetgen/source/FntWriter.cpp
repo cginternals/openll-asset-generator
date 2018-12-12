@@ -52,7 +52,7 @@ namespace llassetgen {
         fontCommon.base = float(face->size->metrics.ascender) / 64.f;
         fontCommon.descent = float(face->size->metrics.descender) / 64.f;
 
-        // havent found any of the following information
+        // haven't found any of the following information
         // irrelevant for distance fields --> ignore them
         /*
         fontInfo.stretchH = 1.0f;
@@ -86,9 +86,9 @@ namespace llassetgen {
             charAreaWidth = charArea.size.x;
             charAreaHeight = charArea.size.y;
         } else {
-            // for example, the space char, is not depictable (thus, is not contained in the glyph texture), but
+            // for example, the space char is not depictable (thus, is not contained in the glyph texture), but
             // actually has a width in typesetting (called xAdvance).
-            // The position in the texture atlas (at the pixel's color at that position) has no meaning, has the
+            // The position in the texture atlas (at the pixel's color at that position) has no meaning, as the
             // width and height of that glyph in the texture is zero.
             charAreaPosX = 0;
             charAreaPosY = 0;
@@ -240,7 +240,7 @@ namespace llassetgen {
                     << "width=" << charInfo.width << " "
                     << "height=" << charInfo.height << " "
                     << "xoffset=" << charInfo.xOffset * scalingFactor << " "
-                    << "yoffset=" << (fontCommon.ascent - charInfo.yOffset) * scalingFactor << " "
+                    << "yoffset=" << (fontCommon.base - charInfo.yOffset) * scalingFactor << " "
                     << "xadvance=" << float(charInfo.xAdvance) * scalingFactor << " "
                     << "page=" << charInfo.page << " "
                     << "chnl=" << int(charInfo.chnl) << std::endl;
