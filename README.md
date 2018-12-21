@@ -1,6 +1,7 @@
 # openll-asset-generator
 Font Asset Generator based on OpenLL Specifications
 
+[![Build status](https://ci.appveyor.com/api/projects/status/24v67iw1h7fdim3f?svg=true)](https://ci.appveyor.com/project/bwasty/openll-asset-generator)
 [![GitHub contributors](https://img.shields.io/github/contributors/hpicgs/openll-asset-generator.svg)](https://GitHub.com/hpicgs/openll-asset-generator/graphs/contributors/)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/hpicgs/openll-asset-generator/blob/master/LICENSE)
 
