@@ -98,6 +98,8 @@ For a simplified cross-platform build and usage setup for the CLI, a `Dockerfile
 ```
 The parameters are the same as described in the section below. The results are saved in the subfolder `output`.
 
+### Troubleshooting
+* /bin/sh: 1: ./configure: not found` during docker build: Make sure to clone the repo with linux line endings (LF).
 
 ## Usage
 
