@@ -8,6 +8,7 @@ namespace llassetgen {
 
     void init() {
         FT_Error init_error = FT_Init_FreeType(&freetype);
+        (void)init_error;
         assert(init_error == 0);
     }
 }

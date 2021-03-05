@@ -115,9 +115,11 @@ namespace llassetgen {
             // Only fails when a rectangle is wider (and higher, if rotations are enabled)
             // than the width of the atlas texture, however this should be prevented
             // by predictAtlasSize.
-            assert(success);
-
             packing.atlasSize = packer.atlasSize();
+            if (!success) {
+                packing.rects.clear();
+            }
+
             return packing;
         }
 

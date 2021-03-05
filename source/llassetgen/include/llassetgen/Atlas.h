@@ -23,8 +23,7 @@ namespace llassetgen {
     template <class ImageIter>
     Image fontAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, uint8_t bitDepth = 1) {
         internal::checkImageIteratorType<ImageIter>();
-        using DiffType = typename std::iterator_traits<ImageIter>::difference_type;
-        assert(std::distance(imgBegin, imgEnd) == static_cast<DiffType>(packing.rects.size()));
+        assert(std::distance(imgBegin, imgEnd) == static_cast<typename std::iterator_traits<ImageIter>::difference_type>(packing.rects.size()));
 
         Image atlas{packing.atlasSize.x, packing.atlasSize.y, bitDepth};
         atlas.clear();
@@ -47,8 +46,7 @@ namespace llassetgen {
     Image distanceFieldAtlas(ImageIter imgBegin, ImageIter imgEnd, Packing packing, ImageTransform distanceTransform,
                              ImageTransform downSampling) {
         internal::checkImageIteratorType<ImageIter>();
-        using DiffType = typename std::iterator_traits<ImageIter>::difference_type;
-        assert(std::distance(imgBegin, imgEnd) == static_cast<DiffType>(packing.rects.size()));
+        assert(std::distance(imgBegin, imgEnd) == static_cast<typename std::iterator_traits<ImageIter>::difference_type>(packing.rects.size()));
 
         Image atlas{packing.atlasSize.x, packing.atlasSize.y, DistanceTransform::bitDepth};
         atlas.fillRect({0, 0}, atlas.getSize(), DistanceTransform::backgroundVal);
