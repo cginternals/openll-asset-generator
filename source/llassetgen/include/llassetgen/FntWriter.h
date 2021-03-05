@@ -19,22 +19,6 @@ namespace llassetgen {
         bool isItalic;
         std::string charset;
         bool useUnicode;
-        /*
-        float stretchH;
-        bool useSmoothing;
-        int supersamplingLevel;
-        struct padding {
-                float left;
-                float right;
-                float up;
-                float down;
-        } padding;
-        struct spacing {
-                float horiz;
-                float vert;
-        } spacing;
-        float outlineThickness;
-        */
     };
 
     struct Common {
@@ -44,6 +28,22 @@ namespace llassetgen {
         int scaleH;
         int pages;
         bool isPacked;
+        struct padding {
+            float left;
+            float right;
+            float up;
+            float down;
+        } padding;
+        /*
+        float stretchH;
+        bool useSmoothing;
+        int supersamplingLevel;
+        struct spacing {
+                float horiz;
+                float vert;
+        } spacing;
+        float outlineThickness;
+        */
     };
 
     struct CharInfo {
@@ -69,7 +69,7 @@ namespace llassetgen {
        public:
         FntWriter(FT_Face face, std::string faceName, unsigned int fontSize, float scalingFactor, bool scaledGlyph);
         void readFont(std::set<FT_ULong>::iterator charcodesBegin, std::set<FT_ULong>::iterator charcodesEnd);
-        void setAtlasProperties(Vec2<PackingSizeType> size, int maxHeight);
+        void setAtlasProperties(Vec2<PackingSizeType> size, int maxHeight, int padding);
         void saveFnt(std::string filepath);
         void setCharInfo(FT_UInt charcode, Rect<PackingSizeType> charArea, Vec2<float> offset);
 

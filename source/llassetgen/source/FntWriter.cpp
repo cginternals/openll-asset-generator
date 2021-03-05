@@ -46,17 +46,6 @@ namespace llassetgen {
         }
 
         fontInfo.useUnicode = (face->charmap->encoding == FT_ENCODING_UNICODE);
-
-        // havent found any of the following information
-        // irrelevant for distance fields --> ignore them
-        /*
-        fontInfo.stretchH = 1.0f;
-        fontInfo.useSmoothing = false;
-        fontInfo.supersamplingLevel = 1;
-        fontInfo.padding = { 2.8f, 2.8f, 2.8f, 2.8f };
-        fontInfo.spacing = { 0, 0 };
-        fontInfo.outlineThickness = 0;
-        */
     }
 
     void FntWriter::setCharInfo(FT_UInt gindex, Rect<PackingSizeType> charArea, Vec2<float> offset) {
@@ -105,13 +94,24 @@ namespace llassetgen {
         setKerningInfo(charcodesBegin, charcodesEnd);
     }
 
-    void FntWriter::setAtlasProperties(Vec2<PackingSizeType> size, int maxHeight) {
+    void FntWriter::setAtlasProperties(Vec2<PackingSizeType> size, int maxHeight, int padding) {
         // collect commonInfo
         fontCommon.lineHeight = maxHeight;
         fontCommon.scaleW = size.x;
         fontCommon.scaleH = size.y;
         fontCommon.pages = 1;
         fontCommon.isPacked = 0;
+        fontCommon.padding = { static_cast<float>(padding), static_cast<float>(padding), static_cast<float>(padding), static_cast<float>(padding) };
+
+        // havent found any of the following information
+        // irrelevant for distance fields --> ignore them
+        /*
+        fontInfo.stretchH = 1.0f;
+        fontInfo.useSmoothing = false;
+        fontInfo.supersamplingLevel = 1;
+        fontInfo.spacing = { 0, 0 };
+        fontInfo.outlineThickness = 0;
+        */
     }
 
     void FntWriter::saveFnt(std::string filepath) {
@@ -133,12 +133,13 @@ namespace llassetgen {
                 << "charset=\"" << fontInfo.charset << "\" "
                 << "unicode="
                 << int(fontInfo.useUnicode)
+                << "padding=" << fontCommon.padding.up << "," << fontCommon.padding.right << "," << fontCommon.padding.down <<
+                "," << fontCommon.padding.left << " "
                 /* << " "
                 << "stretchH=" << fontInfo.stretchH << " "
                 << "smooth=" << int(fontInfo.useSmoothing) << " "
                 << "aa=" << fontInfo.supersamplingLevel << " "
-                << "padding=" << fontInfo.padding.up << "," << fontInfo.padding.right << "," << fontInfo.padding.down <<
-                "," << fontInfo.padding.left << " "
+                
                 << "spacing=" << fontInfo.spacing.horiz << "," << fontInfo.spacing.vert << " "
                 << "outline=" << fontInfo.outlineThickness
                 */

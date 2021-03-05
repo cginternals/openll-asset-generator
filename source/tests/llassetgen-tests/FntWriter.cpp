@@ -55,7 +55,7 @@ TEST(FntWriterTest, createFntFile) {
 	}
 
 	int maxHeight = 20;
-	writer.setAtlasProperties({ 100, 200 }, maxHeight);
+    writer.setAtlasProperties({ 100, 200 }, maxHeight, 0);
 
 	writer.saveFnt(testDestinationPath + "fnt.fnt");
 }
@@ -107,7 +107,7 @@ TEST(FntWriterTest, fntScaling) {
 	}
 
 	int maxHeight = 20;
-	writer.setAtlasProperties({ 100, 200 }, maxHeight);
+    writer.setAtlasProperties({ 100, 200 }, maxHeight, 0);
 
 	writer.saveFnt(testDestinationPath + "fnt_scaled.fnt");
 }
