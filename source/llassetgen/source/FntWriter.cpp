@@ -131,8 +131,7 @@ namespace llassetgen {
                 << "bold=" << int(fontInfo.isBold) << " "
                 << "italic=" << int(fontInfo.isItalic) << " "
                 << "charset=\"" << fontInfo.charset << "\" "
-                << "unicode="
-                << int(fontInfo.useUnicode)
+                << "unicode=" << int(fontInfo.useUnicode) << " "
                 << "padding=" << fontCommon.padding.up << "," << fontCommon.padding.right << "," << fontCommon.padding.down <<
                 "," << fontCommon.padding.left << " "
                 /* << " "
