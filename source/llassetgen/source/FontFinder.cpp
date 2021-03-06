@@ -132,9 +132,10 @@ std::vector<Image> FontFinder::renderGlyphs(const std::set<unsigned long>& glyph
 
     std::vector<Image> v;
     v.reserve(glyphs.size());
-    for (const auto glyph : glyphs) {
+    for (const auto glyph : glyphs)
+    {
         Image img = renderGlyph(glyph, padding, divisibleBy);
-        v.push_back(std::move(img));
+        v.emplace_back(std::move(img));
     }
     return v;
 }

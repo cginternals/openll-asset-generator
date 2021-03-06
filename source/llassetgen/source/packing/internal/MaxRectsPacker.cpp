@@ -36,13 +36,17 @@ private:
 
 public:
     RectReplacer(std::vector<Rect<PackingSizeType>>& _vector, Rect<PackingSizeType>& _existing)
-        : vector(_vector), existing(_existing){};
+    : vector(_vector)
+    , existing(_existing)
+    {
+    };
 
     void addReplacement(Rect<PackingSizeType>&& element);
 };
 
 
-void RectReplacer::addReplacement(Rect<PackingSizeType>&& element) {
+void RectReplacer::addReplacement(Rect<PackingSizeType>&& element)
+{
     if (!usedExisting)
     {
         existing = std::move(element);
@@ -123,7 +127,8 @@ class BssfComparator
 {
 public:
     explicit BssfComparator(const Rect<PackingSizeType>& _toBePlaced) : toBePlaced(_toBePlaced)
-    {}
+    {
+    }
 
     bool operator()(const Rect<PackingSizeType>& free1, const Rect<PackingSizeType>& free2)
     {
@@ -270,6 +275,7 @@ void MaxRectsPacker::pruneFreeList()
 void MaxRectsPacker::cropRects(const Rect<PackingSizeType>& placedRect)
 {
     size_t rectsToCrop = freeList.size();
+
     for (size_t i = 0; i < rectsToCrop;)
     {
         if (placedRect == freeList[i])
@@ -294,5 +300,5 @@ void MaxRectsPacker::cropRects(const Rect<PackingSizeType>& placedRect)
 }
 
 
-} // namespace internals
+} // namespace internal
 } // namespace llassetgen

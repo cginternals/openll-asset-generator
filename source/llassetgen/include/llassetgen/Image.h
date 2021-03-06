@@ -45,7 +45,7 @@ public:
     Image(Image&& src);
     Image(size_t width, size_t height, size_t _bitDepth);
     Image(FT_Bitmap_ bitmap, size_t padding = 0, size_t divisibleBy = 1);
-    Image view(Vec2<size_t> _min, Vec2<size_t> _max, size_t padding = 0);
+    Image view(Vec2<size_t> _min, Vec2<size_t> _max, size_t padding = 0) const;
 
     size_t getWidth() const;
     size_t getHeight() const;
@@ -59,7 +59,7 @@ public:
     void setPixel(Vec2<size_t> pos, pixelType data) const;
 
     template <typename pixelType = uint8_t>
-    void fillRect(Vec2<size_t> _min, Vec2<size_t> _max, pixelType in = 0) const;
+    void fillRect(const Vec2<size_t> & _min, const Vec2<size_t> & _max, pixelType in = 0) const;
     void clear() const;
     void copyDataFrom(const Image& copy);
 

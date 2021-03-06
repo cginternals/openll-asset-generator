@@ -37,5 +37,5 @@ private:
 };
 
 
-} // namespace internals
+} // namespace internal
 } // namespace llassetgen

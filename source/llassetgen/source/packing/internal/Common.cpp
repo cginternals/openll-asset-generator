@@ -24,7 +24,7 @@ unsigned int ceilLog2(uint64_t num)
     // Start with 1 if the input is a power of two
     auto result = static_cast<unsigned int>((num & (num - 1)) != 0);
     unsigned int rangeWidth = 32;
-    for (std::uint64_t rangeMask : rangeMasks)
+    for (const std::uint64_t rangeMask : rangeMasks)
     {
         const auto rangeNotEmpty = static_cast<unsigned int>((num & rangeMask) != 0);
         result += rangeNotEmpty * rangeWidth;
@@ -52,10 +52,13 @@ Vec2<PackingSizeType> predictAtlasSize(const Packing& packing)
     const auto minWidthExponent = ceilLog2(maxSides.x);
     const auto minHeightExponent = ceilLog2(maxSides.y);
 
-    if (widthExponent < minWidthExponent) {
+    if (widthExponent < minWidthExponent)
+    {
         widthExponent = minWidthExponent;
         heightExponent = std::max(minHeightExponent, areaExponent - widthExponent);
-    } else if (heightExponent < minHeightExponent) {
+    }
+    else if (heightExponent < minHeightExponent)
+    {
         heightExponent = minHeightExponent;
         widthExponent = std::max(minWidthExponent, areaExponent - heightExponent);
     }
@@ -64,5 +67,5 @@ Vec2<PackingSizeType> predictAtlasSize(const Packing& packing)
 }
 
 
-} // namespace internals
+} // namespace internal
 } // namespace llassetgen

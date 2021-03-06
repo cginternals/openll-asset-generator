@@ -79,14 +79,7 @@ bool ShelfPacker::packWithRotations(Rect<PackingSizeType>& rect)
     else
     {
         openNewShelf();
-        if (maxSide > atlasSize_.x)
-        {
-            rect.size = {minSide, maxSide};
-        }
-        else
-        {
-            rect.size = {maxSide, minSide};
-        }
+        rect.size = maxSide > atlasSize_.x ? Vec2<PackingSizeType>{minSide, maxSide} : Vec2<PackingSizeType>{maxSide, minSide};
 
         return placeMaybeGrow(rect);
     }
@@ -104,16 +97,14 @@ bool ShelfPacker::placeMaybeGrow(Rect<PackingSizeType>& rect)
 {
     if (usedHeight + rect.size.y > atlasSize_.y)
     {
-        if (allowGrowth)
-        {
-            PackingSizeType finalHeight = usedHeight + rect.size.y;
-            auto numDoublings = ceilLog2(ceilDiv(finalHeight, atlasSize_.y));
-            atlasSize_.y <<= numDoublings;
-        }
-        else
+        if (!allowGrowth)
         {
             return false;
         }
+
+        PackingSizeType finalHeight = usedHeight + rect.size.y;
+        auto numDoublings = ceilLog2(ceilDiv(finalHeight, atlasSize_.y));
+        atlasSize_.y <<= numDoublings;
     }
 
     place(rect);
