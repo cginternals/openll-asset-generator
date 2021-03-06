@@ -1,5 +1,9 @@
 #pragma once
 
+#include <map>
+#include <set>
+#include <string>
+
 #include <llassetgen/DistanceTransform.h>
 #include <llassetgen/Image.h>
 #include <llassetgen/Packing.h>
@@ -26,7 +30,7 @@ std::map<std::string, ImageTransform> downsamplingAlgos{
 };
 
 template <class Func>
-std::set<std::string> algoNames(std::map<std::string, Func> map) {
+std::set<std::string> algoNames(const std::map<std::string, Func> & map) {
     std::set<std::string> names;
     for (const auto& mapEntry : map) {
         names.insert(mapEntry.first);
