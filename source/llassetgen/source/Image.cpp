@@ -1,3 +1,7 @@
+
+#include <llassetgen/Image.h>
+
+
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -20,8 +24,6 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 // clang-format on
-
-#include <llassetgen/Image.h>
 
 namespace llassetgen {
     Image::~Image() {

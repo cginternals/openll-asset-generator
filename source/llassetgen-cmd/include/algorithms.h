@@ -3,15 +3,21 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 #include <llassetgen/DistanceTransform.h>
 #include <llassetgen/Image.h>
-#include <llassetgen/Packing.h>
+#include <llassetgen/Geometry.h>
+#include <llassetgen/packing/Types.h>
+#include <llassetgen/packing/Algorithms.h>
+
 
 using namespace llassetgen;
 
+
 using VecIter = std::vector<Vec2<size_t>>::const_iterator;
 using ImageTransform = void (*)(Image&, Image&);
+
 
 std::map<std::string, ImageTransform> dtAlgos{
     {"deadrec", [](Image& input, Image& output) { DeadReckoning(input, output).transform(); }},

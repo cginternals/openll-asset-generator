@@ -3,6 +3,8 @@
 
 #include <gmock/gmock.h>
 #include <llassetgen/llassetgen.h>
+#include <llassetgen/Image.h>
+#include <llassetgen/DistanceTransform.h>
 
 #include <fstream>
 

@@ -3,6 +3,7 @@
 
 #include <gmock/gmock.h>
 #include <llassetgen/llassetgen.h>
+#include <llassetgen/FntWriter.h>
 
 #include <fstream>
 

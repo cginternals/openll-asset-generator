@@ -48,7 +48,6 @@ set(headers
     ${include_path}/FntWriter.h
     ${include_path}/FontFinder.h
     ${include_path}/Geometry.h
-    ${include_path}/Packing.h
 )
 
 set(sources

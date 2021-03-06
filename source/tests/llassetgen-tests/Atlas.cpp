@@ -1,7 +1,13 @@
+
 #include <gmock/gmock.h>
+
+
 #include <llassetgen/Atlas.h>
+#include <llassetgen/packing/Algorithms.h>
+
 
 using namespace llassetgen;
+
 
 std::string atlasTestDestinationPath = "../../";
 std::vector<Vec2<size_t>> atlasTestSizes{{1, 1}, {34, 5}, {23, 79}, {16, 70}, {91, 64}, {98, 82}, {54, 63}, {100, 6}};

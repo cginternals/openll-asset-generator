@@ -6,6 +6,7 @@
 #include <algorithms.h>
 #include <helpstrings.h>
 
+#include <llassetgen/llassetgen.h>
 #include <llassetgen/Atlas.h>
 #include <llassetgen/FntWriter.h>
 #include <llassetgen/FontFinder.h>

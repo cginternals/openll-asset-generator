@@ -3,11 +3,16 @@
 #include <numeric>
 
 #include <llassetgen/llassetgen.h>
+#include <llassetgen/packing/Types.h>
+#include <llassetgen/packing/Algorithms.h>
+
 
 using llassetgen::Packing;
 
+
 using Vec = llassetgen::Vec2<llassetgen::PackingSizeType>;
 using Rect = llassetgen::Rect<llassetgen::PackingSizeType>;
+
 
 /**
  * Base class for all packing test fixtures.
