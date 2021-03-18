@@ -1,2 +1,4 @@
 build/
-output/
+CMakeLists.txt.user
+.localconfig
+build-debug/

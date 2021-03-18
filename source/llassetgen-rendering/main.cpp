@@ -29,7 +29,8 @@
 
 #include <cpplocate/cpplocate.h>
 
-#include <glbinding/ContextInfo.h>
+#include <glbinding-aux/ContextInfo.h>
+#include <glbinding-aux/types_to_string.h>
 #include <glbinding/Version.h>
 #include <glbinding/gl/gl.h>
 
@@ -71,9 +72,9 @@ class Window : public WindowQt {
         globjects::init(getProcAddress);
 
         std::cout << std::endl
-                  << "OpenGL Version:  " << glbinding::ContextInfo::version() << std::endl
-                  << "OpenGL Vendor:   " << glbinding::ContextInfo::vendor() << std::endl
-                  << "OpenGL Renderer: " << glbinding::ContextInfo::renderer() << std::endl
+                  << "OpenGL Version:  " << glbinding::aux::ContextInfo::version() << std::endl
+                  << "OpenGL Vendor:   " << glbinding::aux::ContextInfo::vendor() << std::endl
+                  << "OpenGL Renderer: " << glbinding::aux::ContextInfo::renderer() << std::endl
                   << std::endl;
 
         globjects::DebugMessage::enable();

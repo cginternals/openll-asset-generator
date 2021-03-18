@@ -89,6 +89,7 @@ target_link_libraries(${target}
     
     PUBLIC
     glbinding::glbinding
+    glbinding::glbinding-aux
     globjects::globjects
     cpplocate::cpplocate
 )
