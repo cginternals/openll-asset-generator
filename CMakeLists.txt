@@ -55,8 +55,8 @@ set(META_AUTHOR_ORGANIZATION "CG Internals GmbH")
 set(META_AUTHOR_DOMAIN       "https://github.com/hpicgs/openll-asset-generator/")
 set(META_AUTHOR_MAINTAINER   "opensource@cginternals.com")
 set(META_VERSION_MAJOR       "1")
-set(META_VERSION_MINOR       "0")
-set(META_VERSION_PATCH       "1")
+set(META_VERSION_MINOR       "1")
+set(META_VERSION_PATCH       "0")
 set(META_VERSION_REVISION    "${GIT_REV}")
 set(META_VERSION             "${META_VERSION_MAJOR}.${META_VERSION_MINOR}.${META_VERSION_PATCH}")
 set(META_NAME_VERSION        "${META_PROJECT_NAME} v${META_VERSION} (${META_VERSION_REVISION})")
@@ -76,6 +76,7 @@ option(OPTION_SELF_CONTAINED "Create a self-contained install with all dependenc
 option(OPTION_BUILD_TESTS    "Build tests."                                           ON)
 option(OPTION_BUILD_DOCS     "Build documentation."                                   OFF)
 option(OPTION_BUILD_EXAMPLES "Build examples."                                        OFF)
+option(OPTION_BUILD_RENDERER "Build renderer."                                        OFF)
 
 
 #
