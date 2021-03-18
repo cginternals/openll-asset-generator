@@ -158,7 +158,7 @@ int parseAtlasArgs(int argc, char** argv) {
 
         if (createFnt) {
             std::string faceName = static_cast<bool>(*fontNameOpt) ? fontName : "Unknown";
-            FntWriter writer{fontFinder.fontFace, faceName, fontSize, 1, (float)padding};
+            FntWriter writer{fontFinder.fontFace, faceName, fontSize, downsamplingRatio > 1 ? 1.f / float(downsamplingRatio) : 1.0f, (float)padding};
             writer.setAtlasProperties(p.atlasSize);
             writer.readFont(glyphSet.begin(), glyphSet.end());
 

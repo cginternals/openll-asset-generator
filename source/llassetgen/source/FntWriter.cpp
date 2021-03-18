@@ -13,6 +13,25 @@
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
 
+
+namespace
+{
+
+
+float from_26_6_fixed_precision(const std::int32_t v)
+{
+    return float(v) / 64.0f;
+}
+
+float from_16_16_fixed_precision(const std::int32_t v)
+{
+    return float(v) / 65536.0f;
+}
+
+
+} // namespace
+
+
 namespace llassetgen {
     FntWriter::FntWriter(FT_Face _face, std::string _faceName, unsigned int _fontSize, float _scalingFactor, float _padding) {
         faceName = _faceName;
@@ -47,10 +66,10 @@ namespace llassetgen {
         fontInfo.useUnicode = (face->charmap->encoding == FT_ENCODING_UNICODE);
 
         //sizes are provided in 26.6 fixed-point format
-        fontCommon.lineHeight = float(face->size->metrics.height) / 64.f;
+        fontCommon.lineHeight = from_26_6_fixed_precision(face->size->metrics.height);
         // base is defined as "the distance from the ascent to the baseline"
-        fontCommon.base = float(face->size->metrics.ascender) / 64.f;
-        fontCommon.descent = float(face->size->metrics.descender) / 64.f;
+        fontCommon.base = from_26_6_fixed_precision(face->size->metrics.ascender);
+        fontCommon.descent = from_26_6_fixed_precision(face->size->metrics.descender);
 
         // haven't found any of the following information
         // irrelevant for distance fields --> ignore them
@@ -100,7 +119,7 @@ namespace llassetgen {
         FT_Load_Glyph(face, gindex, FT_LOAD_DEFAULT);
 
         // bearing is provided in 26.6 fixed - point format
-        FT_Pos yBearing = float(face->glyph->metrics.horiBearingY) / 64.f;
+        FT_Pos yBearing = from_26_6_fixed_precision(face->glyph->metrics.horiBearingY);
         maxYBearing = std::max(yBearing, maxYBearing);
 
         CharInfo charInfo;
@@ -109,8 +128,8 @@ namespace llassetgen {
         charInfo.y = charAreaPosY;
         charInfo.width = charAreaWidth;
         charInfo.height = charAreaHeight;
-        charInfo.xAdvance = float(face->glyph->linearHoriAdvance) / 65536.f;
-        charInfo.xOffset = float(face->glyph->metrics.horiBearingX) / 64.f;
+        charInfo.xAdvance = from_16_16_fixed_precision(face->glyph->linearHoriAdvance);
+        charInfo.xOffset = from_26_6_fixed_precision(face->glyph->metrics.horiBearingX);
         charInfo.yOffset = yBearing;
         charInfo.page = 1;
         charInfo.chnl = 15;
@@ -124,7 +143,7 @@ namespace llassetgen {
         FT_Load_Glyph(face, gindex, FT_LOAD_DEFAULT);
 
         //bearing is provided in 26.6 fixed - point format
-        FT_Pos yBearing = float(face->glyph->metrics.horiBearingY) / 64.f;
+        FT_Pos yBearing = from_26_6_fixed_precision(face->glyph->metrics.horiBearingY);
         maxYBearing = std::max(yBearing, maxYBearing);
 
         CharInfo charInfo;
@@ -133,8 +152,8 @@ namespace llassetgen {
         charInfo.y = charArea.position.y;
         charInfo.width = charArea.size.x;
         charInfo.height = charArea.size.y;
-        charInfo.xAdvance = float(face->glyph->linearHoriAdvance) / 65536.f;
-        charInfo.xOffset = float(face->glyph->metrics.horiBearingX) / 64.f;
+        charInfo.xAdvance = from_16_16_fixed_precision(face->glyph->linearHoriAdvance);
+        charInfo.xOffset = from_26_6_fixed_precision(face->glyph->metrics.horiBearingX);
         charInfo.yOffset = yBearing;
         charInfo.page = 1;
         charInfo.chnl = 15;
@@ -155,7 +174,7 @@ namespace llassetgen {
                     kerningInfo.firstId = *leftCharcode;
                     kerningInfo.secondId = *rightCharcode;
                     // kerning is provided in 26.6 fixed-point format
-                    kerningInfo.kerning = float(kerningVector.x) / 64.f;
+                    kerningInfo.kerning = from_26_6_fixed_precision(kerningVector.x);
                     kerningInfos.push_back(kerningInfo);
                 }
             }
