@@ -30,6 +30,7 @@
 #include <cpplocate/cpplocate.h>
 
 #include <glbinding-aux/ContextInfo.h>
+#include <glbinding-aux/types_to_string.h>
 #include <glbinding/Version.h>
 #include <glbinding/gl/gl.h>
 
