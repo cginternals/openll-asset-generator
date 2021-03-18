@@ -143,6 +143,9 @@ int parseAtlasArgs(int argc, char** argv) {
         FontFinder fontFinder =
             static_cast<bool>(*fontPathOpt) ? FontFinder::fromPath(fontPath) : FontFinder::fromName(fontName);
 
+        // adjust padding such that it resembles the final padding in the result in pixels
+        padding *= downsamplingRatio;
+
         std::vector<Image> glyphImages = fontFinder.renderGlyphs(glyphSet, fontSize, padding, downsamplingRatio);
         std::vector<Vec2<size_t>> imageSizes = sizes(glyphImages, downsamplingRatio);
         Packing p = packingAlgos[packing](imageSizes.begin(), imageSizes.end(), false);
